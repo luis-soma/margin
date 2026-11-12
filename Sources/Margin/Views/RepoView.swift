@@ -668,10 +668,20 @@ private struct GranularitySlider: View {
                         }
                     }
                     .onChange(of: frame.settled) { if $0 { animating = false } }
+                    // A frame drawn while the clock is paused (a redraw from
+                    // elsewhere) can leave something on its way. Start the
+                    // clock so it always lands instead of creeping one redraw
+                    // at a time.
+                    .onAppear { if !frame.settled { Task { @MainActor in start() } } }
+                    .onChange(of: frame.settled) { if !$0, !animating { Task { @MainActor in start() } } }
             }
-            // The track got wider or narrower (the window resizing): a label
-            // may hop, so run the motion until it lands.
-            .onChange(of: width) { _ in start() }
+            // The track got wider or narrower (the window opening or resizing):
+            // the words go straight to their place. Only your hand makes them hop.
+            .onChange(of: width) { _ in
+                motion.placeLabels()
+                redraw += 1
+                start()
+            }
             // The slider sits in the title bar row, where a drag would move
             // the window. This surface (a little larger than the slider)
             // takes the mouse itself, so dragging moves the handle only.
@@ -961,10 +971,15 @@ private final class HopMotion {
         let rightX = min(width, x + gap)
         let rightWidth = max(0, width - rightX)
 
-        // Hop: a label that runs out of room jumps over the handle.
+        // Hop: a label that runs out of room jumps over the handle. It glides
+        // there only while the handle moves; when the room changes because the
+        // window opened or resized, it goes straight to its place. (A window
+        // that opens is laid out narrow first: without this, "Big picture"
+        // hopped left and crept back, blurred, on a paused clock.)
         let widths = Self.labelWidths
-        let leftHop = hop(0, room: leftWidth - Self.pad - Self.clear, needs: widths[0], now: now)
-        let rightHop = hop(1, room: rightWidth - Self.pad - Self.clear, needs: widths[1], now: now)
+        let moving = dragging || abs(velocity) > 0.01 || abs(value - target) > 0.001
+        let leftHop = hop(0, room: leftWidth - Self.pad - Self.clear, needs: widths[0], now: now, glide: moving)
+        let rightHop = hop(1, room: rightWidth - Self.pad - Self.clear, needs: widths[1], now: now, glide: moving)
         let leftTarget = leftHop ? rightX + Self.clear : Self.pad
         let rightTarget = rightHop ? x - Self.gap - Self.clear - widths[1] : width - Self.pad - widths[1]
         let leftLabel = ease(0, toward: leftTarget, now: now)
@@ -1006,18 +1021,27 @@ private final class HopMotion {
     }
 
     /// Whether a label has hopped, with a little hysteresis so it can't flicker.
-    private func hop(_ index: Int, room: CGFloat, needs: CGFloat, now: Date) -> Bool {
+    private func hop(_ index: Int, room: CGFloat, needs: CGFloat, now: Date, glide: Bool) -> Bool {
         let on = hopped[index] ? room < needs + 6 : room < needs
         if on != hopped[index] {
             hopped[index] = on
-            hopStarted[index] = now
+            hopStarted[index] = glide ? now : .distantPast
+            if !glide { labelX[index] = nil }
         }
         return on
     }
 
+    /// The words straight to where they belong, with no glide (the track's
+    /// width changed, not your hand).
+    func placeLabels() {
+        labelX = [nil, nil]
+        hopStarted = [.distantPast, .distantPast]
+    }
+
     /// A label tracks its spot exactly, except for a short glide right after it hops.
     private func ease(_ index: Int, toward target: CGFloat, now: Date) -> CGFloat {
-        guard let current = labelX[index], now.timeIntervalSince(hopStarted[index]) < 0.4 else {
+        guard let current = labelX[index], now.timeIntervalSince(hopStarted[index]) < 0.4,
+              Date().timeIntervalSince(hopStarted[index]) < 0.4 else {
             labelX[index] = target
             return target
         }

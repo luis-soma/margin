@@ -1,23 +1,25 @@
 import AppKit
 import SwiftUI
 
-/// Measures of the repo's header row, from the design: traffic lights 18 pt
-/// from the left edge, everything centered 24 pt from the top, the search
-/// button 18 pt from the right edge.
+/// Measures of the repo's header row. Everything is centered 24 pt from the
+/// top, and what sits in a corner is as far from the side as from the top:
+/// the traffic lights 18 pt from the left (their dots are 18 pt from the
+/// top), the tools' buttons 10 pt from the right (10 pt from the top).
 enum RepoHeader {
     static let height: CGFloat = 48
     /// The traffic lights: left edge (inside the floating sidebar), and centre line of the row.
-    static let trafficLights = CGPoint(x: 24, y: 24)
+    static let trafficLights = CGPoint(x: 18, y: 24)
     /// Where the project name starts.
-    static let titleX: CGFloat = 96
+    static let titleX: CGFloat = 90
     /// From the project name to the slider, and from the slider to search:
     /// the slider's track sits centered between the words and the
     /// magnifier, the same clear space on each side (the breadcrumb's own
     /// inset and the handle make up the difference between the two).
     static let titleGap: CGFloat = 25
     static let searchGap: CGFloat = 26
-    /// Right edge.
-    static let inset: CGFloat = 18
+    /// Right edge, to the tools' buttons: the same as their top edge (24 pt
+    /// center minus half of 28), so the corner reads square.
+    static let inset: CGFloat = 10
     /// Same height as the slider's track, so the row reads as one line.
     static let controlHeight: CGFloat = 18
     static let controlRadius: CGFloat = 5.4

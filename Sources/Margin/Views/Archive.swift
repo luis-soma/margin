@@ -277,9 +277,11 @@ enum Archive {
         static let noteLineSpacing = Space.x2
         /// Previous, next, close.
         static let navSize: CGFloat = 24
-        /// Arrows and close on the traffic lights' line (centred 24 down).
+        /// Arrows and close on the traffic lights' line (centred 24 down),
+        /// as far from the right edge as from the top: 12 pt from the window
+        /// each way, with the panel's 8 inset.
         static let navTop = Space.x1
-        static let navTrailing = Space.x4
+        static let navTrailing = Space.x1
     }
 
     // MARK: Fonts

@@ -191,8 +191,8 @@ struct HomeView: View {
         }
         .overlay(alignment: .bottomTrailing) {
             NewProjectButton(create: open)
-                .padding(.trailing, RepoHeader.inset + 6)
-                .padding(.bottom, RepoHeader.inset + 6)
+                .padding(.trailing, 24)
+                .padding(.bottom, 24)
         }
         .background(Brand.background)
     }
