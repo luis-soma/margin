@@ -43,7 +43,7 @@ h1 { margin: 56px 0 0; font: 500 40px/1.1 var(--display); letter-spacing: -.015e
 .lead { margin: 14px 0 0; font-size: 18px; line-height: 1.5; color: var(--ink2); max-width: 560px; }
 
 /* The film: the one place colour and depth come from */
-.film { margin: 40px -24px 0; aspect-ratio: 2560 / 1184; border-radius: 14px; overflow: hidden; background: #0d0d0e; }
+.film { margin: 40px -24px 0; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; background: #0d0d0e; }
 .film video { display: block; width: 100%; height: 100%; object-fit: cover; }
 @media (min-width: 900px) { .film { margin-left: -120px; margin-right: -120px; } }
 
@@ -93,7 +93,7 @@ footer a:hover { color: var(--ink); }
   <h1>Document your design process while you work.</h1>
   <p class="lead">Margin is a Mac app for designers. Double-press ⌘ on whatever you’re working on, add one line about why, and it lands in an archive you can read from a single step to the whole project.</p>
 
-  <div class="film"><video src="{{ASSETS}}media/margin-hero.mp4" poster="{{ASSETS}}media/margin-hero-poster.jpg" autoplay muted loop playsinline aria-label="Capturing a Figma frame with Margin, adding a note, and finding it in the archive"></video></div>
+  <div class="film"><video poster="{{ASSETS}}media/margin-long-poster.jpg" autoplay muted loop playsinline preload="auto" aria-label="Capturing a Figma frame with Margin, adding a note, finding it in the archive and handing the project to a coding agent"><source src="{{ASSETS}}media/margin-long-1920.mp4" type="video/mp4" media="(min-width: 1100px)"><source src="{{ASSETS}}media/margin-long-1280.mp4" type="video/mp4"></video></div>
 
   <section id="start">
     <h2>Get started</h2>
