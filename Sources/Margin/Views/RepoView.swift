@@ -819,14 +819,20 @@ private struct GranularitySlider: View {
         // Typed as Text first: the Xcode 26.2 compiler can't pick between
         // Text.font and View.font here otherwise.
         let label: Text = Text(HopMotion.labels[index]).font(HopMotion.labelFont)
+        // Every number typed, so the compiler never has to guess between
+        // CGFloat and Double in one long chain.
+        let ink: Double = 0.36 + 0.44 * Double(emphasis)
+        let fade: Double = 1 - 0.55 * Double(hopping)
+        let soft: CGFloat = 1.5 * hopping
+        let top: CGFloat = mid - 8
         return label
             // The end you're at reads darker.
-            .foregroundStyle(Theme.Palette.ink.opacity(0.36 + 0.44 * emphasis))
+            .foregroundStyle(Theme.Palette.ink.opacity(ink))
             .fixedSize()
             .frame(height: 16)
-            .opacity(1 - 0.55 * hopping)
-            .blur(radius: 1.5 * hopping)
-            .offset(x: x, y: mid - 8)
+            .opacity(fade)
+            .blur(radius: soft)
+            .offset(x: x, y: top)
             .allowsHitTesting(false)
     }
 }
