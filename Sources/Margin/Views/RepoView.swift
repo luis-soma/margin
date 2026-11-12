@@ -816,8 +816,10 @@ private struct GranularitySlider: View {
     }
 
     private func word(_ index: Int, x: CGFloat, emphasis: CGFloat, hopping: CGFloat, mid: CGFloat) -> some View {
-        Text(HopMotion.labels[index])
-            .font(HopMotion.labelFont)
+        // Typed as Text first: the Xcode 26.2 compiler can't pick between
+        // Text.font and View.font here otherwise.
+        let label: Text = Text(HopMotion.labels[index]).font(HopMotion.labelFont)
+        return label
             // The end you're at reads darker.
             .foregroundStyle(Theme.Palette.ink.opacity(0.36 + 0.44 * emphasis))
             .fixedSize()
