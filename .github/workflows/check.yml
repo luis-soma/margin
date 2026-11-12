@@ -1,7 +1,0 @@
-name: Check
-on: workflow_dispatch
-jobs:
-  check:
-    runs-on: macos-15
-    steps:
-      - run: sw_vers && swift --version

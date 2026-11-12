@@ -1,0 +1,58 @@
+name: Release
+
+# Builds Margin.dmg on a Mac and attaches it to a GitHub release.
+# Run it from the Actions tab (Run workflow) or push a tag like v0.4.1.
+# The link https://github.com/luis-soma/margin/releases/latest/download/Margin.dmg
+# always points at the newest one.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag
+        default: v0.4.0
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  dmg:
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain
+        run: |
+          sw_vers
+          xcodebuild -version
+          swift --version
+      - name: Package
+        run: |
+          set -o pipefail
+          scripts/package-release.sh 2>&1 | tee package.log
+      - name: Check the disk image
+        run: |
+          hdiutil attach -nobrowse -quiet dist/Margin.dmg -mountpoint /tmp/m
+          ls /tmp/m
+          codesign --verify --verbose=2 /tmp/m/Margin.app
+          lipo -info /tmp/m/Margin.app/Contents/MacOS/Margin
+          test ! -e /tmp/m/Margin.app/Contents/Resources/ai-keys.json
+          hdiutil detach -quiet /tmp/m
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          VERSION="${TAG#v}"
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" --title "Margin $VERSION" --notes-file Resources/Release/NOTES.md --latest
+          fi
+          gh release upload "$TAG" dist/Margin.dmg --clobber
+      - name: Keep the log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-log
+          path: package.log

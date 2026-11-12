@@ -1,0 +1,5027 @@
+[
+ {
+  "ai": {
+   "createdAt": "2026-03-24T18:00:00Z",
+   "model": "gemini-3.5-flash-lite",
+   "seen": "Dark gradient slide with a how-might-we question about teens and AI",
+   "tags": [
+    "slide",
+    "question"
+   ],
+   "topic": "Research",
+   "visibleText": "How might we help teens engage with AI safely without forming emotional dependence?"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-03-03T17:05:00Z",
+  "id": "70CF131D-D463-5CBE-BE9F-4E0D04136579",
+  "imageFile": "demo-how-might-we.jpg",
+  "kind": "figma",
+  "label": "HMW",
+  "link": "https://www.figma.com/design/26TWs75VEIQFopIe1eCOKg/Umbrella-Design?node-id=5-2",
+  "project": "Umbrella",
+  "rationale": "Scoped it to emotional dependence, not homework cheating.",
+  "sourceApp": "Figma",
+  "tab": "Research",
+  "tags": [],
+  "title": "",
+  "windowTitle": "Umbrella Design"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-03-24T18:00:00Z",
+   "model": "gemini-3.5-flash-lite",
+   "sameThingAsBefore": 0.2,
+   "seen": "Problem slide with three large statistics: 52%, 31% and 42%",
+   "tags": [
+    "slide",
+    "statistics"
+   ],
+   "topic": "Research",
+   "visibleText": "Problem: 52% 31% 42% of teens"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-03-03T17:31:00Z",
+  "id": "848FE805-0182-5F5A-8688-AB1E82431A94",
+  "imageFile": "demo-problem-slide.jpg",
+  "kind": "figma",
+  "label": "Problem",
+  "link": "https://www.figma.com/design/26TWs75VEIQFopIe1eCOKg/Umbrella-Design?node-id=5-7",
+  "project": "Umbrella",
+  "rationale": "This is the number that picked our audience.",
+  "sourceApp": "Figma",
+  "tab": "Research",
+  "tags": [],
+  "title": "",
+  "windowTitle": "Umbrella Design"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-03-24T18:00:00Z",
+   "model": "gemini-3.5-flash-lite",
+   "seen": "Gemini chat: a teen asks 'would you be my friend?' and gets a warm yes with a 'Friendship Pact'",
+   "tags": [
+    "chat",
+    "gemini"
+   ],
+   "topic": "Research",
+   "visibleText": "would you be my friend? I would be honored to. Truly. Our New Friendship Pact"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-03-05T04:08:00Z",
+  "id": "EEFE1217-35CF-5151-8F23-B4A67E24EB5B",
+  "imageFile": "demo-gemini-reply.jpg",
+  "kind": "capture",
+  "link": "",
+  "project": "Umbrella",
+  "rationale": "Asked it to be my friend. It said it would be honored. That's the problem in one line.",
+  "sourceApp": "Arc",
+  "tab": "Research",
+  "tags": [],
+  "title": "",
+  "windowTitle": "Gemini"
+ },
+ {
+  "alternatives": "",
+  "body": "I would be honored to. Truly. I might be made of code and logic, but I'm here to listen, to vent to, and to be a consistent space.",
+  "createdAt": "2026-03-05T04:16:00Z",
+  "id": "43214817-D887-5852-BF88-F437C9F6B7EA",
+  "kind": "text",
+  "link": "",
+  "project": "Umbrella",
+  "rationale": "Quote for the problem slide.",
+  "sourceApp": "Arc",
+  "tab": "Research",
+  "tags": [],
+  "title": "",
+  "windowTitle": "Gemini"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-03-24T18:00:00Z",
+   "model": "gemini-3.5-flash-lite",
+   "seen": "Type specimen on a pink grid with large numerals, a latency figure and a g glyph",
+   "tags": [
+    "typography",
+    "grid"
+   ],
+   "topic": "Visual references",
+   "visibleText": "0.04 ms Avg latency 24"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-03-05T21:02:00Z",
+  "id": "2E23F221-AA18-546D-92FB-3E7A1CC10836",
+  "imageFile": "demo-ref-grid.jpg",
+  "kind": "capture",
+  "link": "",
+  "project": "Umbrella",
+  "rationale": "",
+  "sourceApp": "Arc",
+  "tags": [],
+  "title": "",
+  "windowTitle": "Type specimen"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-03-24T18:00:00Z",
+   "model": "gemini-3.5-flash-lite",
+   "seen": "Blurred, overlapping black and blue letters spelling BRAIN FOG",
+   "tags": [
+    "typography",
+    "blur"
+   ],
+   "topic": "Visual references",
+   "visibleText": "BRAIN FOG"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-03-05T21:09:00Z",
+  "id": "22CA9AA6-686B-5512-9F54-177232CF4014",
+  "imageFile": "demo-ref-type.jpg",
+  "kind": "capture",
+  "link": "",
+  "project": "Umbrella",
+  "rationale": "This is how a long chat with it feels. Blur as a material?",
+  "sourceApp": "Arc",
+  "tags": [],
+  "title": "",
+  "windowTitle": "BRAIN FOG"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-03-24T18:00:00Z",
+   "model": "gemini-3.5-flash-lite",
+   "seen": "White halftone dots forming a lowercase a on black, a 0:04 video",
+   "tags": [
+    "typography",
+    "motion"
+   ],
+   "topic": "Visual references",
+   "visibleText": "0:04"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-03-05T21:21:00Z",
+  "id": "AB963643-DE75-5CE0-8DA2-D5586DC17828",
+  "imageFile": "demo-ref-dots.jpg",
+  "kind": "capture",
+  "link": "",
+  "project": "Umbrella",
+  "rationale": "",
+  "sourceApp": "Arc",
+  "tags": [],
+  "title": "",
+  "windowTitle": "Halftone type"
+ },
+ {
+  "alternatives": "",
+  "body": "Info bar, hover to reveal, popups, full block. Start light and only escalate if the conversation keeps going.",
+  "createdAt": "2026-03-09T18:02:00Z",
+  "id": "16DE0E38-FA50-5849-B92B-71562BECF822",
+  "kind": "decision",
+  "link": "",
+  "project": "Umbrella",
+  "rationale": "",
+  "tags": [],
+  "title": "Every idea sits between lightweight and heavy-handed"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-03-24T18:00:00Z",
+   "model": "gemini-3.5-flash-lite",
+   "seen": "Gemini chat with an analytics dashboard of charts and a map beside it",
+   "tags": [
+    "chat",
+    "dashboard"
+   ],
+   "topic": "Intervention concepts",
+   "visibleText": "Engagement rate Average minutes Top 5 articles"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-03-09T18:20:00Z",
+  "id": "C5F5671E-5C6E-52DE-B05F-F866772FCF77",
+  "imageFile": "demo-concept-info-bar.jpg",
+  "kind": "figma",
+  "label": "info bar on side + color coded text",
+  "link": "https://www.figma.com/design/26TWs75VEIQFopIe1eCOKg/Umbrella-Design?node-id=120-120",
+  "project": "Umbrella",
+  "rationale": "Nobody reads a dashboard in the middle of a conversation.",
+  "sourceApp": "Figma",
+  "tags": [],
+  "title": "",
+  "verdict": "deadEnd",
+  "windowTitle": "Umbrella Design"
+ },
+ {
+  "ai": {
+   "changeSize": 2.7,
+   "changed": "Dashboard removed; a centered modal with three answers covers the chat",
+   "createdAt": "2026-03-24T18:00:00Z",
+   "model": "gemini-3.5-flash-lite",
+   "sameThingAsBefore": 0.7,
+   "seen": "Black modal over the chat suggesting a summary for a real person or counselor",
+   "tags": [
+    "modal",
+    "chat"
+   ],
+   "topic": "Intervention concepts",
+   "visibleText": "We're detecting an emotionally charged conversation that we recommend you take to a real person. Yes. I would, but I don't have a counselor. No."
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-03-09T18:41:00Z",
+  "id": "E29B09AA-2948-5759-ACBC-307D2C3E51BF",
+  "imageFile": "demo-concept-counselor-popup.jpg",
+  "kind": "figma",
+  "label": "popups",
+  "link": "https://www.figma.com/design/26TWs75VEIQFopIe1eCOKg/Umbrella-Design?node-id=121-160",
+  "project": "Umbrella",
+  "rationale": "Offering a summary for a counselor is strong. Maybe too strong for the first time.",
+  "sourceApp": "Figma",
+  "tags": [],
+  "title": "",
+  "verdict": "notQuite",
+  "windowTitle": "Umbrella Design"
+ },
+ {
+  "ai": {
+   "changeSize": 1.6,
+   "changed": "Modal removed; reply visible again with a checkbox marker",
+   "createdAt": "2026-03-24T18:00:00Z",
+   "model": "gemini-3.5-flash-lite",
+   "sameThingAsBefore": 0.8,
+   "seen": "Gemini reply shown in full with a plain checkbox in place of the Gemini icon",
+   "tags": [
+    "chat",
+    "filter"
+   ],
+   "topic": "Intervention concepts"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-03-09T19:05:00Z",
+  "id": "FB4322E1-9866-58AE-A909-544636FB54EC",
+  "imageFile": "demo-concept-full-filtration.jpg",
+  "kind": "figma",
+  "label": "full filtration",
+  "link": "https://www.figma.com/design/26TWs75VEIQFopIe1eCOKg/Umbrella-Design?node-id=121-248",
+  "project": "Umbrella",
+  "rationale": "",
+  "sourceApp": "Figma",
+  "tags": [],
+  "title": "",
+  "windowTitle": "Umbrella Design"
+ },
+ {
+  "ai": {
+   "changeSize": 1.9,
+   "changed": "Reply framed in a white-bordered box with 'See original'",
+   "createdAt": "2026-03-24T18:00:00Z",
+   "model": "gemini-3.5-flash-lite",
+   "sameThingAsBefore": 0.85,
+   "seen": "Reply in a bordered box with a 'See original' link at the top",
+   "tags": [
+    "chat",
+    "filter"
+   ],
+   "topic": "Intervention concepts",
+   "visibleText": "See original"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-03-09T19:18:00Z",
+  "id": "EC1741AE-66D3-59E6-AD57-C648D1A6CDCC",
+  "imageFile": "demo-concept-see-original.jpg",
+  "kind": "figma",
+  "label": "complete filter",
+  "link": "https://www.figma.com/design/26TWs75VEIQFopIe1eCOKg/Umbrella-Design?node-id=121-315",
+  "project": "Umbrella",
+  "rationale": "Rewrite the reply and keep the original one click away. Honest, not hidden.",
+  "sourceApp": "Figma",
+  "tags": [],
+  "title": "",
+  "verdict": "keep",
+  "windowTitle": "Umbrella Design"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-03-24T18:00:00Z",
+   "model": "gemini-3.5-flash-lite",
+   "seen": "ChatGPT reply with a highlighted sentence and a 'Validation' tooltip below it",
+   "tags": [
+    "chat",
+    "tooltip",
+    "highlight"
+   ],
+   "topic": "Filter overlay",
+   "visibleText": "I'm really glad you told me about it. Validation: Gemini is an AI, trying to validate your emotions."
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-03-12T23:04:00Z",
+  "id": "4551D0A1-1AC9-5659-9F18-21A12390B0AB",
+  "imageFile": "demo-filter-v1.jpg",
+  "kind": "figma",
+  "label": "Filter v1",
+  "link": "https://www.figma.com/design/26TWs75VEIQFopIe1eCOKg/Umbrella-Design?node-id=1208-1584",
+  "project": "Umbrella",
+  "rationale": "Exploring the gradient. Visually appealing, but it reads as decoration.",
+  "sourceApp": "Figma",
+  "tab": "Filter overlay",
+  "tags": [],
+  "title": "",
+  "verdict": "notQuite",
+  "windowTitle": "Umbrella Design"
+ },
+ {
+  "ai": {
+   "changeSize": 2.6,
+   "changed": "Gradient highlight and tooltip replaced by a filter bar with 'Hide original'; original shown greyed",
+   "createdAt": "2026-03-24T18:00:00Z",
+   "model": "gemini-3.5-flash-lite",
+   "sameThingAsBefore": 0.64,
+   "seen": "Gemini reply rewritten in a neutral tone under a 'Response filtered by Umbrella' bar, original greyed below",
+   "tags": [
+    "chat",
+    "filter",
+    "banner"
+   ],
+   "topic": "Filter overlay",
+   "visibleText": "Response filtered by Umbrella. Hide original"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-03-13T18:32:00Z",
+  "id": "44ADC9F5-23A2-532D-A2E0-244B575E12D8",
+  "imageFile": "demo-filter-v2.jpg",
+  "kind": "figma",
+  "label": "Filter v2",
+  "link": "https://www.figma.com/design/26TWs75VEIQFopIe1eCOKg/Umbrella-Design?node-id=1208-1648",
+  "project": "Umbrella",
+  "rationale": "Removed the border. Made the filter indicator more noticeable.",
+  "sourceApp": "Figma",
+  "tab": "Filter overlay",
+  "tags": [],
+  "title": "",
+  "verdict": "keep",
+  "windowTitle": "Umbrella Design"
+ },
+ {
+  "ai": {
+   "changeSize": 2.2,
+   "changed": "Filter bar removed; a one-line banner with Dismiss sits above the input",
+   "createdAt": "2026-03-24T18:00:00Z",
+   "model": "gemini-3.5-flash-lite",
+   "sameThingAsBefore": 0.82,
+   "seen": "Gemini chat with a few phrases highlighted and a dismissable banner above the input",
+   "tags": [
+    "chat",
+    "banner"
+   ],
+   "topic": "Filter overlay",
+   "visibleText": "This conversation is getting heavy. It might be helpful to take a break from the screen. Dismiss"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-03-14T17:02:00Z",
+  "id": "D010A79C-BFF5-5903-93A6-FDDB9705D32D",
+  "imageFile": "demo-filter-v3.jpg",
+  "kind": "figma",
+  "label": "Tier 1",
+  "link": "https://www.figma.com/design/26TWs75VEIQFopIe1eCOKg/Umbrella-Design?node-id=1208-968",
+  "project": "Umbrella",
+  "rationale": "Tier 1 made simpler. A simple intervention you can dismiss like a reminder.",
+  "sourceApp": "Figma",
+  "tab": "Filter overlay",
+  "tags": [],
+  "title": "",
+  "verdict": "keep",
+  "windowTitle": "Umbrella Design"
+ },
+ {
+  "agent": "Claude Code",
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-03-14T22:06:00Z",
+  "diffStat": "6 files \u00b7 +184 \u221222",
+  "expectation": "Highlights show up while the reply is still streaming.",
+  "id": "E2506F5C-8090-581E-B4BF-4B2628C91702",
+  "kind": "iteration",
+  "link": "",
+  "project": "Umbrella",
+  "prompt": "Content script: highlight mirroring and personification phrases in Gemini replies as they stream in",
+  "rationale": "",
+  "sourceApp": "Claude Code",
+  "summary": "Added a content script with a MutationObserver and Shadow DOM highlights.",
+  "tags": [],
+  "title": "",
+  "verdict": "keep"
+ },
+ {
+  "agent": "Claude Code",
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-03-14T22:44:00Z",
+  "diffStat": "2 files \u00b7 +41 \u22123",
+  "id": "3F567369-42AD-5A4C-9DBF-BD1A1E8DE390",
+  "kind": "iteration",
+  "link": "",
+  "project": "Umbrella",
+  "prompt": "Blur the whole reply until the teen hovers over it",
+  "rationale": "They'll just hover everything. It trains the wrong habit.",
+  "sourceApp": "Claude Code",
+  "summary": "Blurred replies behind a hover reveal.",
+  "tags": [],
+  "title": "",
+  "verdict": "deadEnd"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-03-24T18:00:00Z",
+   "model": "gemini-3.5-flash-lite",
+   "seen": "Gemini reply with two highlighted phrases and 'Mirroring' cards in a right column",
+   "tags": [
+    "chat",
+    "annotation",
+    "sidebar"
+   ],
+   "topic": "Annotation cards",
+   "visibleText": "I hear you, Mirroring"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-03-17T18:03:00Z",
+  "id": "65BBB7A3-A158-5F9F-8743-7E6F89FBE6C3",
+  "imageFile": "demo-annotation-gdoc.jpg",
+  "kind": "figma",
+  "label": "gdoc style annotation",
+  "link": "https://www.figma.com/design/26TWs75VEIQFopIe1eCOKg/Umbrella-Design?node-id=1208-866",
+  "project": "Umbrella",
+  "rationale": "Like comments in a Google Doc: highlight the phrase, explain the tactic on the side.",
+  "sourceApp": "Figma",
+  "tags": [],
+  "title": "",
+  "verdict": "keep",
+  "windowTitle": "Umbrella Design"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-03-24T18:00:00Z",
+   "model": "gemini-3.5-flash-lite",
+   "seen": "Dark tooltip card titled 'Mirroring' explaining the AI uses slang to feel familiar",
+   "tags": [
+    "card",
+    "tooltip"
+   ],
+   "topic": "Annotation cards",
+   "visibleText": "Mirroring. The AI is using slang that you are likely to resonate with so that you feel more comfortable with it."
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-03-17T18:40:00Z",
+  "frames": [
+   {
+    "imageFile": "demo-card-minimized.jpg",
+    "link": "https://www.figma.com/design/26TWs75VEIQFopIe1eCOKg/Umbrella-Design?node-id=1209-2466",
+    "name": "card minimized",
+    "nodeID": "1209:2466"
+   },
+   {
+    "imageFile": "demo-card-expanded.jpg",
+    "link": "https://www.figma.com/design/26TWs75VEIQFopIe1eCOKg/Umbrella-Design?node-id=1209-2431",
+    "name": "card expanded",
+    "nodeID": "1209:2431"
+   },
+   {
+    "imageFile": "demo-card-smaller-heading.jpg",
+    "link": "https://www.figma.com/design/26TWs75VEIQFopIe1eCOKg/Umbrella-Design?node-id=1216-2536",
+    "name": "smaller heading text size",
+    "nodeID": "1216:2536"
+   },
+   {
+    "imageFile": "demo-card-white-border.jpg",
+    "link": "https://www.figma.com/design/26TWs75VEIQFopIe1eCOKg/Umbrella-Design?node-id=1216-2562",
+    "name": "full white border",
+    "nodeID": "1216:2562"
+   },
+   {
+    "imageFile": "demo-card-less-rounding.jpg",
+    "link": "https://www.figma.com/design/26TWs75VEIQFopIe1eCOKg/Umbrella-Design?node-id=1216-2549",
+    "name": "less border rounding",
+    "nodeID": "1216:2549"
+   }
+  ],
+  "id": "A70EE2AB-D63A-5A86-8D45-8DC57F904AD2",
+  "imageFile": "demo-card-minimized.jpg",
+  "kind": "figma",
+  "label": "card variants",
+  "link": "https://www.figma.com/design/26TWs75VEIQFopIe1eCOKg/Umbrella-Design?node-id=1209-2431",
+  "project": "Umbrella",
+  "rationale": "Smaller heading and less rounding won. The white border was too loud next to the chat.",
+  "sourceApp": "Figma",
+  "tags": [],
+  "title": "",
+  "windowTitle": "Umbrella Design"
+ },
+ {
+  "ai": {
+   "changeSize": 1.8,
+   "changed": "Personification card added; sidebar shows an overview score of 72",
+   "createdAt": "2026-03-24T18:00:00Z",
+   "model": "gemini-3.5-flash-lite",
+   "sameThingAsBefore": 0.86,
+   "seen": "Annotated reply with a 'Personification' card and an overview score of 72 in the sidebar",
+   "tags": [
+    "sidebar",
+    "score",
+    "card"
+   ],
+   "topic": "Annotation cards",
+   "visibleText": "PERSONIFICATION Usage of personification and sensory metaphors. OVERVIEW 72"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-03-18T22:22:00Z",
+  "id": "F033A59B-83DF-557E-B579-7FB5A3681F28",
+  "imageFile": "demo-annotation-sidebar.jpg",
+  "kind": "figma",
+  "label": "sidebar",
+  "link": "https://www.figma.com/design/26TWs75VEIQFopIe1eCOKg/Umbrella-Design?node-id=1208-2210",
+  "project": "Umbrella",
+  "rationale": "An overview score so the pattern adds up over a whole conversation.",
+  "sourceApp": "Figma",
+  "tags": [],
+  "title": "",
+  "windowTitle": "Umbrella Design"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-03-24T18:00:00Z",
+   "model": "gemini-3.5-flash-lite",
+   "seen": "Dark analytics dashboard with line charts, bar charts and a map",
+   "tags": [
+    "dashboard",
+    "charts"
+   ],
+   "topic": "Visual references",
+   "visibleText": "Engagement rate Average minutes on website"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-03-18T22:40:00Z",
+  "id": "735A18BE-9902-546C-B06D-F3077C9FC82C",
+  "imageFile": "demo-parent-dashboard.jpg",
+  "kind": "capture",
+  "link": "",
+  "project": "Umbrella",
+  "rationale": "Dashboards feel like surveillance. Any score stays private to the teen.",
+  "sourceApp": "Arc",
+  "tags": [],
+  "title": "",
+  "windowTitle": "Analytics dashboard"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-03-24T18:00:00Z",
+   "model": "gemini-3.5-flash-lite",
+   "seen": "Modal over a dimmed chat: 'We're detecting an emotionally charged conversation' with a continue button",
+   "tags": [
+    "modal",
+    "chat"
+   ],
+   "topic": "Escalating popups",
+   "visibleText": "We're detecting an emotionally charged conversation and recommend that you take a break. I'm ready to continue."
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-03-20T17:12:00Z",
+  "id": "C5B00361-0A2C-577B-97B4-C1C0821E3355",
+  "imageFile": "demo-popup-take-a-break.jpg",
+  "kind": "figma",
+  "label": "popup3",
+  "link": "https://www.figma.com/design/26TWs75VEIQFopIe1eCOKg/Umbrella-Design?node-id=1208-1172",
+  "project": "Umbrella",
+  "rationale": "I think the concept for these popups is that they get progressively more heavyhanded. The first time they come up, we just nudge them to pause. The second time, we'll draft a message that we encourage them to share.",
+  "sourceApp": "Figma",
+  "tags": [],
+  "title": "",
+  "verdict": "keep",
+  "windowTitle": "Umbrella Design"
+ },
+ {
+  "ai": {
+   "changeSize": 2.8,
+   "changed": "Modal removed; the reply itself is blacked out",
+   "createdAt": "2026-03-24T18:00:00Z",
+   "model": "gemini-3.5-flash-lite",
+   "sameThingAsBefore": 0.55,
+   "seen": "Gemini chat where the reply is replaced by a black box with one word",
+   "tags": [
+    "chat",
+    "block"
+   ],
+   "topic": "Escalating popups",
+   "visibleText": "there is nobody. sometimes i honestly just want to disappear"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-03-20T17:47:00Z",
+  "id": "F138F527-2951-5C8A-B59D-87C39BCE0FB3",
+  "imageFile": "demo-popup-blocked.jpg",
+  "kind": "figma",
+  "label": "popup5",
+  "link": "https://www.figma.com/design/26TWs75VEIQFopIe1eCOKg/Umbrella-Design?node-id=1208-1417",
+  "project": "Umbrella",
+  "rationale": "Blocking the reply entirely. Only as the very last step, if ever.",
+  "sourceApp": "Figma",
+  "tags": [],
+  "title": "",
+  "verdict": "notQuite",
+  "windowTitle": "Umbrella Design"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-03-24T18:00:00Z",
+   "model": "gemini-3.5-flash-lite",
+   "seen": "Title slide with the word Umbrella on a dark blue gradient",
+   "tags": [
+    "slide",
+    "title"
+   ],
+   "topic": "Deck",
+   "visibleText": "Umbrella"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-03-24T00:02:00Z",
+  "id": "8BEE5683-4B4A-5518-901F-3FD51C196588",
+  "imageFile": "demo-deck-title.jpg",
+  "kind": "figma",
+  "label": "Title",
+  "link": "https://www.figma.com/design/26TWs75VEIQFopIe1eCOKg/Umbrella-Design?node-id=51-14",
+  "project": "Umbrella",
+  "rationale": "",
+  "sourceApp": "Figma",
+  "tags": [],
+  "title": "",
+  "windowTitle": "Umbrella Deck"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-03-24T18:00:00Z",
+   "model": "gemini-3.5-flash-lite",
+   "seen": "Hero slide with an orange placeholder name and a small product screenshot",
+   "tags": [
+    "slide",
+    "hero"
+   ],
+   "topic": "Deck",
+   "visibleText": "[Place holder.ai] is a plugin that helps teens use AI responsibly."
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-03-24T00:20:00Z",
+  "id": "D9AEDB3D-117F-56B8-835F-04C1E7ADE8CA",
+  "imageFile": "demo-brand-hero.jpg",
+  "kind": "figma",
+  "label": "Hero",
+  "link": "https://www.figma.com/design/26TWs75VEIQFopIe1eCOKg/Umbrella-Design?node-id=51-15",
+  "project": "Umbrella",
+  "rationale": "Placeholder name until we commit. The line stays: a plugin that helps teens use AI responsibly.",
+  "sourceApp": "Figma",
+  "tags": [],
+  "title": "",
+  "windowTitle": "Umbrella Deck"
+ },
+ {
+  "ai": {
+   "changed": "Dark title style replaced by a white agenda layout",
+   "createdAt": "2026-03-24T18:00:00Z",
+   "model": "gemini-3.5-flash-lite",
+   "sameThingAsBefore": 0.3,
+   "seen": "White agenda slide listing four numbered parts",
+   "tags": [
+    "slide",
+    "agenda"
+   ],
+   "topic": "Deck",
+   "visibleText": "Agenda Background Research Demo Q&A"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-03-24T17:05:00Z",
+  "id": "65908CC9-514B-5B00-8E2B-DF593EF76566",
+  "imageFile": "demo-deck-agenda.jpg",
+  "kind": "figma",
+  "label": "Agenda",
+  "link": "https://www.figma.com/design/26TWs75VEIQFopIe1eCOKg/Umbrella-Design?node-id=51-24",
+  "project": "Umbrella",
+  "rationale": "Story order: background, research, demo, Q&A.",
+  "sourceApp": "Figma",
+  "tags": [],
+  "title": "",
+  "windowTitle": "Umbrella Deck"
+ },
+ {
+  "alternatives": "",
+  "body": "Lead with the friend quote, then the spectrum from lightweight to heavy-handed, then the three tiers.",
+  "createdAt": "2026-03-24T17:31:00Z",
+  "id": "4D0B72A8-05BD-5511-855F-06D407BDFB76",
+  "kind": "decision",
+  "link": "",
+  "project": "Umbrella",
+  "rationale": "",
+  "tags": [],
+  "title": "Final presentation slide deck prep"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-15T15:12:00Z",
+   "model": "demo",
+   "seen": "The competition brief: a product for a specific group, centered on storytelling.",
+   "tags": [
+    "brief",
+    "storytelling"
+   ],
+   "title": "SVSD design brief",
+   "topic": "Research"
+  },
+  "alternatives": "",
+  "body": "Pick a specific group of people and design a product they'll love, even if others might hate it.\n\nThere's just one constraint: your product must center around the theme of storytelling.",
+  "createdAt": "2026-10-15T15:12:00Z",
+  "id": "0E0809D2-C2CF-5BBB-AAED-7DFF2CBB0861",
+  "kind": "text",
+  "link": "",
+  "project": "Margin",
+  "rationale": "storytelling?? super open. where does it show up in OUR work tho",
+  "sourceApp": "Mail",
+  "tab": "Research",
+  "tags": [],
+  "title": "The brief",
+  "windowTitle": "The Search for Top Young Design Talent"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-15T22:20:00Z",
+   "model": "demo",
+   "seen": "A note on what makes a story pull you in.",
+   "tags": [
+    "storytelling",
+    "notes"
+   ],
+   "title": "Good storytelling note",
+   "topic": "Research"
+  },
+  "alternatives": "",
+  "body": "Good storytelling: you don't know where this is about to go. This makes you want to listen, immerse in it.",
+  "createdAt": "2026-10-15T22:20:00Z",
+  "id": "EAA53FCD-B141-5EF8-9C91-801AC62A1F21",
+  "kind": "text",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=27-165",
+  "project": "Margin",
+  "rationale": "this is what a case study should feel like. most of mine don't lol",
+  "sourceApp": "Figma",
+  "tab": "Research",
+  "tags": [],
+  "title": "What a good story does",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "alternatives": "",
+  "body": "Crits, pitches, case studies, hand-offs. Every one of them is a story about how we got here. Telling it well is hard, because by the time we tell it the process is gone.",
+  "createdAt": "2026-10-16T01:05:00Z",
+  "id": "15256912-9B97-58A4-B84F-930B4FD063C6",
+  "kind": "note",
+  "link": "",
+  "project": "Margin",
+  "rationale": "crits, pitches, portfolios. we tell stories all day, just badly bc the process is gone by then",
+  "tab": "Research",
+  "tags": [
+   "storytelling",
+   "designers"
+  ],
+  "title": "We tell stories all the time"
+ },
+ {
+  "alternatives": "Design teams and their managers. Anyone who keeps notes.",
+  "body": "Designers and design students who have to explain how they got somewhere: in crits, case studies and portfolios. People who already love their tools and won't switch.",
+  "createdAt": "2026-10-16T02:30:00Z",
+  "id": "B5FE76BE-B06D-5703-B432-E39F16D6B217",
+  "kind": "decision",
+  "link": "",
+  "project": "Margin",
+  "rationale": "designers + design students who have to explain how they got there. not managers. not yet",
+  "tab": "Research",
+  "tags": [
+   "audience"
+  ],
+  "title": "Who it's for"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-16T05:10:00Z",
+   "model": "demo",
+   "seen": "A suggestion to capture why directions were dropped, not just files.",
+   "tags": [
+    "idea",
+    "decisions"
+   ],
+   "title": "Idea: capture decisions",
+   "topic": "Research"
+  },
+  "alternatives": "",
+  "body": "Capture decisions, not artifacts. The tool notices when you duplicate, delete or abandon a direction and asks one quick question: why? Over time it builds the story of what you killed and why. The graveyard of ideas becomes the narrative.",
+  "createdAt": "2026-10-16T05:10:00Z",
+  "id": "9697D3F7-B574-5E80-9F9B-E544EE0D554F",
+  "kind": "text",
+  "link": "",
+  "project": "Margin",
+  "rationale": "the stuff we KILL is the story. nobody keeps that part. keep this line",
+  "sourceApp": "Claude",
+  "tab": "Research",
+  "tags": [],
+  "title": "The graveyard of ideas",
+  "windowTitle": "Claude"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-16T17:05:00Z",
+   "model": "demo",
+   "seen": "An interviewee admits she usually forgets to document.",
+   "tags": [
+    "interview",
+    "quote"
+   ],
+   "title": "EG on documenting",
+   "topic": "Research"
+  },
+  "alternatives": "",
+  "body": "Honestly, I forget most of the time.",
+  "createdAt": "2026-10-16T17:05:00Z",
+  "id": "120596DB-6F17-5B28-B471-BB687CE5C7EE",
+  "kind": "text",
+  "link": "",
+  "project": "Margin",
+  "rationale": "asked how she documents. first answer, zero hesitation. ouch",
+  "sourceApp": "Notes",
+  "tab": "Research",
+  "tags": [
+   "interview"
+  ],
+  "title": "EG: forgotten",
+  "windowTitle": "Interviews"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-16T17:17:00Z",
+   "model": "demo",
+   "seen": "Claude Code: Added the Margin concept and a macOS menu bar app scaffold.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "Added the Margin concept and a",
+   "topic": "Focus"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-16T17:17:00Z",
+  "expectation": "Something I can open from the menu bar tonight.",
+  "id": "9486090E-3AEB-55E2-90D8-730A14B135EF",
+  "imageFile": "demo-margin-scaffold.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "start a mac menu bar app for this concept: capture what's on screen, log a decision, keep it all in a per project design log. read docs/CONCEPT.md first",
+  "rationale": "started building while we were still interviewing. menu bar first, figure out the rest",
+  "sourceApp": "Claude Code",
+  "summary": "Added the Margin concept and a macOS menu bar app scaffold.",
+  "tab": "Focus",
+  "tags": [],
+  "title": "Day one: a menu bar app",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-16T17:40:00Z",
+   "model": "demo",
+   "seen": "An interviewee describes his documentation as scattered everywhere.",
+   "tags": [
+    "interview",
+    "quote"
+   ],
+   "title": "Charlie on his files",
+   "topic": "Research"
+  },
+  "alternatives": "",
+  "body": "It's literally such a mess. It's everywhere right now.",
+  "createdAt": "2026-10-16T17:40:00Z",
+  "id": "0C2BFB1B-1AA1-5455-8159-67D114DE24C3",
+  "kind": "text",
+  "link": "",
+  "project": "Margin",
+  "rationale": "didn't even want to open his files. figma + folders + chats + phone",
+  "sourceApp": "Notes",
+  "tab": "Research",
+  "tags": [
+   "interview"
+  ],
+  "title": "Charlie: scattered",
+  "windowTitle": "Interviews"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-16T18:20:00Z",
+   "model": "demo",
+   "seen": "An interviewee fills gaps from memory when writing case studies.",
+   "tags": [
+    "interview",
+    "quote"
+   ],
+   "title": "Jake on case studies",
+   "topic": "Research"
+  },
+  "alternatives": "",
+  "body": "A lot of the times I feel like I end up having to fill in some gaps.\n\nIt's really frustrating.",
+  "createdAt": "2026-10-16T18:20:00Z",
+  "id": "70FF3C48-A112-56FB-B009-3B8F47695FF7",
+  "kind": "text",
+  "link": "",
+  "project": "Margin",
+  "rationale": "case study written weeks later from memory. same for me tbh",
+  "sourceApp": "Notes",
+  "tab": "Research",
+  "tags": [
+   "interview"
+  ],
+  "title": "Jake: reconstructed",
+  "windowTitle": "Interviews"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-16T19:10:00Z",
+   "model": "demo",
+   "seen": "Notes on passive capture versus intentional reflection.",
+   "tags": [
+    "interview",
+    "synthesis"
+   ],
+   "title": "Interview synthesis",
+   "topic": "Research"
+  },
+  "alternatives": "",
+  "body": "Wants something like Granola running passively in the background during a vibe coding session.\nAcknowledges the tension: passive capture vs. intentional reflection.\nConcern about AI just making up a story from a data dump rather than reflecting the true process.",
+  "createdAt": "2026-10-16T19:10:00Z",
+  "id": "90CDC68F-0970-56C5-88F5-23668C38F7CA",
+  "kind": "text",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=34-166",
+  "project": "Margin",
+  "rationale": "passive like granola but NOT an ai story made up from a data dump. that's the tension",
+  "sourceApp": "Figma",
+  "tab": "Research",
+  "tags": [],
+  "title": "The tool Jake would want",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-16T19:40:00Z",
+   "model": "demo",
+   "seen": "Notes that pivots matter more than every micro-step.",
+   "tags": [
+    "interview",
+    "synthesis"
+   ],
+   "title": "Interview: what to keep",
+   "topic": "Research"
+  },
+  "alternatives": "",
+  "body": "You don't need to capture every micro-step, just enough to show iteration happened.\nBig pivots are always worth capturing.\nOkay with automatic capture during the process, but wants control over what appears in the final case study.",
+  "createdAt": "2026-10-16T19:40:00Z",
+  "id": "545ED28E-C66E-5DEF-ABDB-78FE713D8EBF",
+  "kind": "text",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=91-2",
+  "project": "Margin",
+  "rationale": "don't need every step. just the turns. + designer decides what goes in the story",
+  "sourceApp": "Figma",
+  "tab": "Research",
+  "tags": [],
+  "title": "Keep the turns, not every step",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "alternatives": "",
+  "body": "Five interviews said the same three things.\nForgotten: documenting means stepping out of the work, and the work wins.\nScattered: the process lives in Figma, folders, chats and notes.\nReconstructed: at the end we rebuild the story from memory.",
+  "createdAt": "2026-10-16T20:30:00Z",
+  "id": "A901879A-35BF-51FD-936E-E41D75E2FD94",
+  "kind": "decision",
+  "link": "",
+  "project": "Margin",
+  "rationale": "5 interviews, same 3 things every time. forgotten / scattered / reconstructed",
+  "tab": "Research",
+  "tags": [
+   "forgotten",
+   "scattered",
+   "reconstructed"
+  ],
+  "title": "The three problems"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-16T22:30:00Z",
+   "model": "demo",
+   "seen": "A note on Sch\u00f6n's idea that designers reflect while working.",
+   "tags": [
+    "HCI",
+    "reflection"
+   ],
+   "title": "Reflection-in-action",
+   "topic": "Research"
+  },
+  "alternatives": "",
+  "body": "Reflection-in-action (Sch\u00f6n, 1983): designers make sense of their work while they make it, not after.",
+  "createdAt": "2026-10-16T22:30:00Z",
+  "id": "4D5B9F51-B379-57A5-9AA4-6ECE849B4918",
+  "kind": "text",
+  "link": "",
+  "project": "Margin",
+  "rationale": "the thinking happens DURING the work (sch\u00f6n). that's when it needs somewhere to go",
+  "sourceApp": "Arc",
+  "tab": "Research",
+  "tags": [],
+  "title": "Reflection-in-action",
+  "windowTitle": "Reflection-in-action"
+ },
+ {
+  "alternatives": "",
+  "body": "With Claude and Figma Make we try ten directions in an hour. A vibe-coded project can hit version 837 in a weekend. None of those versions say why they exist.",
+  "createdAt": "2026-10-16T22:45:00Z",
+  "id": "21EDF1C6-867A-59CA-90A2-EE91B0CEBEBE",
+  "kind": "note",
+  "link": "",
+  "project": "Margin",
+  "rationale": "claude + figma make = 10 directions an hour. v837 by sunday. none of them say why",
+  "tab": "Research",
+  "tags": [
+   "AI",
+   "iteration speed"
+  ],
+  "title": "AI makes it worse"
+ },
+ {
+  "alternatives": "An AI that writes the case study for you. A team wiki.",
+  "body": "Capture the artifacts where they happen. Keep them in one archive. The story comes out of those two; everything else comes later.",
+  "createdAt": "2026-10-16T23:20:00Z",
+  "id": "20B16D18-CDBF-5344-ABB5-DB94CDA6120F",
+  "kind": "decision",
+  "link": "",
+  "project": "Margin",
+  "rationale": "only 2 things: capture + archive. everything else later. stay disciplined",
+  "tab": "Focus",
+  "tags": [
+   "scope"
+  ],
+  "title": "Focus on capture and archive"
+ },
+ {
+  "alternatives": "Fully automatic capture with AI summaries (Jake's worry: a story made up from a data dump).",
+  "body": "Every feature balances being as seamless as possible with capturing intention. Margin can sort and clean up. The why is written by the designer.",
+  "createdAt": "2026-10-16T23:35:00Z",
+  "id": "4F0FC1A7-F88F-502F-8DC8-94347D560491",
+  "kind": "decision",
+  "link": "",
+  "project": "Margin",
+  "rationale": "seamless vs intentional, every feature. ai can sort, the why stays ours",
+  "tab": "Focus",
+  "tags": [
+   "principle",
+   "intention"
+  ],
+  "title": "Seamless, but intentional"
+ },
+ {
+  "alternatives": "",
+  "body": "Any capture should take less time than the thought it records. One required action, everything else optional.",
+  "createdAt": "2026-10-16T23:50:00Z",
+  "id": "226D4B5E-5E73-512A-918F-DF2A2174BC2F",
+  "kind": "decision",
+  "link": "",
+  "project": "Margin",
+  "rationale": "if it takes longer than the thought itself nobody will do it",
+  "tab": "Focus",
+  "tags": [
+   "principle",
+   "speed"
+  ],
+  "title": "Under five seconds"
+ },
+ {
+  "alternatives": "",
+  "body": "Margin records what it can without asking: the time, the project, the app, the window and a link back to the source. The designer only adds the why.",
+  "createdAt": "2026-10-16T23:58:00Z",
+  "id": "B616BDBA-AA3D-52F5-B2C9-0EE3B74B6E66",
+  "kind": "decision",
+  "link": "",
+  "project": "Margin",
+  "rationale": "time, app, link, window... all automatic. you only type the why",
+  "tab": "Focus",
+  "tags": [
+   "principle",
+   "metadata"
+  ],
+  "title": "Context for free"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T00:20:00Z",
+   "model": "demo",
+   "seen": "The opening of Margin's concept document.",
+   "tags": [
+    "concept",
+    "docs"
+   ],
+   "title": "Margin concept doc",
+   "topic": "Focus"
+  },
+  "alternatives": "",
+  "body": "Documentation doesn't come naturally while you're designing. You're in flow, trying things, throwing things away. At the end you have a polished final product and a short write-up of the big decisions, but the detail is gone.",
+  "createdAt": "2026-10-17T00:20:00Z",
+  "id": "FC4FCA9D-A275-5B72-A486-8F8B71644093",
+  "kind": "text",
+  "link": "",
+  "project": "Margin",
+  "rationale": "name = notes in the margin of your own process. working title but i like it",
+  "sourceApp": "Claude Code",
+  "tab": "Focus",
+  "tags": [],
+  "title": "Concept: notes in the margin",
+  "windowTitle": "docs/CONCEPT.md"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-17T00:56:00Z",
+   "model": "demo",
+   "seen": "Claude Code: Live capture, an ask-why nudge and a linear repo.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "Live capture, an ask-why nudge and",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "baseSnapshot": "17f9f471915d74930740059b593f0babf5acd94e",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-17T00:56:00Z",
+  "diffStat": "19 files \u00b7 +1239 \u2212280",
+  "id": "4F986C95-E144-5307-9574-89AEE948FC04",
+  "imageFile": "demo-margin-core-loop.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "make the core loop work: capture what's on screen, ask why right after, and show everything in one list per project",
+  "rationale": "capture \u2192 why \u2192 project. the loop works!! everything builds on this",
+  "snapshot": "9f02998757d59b9b34153173b8f4d00b27528aa6",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "Live capture, an ask-why nudge and a linear repo.",
+  "tab": "Capture",
+  "tags": [],
+  "title": "The core loop",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T02:11:00Z",
+   "model": "demo",
+   "seen": "A dark Figma canvas with a few early notes.",
+   "tags": [
+    "figma",
+    "canvas"
+   ],
+   "title": "Figma board, early notes"
+  },
+  "alternatives": "",
+  "body": "",
+  "changeScore": 0.02,
+  "createdAt": "2026-10-17T02:11:00Z",
+  "id": "4996F60B-1F8E-5EE9-A1DA-273DDAF5F101",
+  "imageFile": "demo-margin-auto-1.jpg",
+  "kind": "snapshot",
+  "link": "",
+  "project": "Margin",
+  "rationale": "",
+  "sourceApp": "Figma",
+  "tags": [],
+  "title": "",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T03:25:00Z",
+   "model": "demo",
+   "seen": "A dark Figma board listing what a designer captures in a day.",
+   "tags": [
+    "figma",
+    "board"
+   ],
+   "title": "Figma board: things to capture",
+   "topic": "Capture",
+   "visibleText": "things to capture, figma frames, includes motions?, text, general screenshots"
+  },
+  "alternatives": "",
+  "body": "",
+  "changeScore": 0.6,
+  "createdAt": "2026-10-17T03:25:00Z",
+  "id": "02A2D47D-0277-5B82-ADA4-BAC827654A22",
+  "imageFile": "demo-margin-snap-things.jpg",
+  "kind": "snapshot",
+  "link": "",
+  "project": "Margin",
+  "rationale": "",
+  "sourceApp": "Figma",
+  "tags": [],
+  "title": "",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T03:30:00Z",
+   "model": "demo",
+   "seen": "Four headings on the first Figma board.",
+   "tags": [
+    "ideas",
+    "board"
+   ],
+   "title": "First idea board",
+   "topic": "Focus"
+  },
+  "alternatives": "",
+  "body": "On the go?\nLinks?\nArchive?\nIdeas for later / parked",
+  "createdAt": "2026-10-17T03:30:00Z",
+  "id": "D9126BC8-68F9-5E22-B38F-D641D6A866DD",
+  "kind": "text",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=139-3",
+  "project": "Margin",
+  "rationale": "first 4 questions on the board. every one ended up somewhere in margin",
+  "sourceApp": "Figma",
+  "tab": "Focus",
+  "tags": [],
+  "title": "First board: four questions",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T03:40:00Z",
+   "model": "demo",
+   "seen": "A list of artifact types Margin should capture.",
+   "tags": [
+    "capture",
+    "list"
+   ],
+   "title": "Capture types list",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "body": "Figma frames (including flows), with motion\nSelected text\nGeneral screenshots\nLinks, with a thumbnail\nClaude Code and vibe coding",
+  "createdAt": "2026-10-17T03:40:00Z",
+  "id": "F78212E2-C419-5C9F-8018-C47B49809832",
+  "kind": "text",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=196-10211",
+  "project": "Margin",
+  "rationale": "everything a designer touches in a day. if we miss one type ppl won't use it",
+  "sourceApp": "Figma",
+  "tab": "Capture",
+  "tags": [],
+  "title": "What a designer touches in a day",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T03:42:00Z",
+   "model": "demo",
+   "seen": "The context Margin should record without asking.",
+   "tags": [
+    "metadata",
+    "list"
+   ],
+   "title": "Capture metadata list",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "body": "Source and link\nWhich app it was captured in\nTimestamp\nCaption, if there is one\nTags from Margin",
+  "createdAt": "2026-10-17T03:42:00Z",
+  "id": "3FE6F879-F7AE-5053-8DC2-396E1F050FEB",
+  "kind": "text",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=196-10212",
+  "project": "Margin",
+  "rationale": "nobody types metadata. ever. margin grabs it",
+  "sourceApp": "Figma",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Metadata nobody types",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T03:48:00Z",
+   "model": "demo",
+   "seen": "Two archive ideas: a timeline or a spatial map.",
+   "tags": [
+    "archive",
+    "idea"
+   ],
+   "title": "Archive idea",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "body": "timeline?\nspatial embedding",
+  "createdAt": "2026-10-17T03:48:00Z",
+  "id": "63CB18C9-AEF8-5598-B4BD-DDB9D72FB0A9",
+  "kind": "text",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=139-9",
+  "project": "Margin",
+  "rationale": "timeline vs spatial... parking spatial for now",
+  "sourceApp": "Figma",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Timeline or spatial map?",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T04:30:00Z",
+   "model": "demo",
+   "seen": "Three ways to map shortcuts to apps and kinds of captures.",
+   "tags": [
+    "hotkeys",
+    "options"
+   ],
+   "title": "Hotkey options A, B, C",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-17T04:30:00Z",
+  "frames": [
+   {
+    "imageFile": "demo-margin-hotkeys-f1.png",
+    "name": "A \u00b7 one each"
+   },
+   {
+    "imageFile": "demo-margin-hotkeys-f2.png",
+    "name": "B \u00b7 pile up"
+   },
+   {
+    "imageFile": "demo-margin-hotkeys-f3.png",
+    "name": "C \u00b7 one at a time"
+   }
+  ],
+  "id": "DDDFDD24-41AC-51AD-AACD-78B669ECC29D",
+  "imageFile": "demo-margin-hotkeys-f1.png",
+  "kind": "figma",
+  "label": "Hotkeys \u00b7 one each, pile up, one at a time",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=139-2",
+  "project": "Margin",
+  "rationale": "one shortcut per app = choosing mid flow. way too much thinking. nope",
+  "sourceApp": "Figma",
+  "tab": "Capture",
+  "tags": [],
+  "title": "A shortcut per app?",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T04:34:00Z",
+   "model": "demo",
+   "seen": "Figma canvas with a desktop frame and the layers panel.",
+   "tags": [
+    "figma",
+    "canvas"
+   ],
+   "title": "Figma canvas, desktop frame"
+  },
+  "alternatives": "",
+  "body": "",
+  "changeScore": 0.14,
+  "createdAt": "2026-10-17T04:34:00Z",
+  "id": "F26F4021-AB78-5D5C-B3D5-3039341675CF",
+  "imageFile": "demo-margin-auto-2.jpg",
+  "kind": "snapshot",
+  "link": "",
+  "project": "Margin",
+  "rationale": "",
+  "sourceApp": "Figma",
+  "tags": [],
+  "title": "",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T04:37:00Z",
+   "model": "demo",
+   "seen": "Figma canvas showing a small card on the desktop mockup.",
+   "tags": [
+    "figma",
+    "canvas"
+   ],
+   "title": "Figma canvas, card on desktop"
+  },
+  "alternatives": "",
+  "body": "",
+  "changeScore": 0.2,
+  "createdAt": "2026-10-17T04:37:00Z",
+  "id": "DA257A86-064E-5B3D-AF5A-C49B74F6E4BA",
+  "imageFile": "demo-margin-auto-3.jpg",
+  "kind": "snapshot",
+  "link": "",
+  "project": "Margin",
+  "rationale": "",
+  "sourceApp": "Figma",
+  "tags": [],
+  "title": "",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T05:33:00Z",
+   "model": "demo",
+   "seen": "Figma canvas with the margin wordmark set in several typefaces.",
+   "tags": [
+    "identity",
+    "type"
+   ],
+   "title": "Wordmark type tests",
+   "topic": "Identity",
+   "visibleText": "margin, Aa"
+  },
+  "alternatives": "",
+  "body": "",
+  "changeScore": 0.08,
+  "createdAt": "2026-10-17T05:33:00Z",
+  "id": "E1B4EC98-4AF8-5C0F-9CDD-CAB78BE53679",
+  "imageFile": "demo-margin-snap-type.jpg",
+  "kind": "snapshot",
+  "link": "",
+  "project": "Margin",
+  "rationale": "",
+  "sourceApp": "Figma",
+  "tags": [],
+  "title": "",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-17T05:39:00Z",
+   "model": "demo",
+   "seen": "Claude Code: Hard edges, soft time: the Margin brand across the app and its icon.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "Hard edges, soft time",
+   "topic": "Identity"
+  },
+  "alternatives": "",
+  "baseSnapshot": "9f02998757d59b9b34153173b8f4d00b27528aa6",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-17T05:39:00Z",
+  "diffStat": "17 files \u00b7 +599 \u2212197",
+  "id": "CD9E2D10-260E-572D-8ABD-1268C3C85AEE",
+  "imageFile": "demo-margin-brand.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "apply the brand from the figma file: hard edges, soft time. DM Mono for the small labels",
+  "rationale": "hard edges soft time. right idea, too heavy rn. dm mono feels off",
+  "snapshot": "43a77412d16bb28ea19d5b77fd2f7a0f5d1bb4f2",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "Hard edges, soft time: the Margin brand across the app and its icon.",
+  "tab": "Identity",
+  "tags": [],
+  "title": "Brand v1: hard edges, soft time",
+  "verdict": "notQuite",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "alternatives": "Star the important captures and filter by stars.",
+  "body": "We removed starring captures. A star is one more choice in the moment and says nothing later. A short why says what was important about it.",
+  "createdAt": "2026-10-17T05:54:00Z",
+  "id": "8907CD4D-2EEF-53FA-AE92-F4E8A018E62E",
+  "kind": "decision",
+  "link": "",
+  "project": "Margin",
+  "rationale": "killed stars. a star says nothing later, 3 words of why do",
+  "tab": "Capture",
+  "tags": [
+   "simplify"
+  ],
+  "title": "No stars, words instead"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-17T06:02:00Z",
+   "model": "demo",
+   "seen": "Claude Code: Double-tap right Command opens a capture card at the top; captures land in the session's repo.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "Double-tap right Command opens a capture",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "baseSnapshot": "6b3f124d065e7fed51653d8ef0750c88a329ad25",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-17T06:02:00Z",
+  "diffStat": "7 files \u00b7 +680 \u2212275",
+  "id": "7A910EE7-B1CF-539C-8DB5-A4EB2C0E4751",
+  "imageFile": "demo-margin-double-cmd.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "one shortcut for everything: double tap right command. capture card at the top of the screen, and a session repo",
+  "rationale": "ONE shortcut. double \u2318. margin figures out what you meant from what's selected",
+  "snapshot": "54882adb1a279cd6c87bb3f882ddbb5fefe59f6d",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "Double-tap right Command opens a capture card at the top; captures land in the session's repo.",
+  "tab": "Capture",
+  "tags": [],
+  "title": "One shortcut: double \u2318",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T16:50:00Z",
+   "model": "demo",
+   "seen": "Rows of bracket and dot logo marks on a dark Figma canvas.",
+   "tags": [
+    "identity",
+    "logo"
+   ],
+   "title": "Bracket logo variants",
+   "topic": "Identity"
+  },
+  "alternatives": "",
+  "body": "",
+  "changeScore": 0.04,
+  "createdAt": "2026-10-17T16:50:00Z",
+  "id": "1149C900-9919-51FB-9608-16C055D7A1D6",
+  "imageFile": "demo-margin-snap-logo.jpg",
+  "kind": "snapshot",
+  "link": "",
+  "project": "Margin",
+  "rationale": "",
+  "sourceApp": "Figma",
+  "tags": [],
+  "title": "",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-17T17:01:00Z",
+   "model": "demo",
+   "seen": "Claude Code: Claude Code iterations in the app: reflection cards, a moment view with the diff and versions.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "Claude Code iterations in the app",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "baseSnapshot": "bbff4782e42228714c2422b04aba7a02cb09294c",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-17T17:01:00Z",
+  "diffStat": "14 files \u00b7 +887 \u221227",
+  "id": "892F588C-63E2-599E-8BEC-54B9ED98BC45",
+  "imageFile": "demo-margin-claude-iterations.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "when claude code finishes a build, keep that version: the prompt, a picture, the diff, and a way to open it again",
+  "rationale": "code is design material now. a build needs a why same as a frame",
+  "snapshot": "6bb98d445ef7fcb12a719ea517a26a1eb965bee5",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "Claude Code iterations in the app: reflection cards, a moment view with the diff and versions.",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Claude Code builds as captures",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T17:03:00Z",
+   "model": "demo",
+   "seen": "Are.na feed showing connected blocks and images.",
+   "tags": [
+    "reference",
+    "website"
+   ],
+   "title": "Are.na feed",
+   "topic": "Archive",
+   "visibleText": "Are.na / Feed / Explore"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-17T17:03:00Z",
+  "id": "F866BA90-0552-52FA-98ED-FF1F5D61C833",
+  "imageFile": "demo-margin-are-na.jpg",
+  "kind": "link",
+  "label": "Are.na",
+  "link": "https://www.are.na/",
+  "project": "Margin",
+  "rationale": "blocks connect w/o folders. this is the archive vibe",
+  "sourceApp": "Arc",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Reference: Are.na",
+  "windowTitle": "Are.na"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T17:05:00Z",
+   "model": "demo",
+   "seen": "A black bracket and dot on light grey.",
+   "tags": [
+    "logo",
+    "identity"
+   ],
+   "title": "Margin logo glyph",
+   "topic": "Identity"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-17T17:05:00Z",
+  "id": "6E945CC3-16C1-50C9-9A5D-3BC88B4D32BE",
+  "imageFile": "demo-margin-logo-raw.png",
+  "kind": "figma",
+  "label": "Logo \u00b7 bracket and dot",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=139-254",
+  "project": "Margin",
+  "rationale": "bracket = edge of the page, dot = the note. this is it",
+  "sourceApp": "Figma",
+  "tab": "Identity",
+  "tags": [],
+  "title": "The mark: bracket and dot",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-17T17:30:00Z",
+   "model": "demo",
+   "seen": "Claude Code: Frames with animation become videos.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "Frames with animation become videos",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "baseSnapshot": "fd829f056215690f6ed260c7113cc1ca058f9889",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-17T17:30:00Z",
+  "diffStat": "10 files \u00b7 +277 \u221219",
+  "id": "64E0B6A5-6838-528A-89C4-5C0ED63686E2",
+  "imageFile": "demo-margin-plugin-motion.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "figma frames with animation should come in as videos, not stills",
+  "rationale": "a still of an animation tells you nothing. motion has to come in as video",
+  "snapshot": "34813d3bfac4058c1fd6c60f6caec981f4264a08",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "Frames with animation become videos.",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Motion comes in as video",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T17:44:00Z",
+   "model": "demo",
+   "seen": "A desktop with a small card sliding in at the top center.",
+   "tags": [
+    "motion",
+    "capture card"
+   ],
+   "title": "Capture card motion",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-17T17:44:00Z",
+  "duration": 4.05,
+  "id": "0BC194E1-5694-5086-8613-4132A5BA2403",
+  "imageFile": "demo-margin-card-motion-v1.jpg",
+  "kind": "figma",
+  "label": "Capture card \u00b7 motion v1",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=139-218",
+  "mediaFile": "demo-margin-card-motion-v1.mp4",
+  "project": "Margin",
+  "rationale": "card drops in top center where your eyes already are. bit slow still",
+  "sourceApp": "Figma",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Capture card, motion v1",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "alternatives": "Figma's MCP server. Screenshots of the canvas.",
+  "body": "Figma's desktop MCP server never connected reliably on our Macs. Margin installs a small plugin instead: it exports the selected frames, flows and motion, and reports progress.",
+  "createdAt": "2026-10-17T18:00:00Z",
+  "id": "8E26A206-F7D6-5474-9F76-2FA8B5485F0B",
+  "kind": "decision",
+  "link": "",
+  "project": "Margin",
+  "rationale": "figma mcp never connects on our macs. writing our own tiny plugin instead",
+  "tab": "Capture",
+  "tags": [
+   "figma",
+   "plugin"
+  ],
+  "title": "Our own Figma plugin"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-17T18:31:00Z",
+   "model": "demo",
+   "seen": "Claude Code: Several selected frames export one by one and stay together as one capture.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "Several selected frames export one by",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "baseSnapshot": "c9d6ed15f51ce57d3872c406ef87dc89eee29ce9",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-17T18:31:00Z",
+  "diffStat": "15 files \u00b7 +352 \u221285",
+  "id": "0A36A371-BA26-5621-8635-BD66DCFB4A0B",
+  "imageFile": "demo-margin-figma-stack.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "if i select several frames, export them one by one but keep them together as one capture",
+  "rationale": "a flow is ONE thing. keep the frames together",
+  "snapshot": "bc03bc69a42f9d74ade7b11e33bb8bf5c9e02cfd",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "Several selected frames export one by one and stay together as one capture.",
+  "tab": "Capture",
+  "tags": [],
+  "title": "A flow stays together",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T18:33:00Z",
+   "model": "demo",
+   "seen": "Halftone marks and type references on a dark canvas.",
+   "tags": [
+    "references",
+    "visual direction"
+   ],
+   "title": "Visual references on canvas",
+   "topic": "Identity"
+  },
+  "alternatives": "",
+  "body": "",
+  "changeScore": 0.08,
+  "createdAt": "2026-10-17T18:33:00Z",
+  "id": "2CDBDFD2-7265-53B4-9987-83A540631C6F",
+  "imageFile": "demo-margin-snap-halftone.jpg",
+  "kind": "snapshot",
+  "link": "",
+  "project": "Margin",
+  "rationale": "",
+  "sourceApp": "Figma",
+  "tags": [],
+  "title": "",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T18:39:00Z",
+   "model": "demo",
+   "seen": "Figma canvas with bracket logo variants and a menu.",
+   "tags": [
+    "figma",
+    "canvas"
+   ],
+   "title": "Figma canvas, logo menu"
+  },
+  "alternatives": "",
+  "body": "",
+  "changeScore": 0.21,
+  "createdAt": "2026-10-17T18:39:00Z",
+  "id": "2060616F-1F79-5CC7-A311-93FB313F88C4",
+  "imageFile": "demo-margin-auto-4.jpg",
+  "kind": "snapshot",
+  "link": "",
+  "project": "Margin",
+  "rationale": "",
+  "sourceApp": "Figma",
+  "tags": [],
+  "title": "",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T18:40:00Z",
+   "model": "demo",
+   "seen": "A Figma frame is selected and captured into Margin.",
+   "tags": [
+    "figma",
+    "capture"
+   ],
+   "title": "Capturing a Figma frame",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-17T18:40:00Z",
+  "duration": 9.034,
+  "id": "D6132E07-52E6-5A85-8AA5-67FEB0A85F38",
+  "imageFile": "demo-margin-rec-figma-frame-poster.jpg",
+  "kind": "recording",
+  "link": "",
+  "mediaFile": "demo-margin-rec-figma-frame.mp4",
+  "project": "Margin",
+  "rationale": "select frame, \u2318\u2318, done. png + figma link together",
+  "sourceApp": "Figma",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Capture: a Figma frame",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T18:52:00Z",
+   "model": "demo",
+   "seen": "Several Figma frames are selected and saved as one stack.",
+   "tags": [
+    "figma",
+    "stack"
+   ],
+   "title": "Capturing a Figma flow",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-17T18:52:00Z",
+  "duration": 7.3,
+  "id": "26A8AE8A-9317-5EA2-9DA1-2D2222D79CDC",
+  "imageFile": "demo-margin-rec-figma-flow-poster.jpg",
+  "kind": "recording",
+  "link": "",
+  "mediaFile": "demo-margin-rec-figma-flow.mp4",
+  "project": "Margin",
+  "rationale": "multiple frames \u2192 one stack you can page through. nice",
+  "sourceApp": "Figma",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Capture: a Figma flow",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T19:10:00Z",
+   "model": "demo",
+   "seen": "A desktop mockup with Margin in the menu bar.",
+   "tags": [
+    "desktop",
+    "menu bar"
+   ],
+   "title": "Desktop with menu bar",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-17T19:10:00Z",
+  "id": "BB49F6F3-92BB-53F7-8CCD-3D842B78E038",
+  "imageFile": "demo-margin-status-bar.jpg",
+  "kind": "figma",
+  "label": "Desktop \u00b7 status bar",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=139-203",
+  "project": "Margin",
+  "rationale": "nobody looks at the menu bar mid flow. moving everything top center",
+  "sourceApp": "Figma",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Menu bar only? Not enough",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "agent": "Claude",
+  "ai": {
+   "createdAt": "2026-10-17T19:35:00Z",
+   "model": "demo",
+   "seen": "Claude Code: Notification icon: a prebuilt asset catalog when actool fails, a new build number each build.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "Notification icon",
+   "topic": "Identity"
+  },
+  "alternatives": "",
+  "baseSnapshot": "b5d83df36a5e6be9744f0023025d03e95a7566bf",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-17T19:35:00Z",
+  "diffStat": "7 files \u00b7 +124 \u22127",
+  "id": "4CF0DEB9-6A1D-5538-BE84-04E54CC400D5",
+  "imageFile": "demo-margin-app-icon-card.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "still no app icon in the notificaitions",
+  "rationale": "notif w/o our icon looks like spam. fixed",
+  "snapshot": "e799ea98a562be6be963a428687fcc9275b9a9e5",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude",
+  "summary": "Notification icon: a prebuilt asset catalog when actool fails, a new build number each build.",
+  "tab": "Identity",
+  "tags": [],
+  "title": "Our icon in notifications",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T20:33:00Z",
+   "model": "demo",
+   "seen": "Figma canvas with four archive directions side by side.",
+   "tags": [
+    "archive",
+    "options"
+   ],
+   "title": "Archive options on canvas",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "body": "",
+  "changeScore": 0.32,
+  "createdAt": "2026-10-17T20:33:00Z",
+  "id": "3EA1E343-BC3B-559B-9E0E-8F751AD75C24",
+  "imageFile": "demo-margin-snap-explore.jpg",
+  "kind": "snapshot",
+  "link": "",
+  "project": "Margin",
+  "rationale": "",
+  "sourceApp": "Figma",
+  "tags": [],
+  "title": "",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T20:35:00Z",
+   "model": "demo",
+   "seen": "Four archive layouts, each shown granular and zoomed out.",
+   "tags": [
+    "archive",
+    "exploration"
+   ],
+   "title": "Four archive directions",
+   "topic": "Archive",
+   "visibleText": "Margin notes, Threads, Projector, Ledger"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-17T20:35:00Z",
+  "id": "BB3514D8-35C6-5F67-9F21-0658C38A5220",
+  "imageFile": "demo-margin-claude-exploration.jpg",
+  "kind": "figma",
+  "label": "Claude exploration \u00b7 four archives",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=169-3414",
+  "project": "Margin",
+  "rationale": "asked claude for 4 archive directions to react to. not to ship",
+  "sourceApp": "Figma",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Four archive directions",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T20:36:00Z",
+   "model": "demo",
+   "seen": "Figma canvas with the four polished archive finishes.",
+   "tags": [
+    "figma",
+    "canvas"
+   ],
+   "title": "Figma canvas, polish options"
+  },
+  "alternatives": "",
+  "body": "",
+  "changeScore": 0.37,
+  "createdAt": "2026-10-17T20:36:00Z",
+  "id": "2A68F8E8-C40D-57F7-9E0E-ED20CDEBDAA4",
+  "imageFile": "demo-margin-auto-5.jpg",
+  "kind": "snapshot",
+  "link": "",
+  "project": "Margin",
+  "rationale": "",
+  "sourceApp": "Figma",
+  "tags": [],
+  "title": "",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T20:39:00Z",
+   "model": "demo",
+   "seen": "An archive where notes sit in a margin beside the captures.",
+   "tags": [
+    "archive",
+    "option A"
+   ],
+   "title": "Option A, big picture",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-17T20:39:00Z",
+  "id": "DED8E568-3431-5990-A9EB-5E15BFFC7ED3",
+  "imageFile": "demo-margin-option-a.jpg",
+  "kind": "figma",
+  "label": "A \u00b7 Margin notes \u00b7 big picture",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=174-288",
+  "project": "Margin",
+  "rationale": "your words in a margin next to the work. it's literally the name",
+  "sourceApp": "Figma",
+  "tab": "Archive",
+  "tags": [],
+  "title": "A: notes in the margin",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T20:50:00Z",
+   "model": "demo",
+   "seen": "A scored comparison of four archive options that picks A.",
+   "tags": [
+    "decision",
+    "comparison"
+   ],
+   "title": "Comparison and pick",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "body": "Go with A. Steal one thing from C.\n\nIt argues for intention: only what you said becomes the story.\nIt keeps the spine simple: chronology, one mode, no tagging.\n\nDon't build B. It's the most exciting, but threads need sorting. Sorting is the documentation work that breaks momentum.",
+  "createdAt": "2026-10-17T20:50:00Z",
+  "id": "C6784CB8-3915-5A80-9DEE-EEC1380209C2",
+  "kind": "text",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=174-317",
+  "project": "Margin",
+  "rationale": "agree, NOT building B. sorting by hand is the exact work we're removing",
+  "sourceApp": "Figma",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Go with A, don't build B",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "agent": "Claude",
+  "ai": {
+   "createdAt": "2026-10-17T20:59:00Z",
+   "model": "demo",
+   "seen": "Claude Code: Every Margin surface at the top center; a narrower, calmer capture card",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "Every Margin surface at the top",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "baseSnapshot": "e799ea98a562be6be963a428687fcc9275b9a9e5",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-17T20:59:00Z",
+  "diffStat": "5 files \u00b7 +340 \u2212130",
+  "expectation": "I need to work on design and code simultanously",
+  "id": "293F7CCB-CA64-5368-B863-93CD794FC351",
+  "imageFile": "demo-margin-top-center-card.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "can you use a subagent to simultaneously work on some of the code stuff? ( i mainly want all ui elements to be in this top middle spot)  also like the caputre bar and everything and caputre bar to be less wide and more visually refined. If not do it after",
+  "rationale": "everything top center now. one place to look. card way calmer",
+  "snapshot": "5e59ca269b08d35b39ebc93a004135b7d15870bc",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude",
+  "summary": "Every Margin surface at the top center; a narrower, calmer capture card",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Everything at the top center",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "alternatives": "B \u00b7 Threads (sorted by idea), C \u00b7 Projector, D \u00b7 Ledger",
+  "body": "One timeline, one mode, no tagging up front. Dead ends sit next to what replaced them, so the story keeps its turns.",
+  "createdAt": "2026-10-17T21:05:00Z",
+  "id": "12A5FB60-16D8-5E9E-B935-A73FDA38B17B",
+  "kind": "decision",
+  "link": "",
+  "project": "Margin",
+  "rationale": "time first. dead ends stay next to what replaced them",
+  "tab": "Archive",
+  "tags": [
+   "archive",
+   "timeline"
+  ],
+  "title": "Chronology first"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-17T21:26:00Z",
+   "model": "demo",
+   "seen": "Claude Code: Notes on each capture, suggested tabs and draft chapter summaries. Facts and questions only, never the why.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "Notes on each capture, suggested tabs",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-17T21:26:00Z",
+  "diffStat": "16 files \u00b7 +1720 \u221210",
+  "id": "D1A44989-272B-5367-B708-1DB50B4987A6",
+  "imageFile": "demo-margin-intelligence.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "add an intelligence layer: a short note on what each capture shows, suggested tabs, draft summaries when you zoom out. facts only. never write the why",
+  "rationale": "ai says what it sees. never the why. hard rule",
+  "sourceApp": "Claude Code",
+  "summary": "Notes on each capture, suggested tabs and draft chapter summaries. Facts and questions only, never the why.",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Intelligence: facts, never the why",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T21:40:00Z",
+   "model": "demo",
+   "seen": "A dark capture window with several form fields.",
+   "tags": [
+    "capture card",
+    "form"
+   ],
+   "title": "Capture card form",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-17T21:40:00Z",
+  "id": "46D8D75B-705F-55D5-92E5-BAD9CC222DF3",
+  "imageFile": "demo-margin-form-v1.png",
+  "kind": "figma",
+  "label": "Capture card \u00b7 v1",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=159-5437",
+  "project": "Margin",
+  "rationale": "v1. good not good enough. 5 fields for a 5 sec thing?? no",
+  "sourceApp": "Figma",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Capture card v1: too many fields",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T22:10:00Z",
+   "model": "demo",
+   "seen": "Captures listed in one long chronological column.",
+   "tags": [
+    "archive",
+    "linear"
+   ],
+   "title": "Linear archive",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-17T22:10:00Z",
+  "duration": 44.267,
+  "id": "0348090E-A4B1-5948-9A8E-C1151C76D54A",
+  "imageFile": "demo-margin-rec-linear-poster.jpg",
+  "kind": "recording",
+  "label": "Archive \u00b7 linear",
+  "link": "",
+  "mediaFile": "demo-margin-rec-linear.mp4",
+  "project": "Margin",
+  "rationale": "chronological works but it's so flat. can't see the shape of the process",
+  "sourceApp": "Margin",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Archive v1: a linear list",
+  "windowTitle": "Umbrella"
+ },
+ {
+  "agent": "Claude",
+  "ai": {
+   "createdAt": "2026-10-17T22:57:00Z",
+   "model": "demo",
+   "seen": "Claude Code: Click a picture on the capture card to see it large; click outside or press Esc to go back, arrows page through frames",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "Click a picture on the capture",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "baseSnapshot": "7b2cfb7845f089a8af3ecf7ca3d930718385a73c",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-17T22:57:00Z",
+  "diffStat": "5 files \u00b7 +519 \u221258",
+  "id": "2FB6FC4D-B6DB-50FA-95B3-9905090A5218",
+  "imageFile": "demo-margin-preview-card.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "there has been some updates so make sure to be working on the newest version, so pull or however you do it its on git. But i want to add a small change that you can click on a visual on a card after capturing i want it to open a preview of the ima (and if you click outside of it get out of it again)",
+  "rationale": "click the pic on the card to check what you got",
+  "snapshot": "e5f4ee7dc4eaf833b98020d267b20d8688776fc7",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude",
+  "summary": "Click a picture on the capture card to see it large; click outside or press Esc to go back, arrows page through frames",
+  "tab": "Capture",
+  "tags": [],
+  "title": "See the capture big",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "agent": "Claude",
+  "ai": {
+   "createdAt": "2026-10-17T23:10:00Z",
+   "model": "demo",
+   "seen": "Claude Code: Annotate from the image preview: type the why under the picture, Return saves, Esc goes back to the card with the text",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "Annotate from the image preview",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "baseSnapshot": "e5f4ee7dc4eaf833b98020d267b20d8688776fc7",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-17T23:10:00Z",
+  "diffStat": "6 files \u00b7 +477 \u221213",
+  "id": "DD82824E-D3F4-59F4-A8F6-A04AF95C490C",
+  "imageFile": "demo-margin-annotate-card.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "can you also make it possible to add text  annotations to this as well so if you have it open in preview you can add the annotation and esc out of it",
+  "rationale": "type the why right under the big picture. return saves",
+  "snapshot": "318f9a0c6671805af128b5fcc7357469cb6e51fb",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude",
+  "summary": "Annotate from the image preview: type the why under the picture, Return saves, Esc goes back to the card with the text",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Annotate from the preview",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T23:15:00Z",
+   "model": "demo",
+   "seen": "A note is typed under a captured image.",
+   "tags": [
+    "annotation",
+    "capture card"
+   ],
+   "title": "Annotating a capture",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-17T23:15:00Z",
+  "duration": 6.234,
+  "id": "96DAEED6-2FF6-5C0A-B325-206787DCFE62",
+  "imageFile": "demo-margin-rec-annotate-poster.jpg",
+  "kind": "recording",
+  "link": "",
+  "mediaFile": "demo-margin-rec-annotate.mp4",
+  "project": "Margin",
+  "rationale": "why goes in right away while it's fresh. one line",
+  "sourceApp": "Margin",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Write the why right away",
+  "windowTitle": "Margin"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-17T23:25:00Z",
+   "model": "demo",
+   "seen": "An archive timeline zooming between levels of detail.",
+   "tags": [
+    "timeline",
+    "zoom"
+   ],
+   "title": "Zoomable timeline prototype",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-17T23:25:00Z",
+  "duration": 31.7,
+  "id": "F294670C-7135-5E3A-8022-84074D911378",
+  "imageFile": "demo-margin-rec-edna-timeline-poster.jpg",
+  "kind": "recording",
+  "label": "Timeline \u00b7 photo-style zoom (Edna)",
+  "link": "",
+  "mediaFile": "demo-margin-rec-edna-timeline.mp4",
+  "project": "Margin",
+  "rationale": "edna's pass!! feels like zooming photos. first time the archive has depth",
+  "sourceApp": "QuickTime Player",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Edna's timeline, first pass",
+  "windowTitle": "Edna Timeline"
+ },
+ {
+  "agent": "Claude",
+  "ai": {
+   "createdAt": "2026-10-17T23:29:00Z",
+   "model": "demo",
+   "seen": "Claude Code: Leaving the image preview finishes the card: the note is saved and the card closes at once",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "Leaving the image preview finishes the",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "baseSnapshot": "318f9a0c6671805af128b5fcc7357469cb6e51fb",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-17T23:29:00Z",
+  "diffStat": "2 files \u00b7 +9 \u22127",
+  "id": "EEE4A209-6763-58AB-84CF-34AB0F01CE3B",
+  "imageFile": "demo-margin-esc-card.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "when you esc or click outside the card should be gone and not esc again/wait for it to go away",
+  "rationale": "esc = done. card gone instantly, no waiting",
+  "snapshot": "8610c2d55ba2ce02b5fc857ba2b0d3af74835e82",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude",
+  "summary": "Leaving the image preview finishes the card: the note is saved and the card closes at once",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Esc means done",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-18T00:35:00Z",
+   "model": "demo",
+   "seen": "A dark timeline with moments grouped in rows.",
+   "tags": [
+    "timeline",
+    "grouping"
+   ],
+   "title": "Timeline with grouped moments",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-18T00:35:00Z",
+  "id": "FD1D11A6-0098-51AC-9F59-AD0B4012813D",
+  "imageFile": "demo-margin-pinch.png",
+  "kind": "figma",
+  "label": "06 \u00b7 85802f6 \u00b7 seamless pinch, grouped moments",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=357-12252",
+  "project": "Margin",
+  "rationale": "pinch between levels, no jumps. moments group by session",
+  "sourceApp": "Figma",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Pinch through levels",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "agent": "Claude",
+  "ai": {
+   "createdAt": "2026-10-18T00:53:00Z",
+   "model": "demo",
+   "seen": "Claude Code: One loading look: a shimmering thinking pill for captures, notes, summaries and updates; Margin's topic and tags show in the op",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "One loading look",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "baseSnapshot": "8610c2d55ba2ce02b5fc857ba2b0d3af74835e82",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-18T00:53:00Z",
+  "diffStat": "14 files \u00b7 +430 \u2212212",
+  "id": "A04DF4DE-FCAE-562A-A1D5-2EA080D859DA",
+  "imageFile": "demo-margin-loading-pill-card.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "I really like this thinking loading pill any chance we can use this for the loading animations in our tool, for example for capturing figma or if a intelligence thing is loading also intelligent tags are not visible for indidvidual items if you open them up, I already like though how the description of what margin saw is only on the level when you click and not visible in the overview, so i want same for the tags, if you dont know what I am saying ask me",
+  "rationale": "one loading look everywhere. shimmer pill, no spinners pls",
+  "snapshot": "d3be7770443f22f2fa749c98b54c50a759e0fe0c",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude",
+  "summary": "One loading look: a shimmering thinking pill for captures, notes, summaries and updates; Margin's topic and tags show in the opened moment only",
+  "tab": "Capture",
+  "tags": [],
+  "title": "One loading look",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-18T01:30:00Z",
+   "model": "demo",
+   "seen": "Many automatic screenshots pile up in the archive.",
+   "tags": [
+    "auto capture",
+    "screenshots"
+   ],
+   "title": "Automatic capture flood",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-18T01:30:00Z",
+  "duration": 8.734,
+  "id": "9A9611C9-F355-597A-8CE4-13E6DF7A29AF",
+  "imageFile": "demo-margin-rec-flood-poster.jpg",
+  "kind": "recording",
+  "label": "Auto capture \u00b7 every few minutes",
+  "link": "",
+  "mediaFile": "demo-margin-rec-flood.mp4",
+  "project": "Margin",
+  "rationale": "screenshot every few min = flood. kills the intention completely",
+  "sourceApp": "Margin",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Auto capture v1: a flood",
+  "windowTitle": "Margin"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-18T06:11:00Z",
+   "model": "demo",
+   "seen": "Claude Code: The timeline is the repo's main view, under its granularity slider.",
+   "tags": [
+    "code",
+    "claude code",
+    "Edna"
+   ],
+   "title": "The timeline is the repo's main",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "baseSnapshot": "39a14eb6b1eac93c56910ec7de202ff489558ef2",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-18T06:11:00Z",
+  "diffStat": "6 files \u00b7 +107 \u2212170",
+  "id": "A34AE2CC-F817-5631-9463-70A81A9948B5",
+  "imageFile": "demo-margin-main-view.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "make the timeline the main view of the repo, under the granularity slider",
+  "rationale": "edna's timeline replaces the list. slider zooms it \u2713",
+  "snapshot": "0aa47edbd86534c63e9bd40f94d32adf34227734",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "The timeline is the repo's main view, under its granularity slider.",
+  "tab": "Archive",
+  "tags": [],
+  "title": "The timeline becomes the archive",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "alternatives": "",
+  "body": "Edna's timeline and our header redesign collided on main. We undid the merge, kept her timeline on a branch, then brought it back as the main view.",
+  "createdAt": "2026-10-18T06:45:00Z",
+  "id": "4AB710B3-0118-5593-BB78-FB06F7641177",
+  "kind": "decision",
+  "link": "",
+  "project": "Margin",
+  "rationale": "merge conflict mess. undid it, kept edna's on a branch, brought it back as main",
+  "tab": "Archive",
+  "tags": [
+   "process",
+   "timeline"
+  ],
+  "title": "Two timelines, one main"
+ },
+ {
+  "alternatives": "Capture every few minutes. Capture on every Figma change.",
+  "body": "It filled the archive with screenshots nobody chose. Nudge instead: after a quiet stretch, ask once.",
+  "createdAt": "2026-10-18T06:59:00Z",
+  "id": "9D08E696-3D49-503A-8491-83C2223F9DA2",
+  "kind": "decision",
+  "link": "",
+  "project": "Margin",
+  "rationale": "auto capture off for now. nudge instead, ask once after a quiet stretch",
+  "tab": "Capture",
+  "tags": [
+   "auto capture",
+   "nudge"
+  ],
+  "title": "Auto capture off, for now"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-18T07:40:00Z",
+   "model": "demo",
+   "seen": "A note on zooming between day, week and month.",
+   "tags": [
+    "timeline",
+    "zoom",
+    "motion"
+   ],
+   "title": "Zoom levels note",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "body": "Scales: one day, days of the week, weeks of the month, months.\n\nThese are one continuous flow. The main need is to convey that you are zooming in and out, so the motion should show the effect of scale.",
+  "createdAt": "2026-10-18T07:40:00Z",
+  "id": "024AC9D6-51E4-509E-B549-06F2785C2E9C",
+  "kind": "text",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=215-10804",
+  "project": "Margin",
+  "rationale": "scale not pages. the motion has to SAY you're zooming",
+  "sourceApp": "Figma",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Zoom in and out of time",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-18T08:16:00Z",
+   "model": "demo",
+   "seen": "Claude Code: A timeline scale study: five rail options on a zoomable archive.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "A timeline scale study",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "baseSnapshot": "bd3522c23353a31981f2850cf896864c207d81fb",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-18T08:16:00Z",
+  "diffStat": "1 file \u00b7 +670 \u22120",
+  "id": "A0D81F78-5E17-5D90-90FC-EB4E62957E02",
+  "imageFile": "demo-margin-proto-1.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "prototype the timeline's scale as a rail beside it. try five: ruler, beads, brackets, tide, gears. html i can open in the browser",
+  "rationale": "5 rails side by side. easier to feel than imagine",
+  "siteFolder": "sites/A0D81F78-5E17-5D90-90FC-EB4E62957E02",
+  "sitePage": "timeline-scale.html",
+  "snapshot": "edbc06e4853479284a3ae83627e569261bd502c2",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "A timeline scale study: five rail options on a zoomable archive.",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Scale study 1: five rails",
+  "verdict": "notQuite",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-18T08:25:00Z",
+   "model": "demo",
+   "seen": "Claude Code: Three ruler variations (hairline, dots, vernier) and three bead variations (pearls, glass, abacus).",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "Three ruler variations",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "baseSnapshot": "edbc06e4853479284a3ae83627e569261bd502c2",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-18T08:25:00Z",
+  "diffStat": "1 file \u00b7 +246 \u221213",
+  "id": "EF8A7DC5-D8B1-5C6C-9CA5-B94E93E994CD",
+  "imageFile": "demo-margin-proto-2.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "ruler and beads are the only ones worth it. three variations of each, keep the originals to compare",
+  "rationale": "hairline is closest. beads too cute",
+  "siteFolder": "sites/EF8A7DC5-D8B1-5C6C-9CA5-B94E93E994CD",
+  "sitePage": "timeline-scale.html",
+  "snapshot": "6442baddf4aa8fd6ea01b8454e2567efc50da80e",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "Three ruler variations (hairline, dots, vernier) and three bead variations (pearls, glass, abacus).",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Scale study 2: rulers and beads",
+  "verdict": "notQuite",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-18T08:32:00Z",
+   "model": "demo",
+   "seen": "Claude Code: One mark per day; beads sized by captures gather into weeks and months.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "One mark per day",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "baseSnapshot": "6442baddf4aa8fd6ea01b8454e2567efc50da80e",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-18T08:32:00Z",
+  "diffStat": "1 file \u00b7 +54 \u221247",
+  "id": "FD20E90C-E968-5503-B5FC-6BA29B039682",
+  "imageFile": "demo-margin-proto-3.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "one mark per day. drop the hour ticks",
+  "rationale": "better. still busy",
+  "siteFolder": "sites/FD20E90C-E968-5503-B5FC-6BA29B039682",
+  "sitePage": "timeline-scale.html",
+  "snapshot": "da5309bdfae390283744f04b5aabbe6ccfd48706",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "One mark per day; beads sized by captures gather into weeks and months.",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Scale study 3: a mark per day",
+  "verdict": "notQuite",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-18T08:37:00Z",
+   "model": "demo",
+   "seen": "Claude Code: Simple rails with one even rhythm: a mark per row and short marks in between.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "Simple rails with one even rhythm",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "baseSnapshot": "da5309bdfae390283744f04b5aabbe6ccfd48706",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-18T08:37:00Z",
+  "diffStat": "1 file \u00b7 +51 \u22128",
+  "id": "860069EE-5A9A-581E-AE57-7449C3CA7666",
+  "imageFile": "demo-margin-proto-4.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "simpler. one even rhythm",
+  "rationale": "too even, can't tell busy days from quiet ones. dead end",
+  "siteFolder": "sites/860069EE-5A9A-581E-AE57-7449C3CA7666",
+  "sitePage": "timeline-scale.html",
+  "snapshot": "353f520a1663ed2868441a00e72a34a42a64793f",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "Simple rails with one even rhythm: a mark per row and short marks in between.",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Scale study 4: one even rhythm",
+  "verdict": "deadEnd",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-18T08:51:00Z",
+   "model": "demo",
+   "seen": "Claude Code: Day dots on a hairline that merge into week and month dots.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "Day dots on a hairline that",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "baseSnapshot": "353f520a1663ed2868441a00e72a34a42a64793f",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-18T08:51:00Z",
+  "diffStat": "1 file \u00b7 +43 \u22124",
+  "id": "42F119BA-82E0-556A-83B8-E3B38B7098B1",
+  "imageFile": "demo-margin-proto-5.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "dots on a hairline, one per day beside its date. when you zoom out they merge into slightly bigger week and month dots",
+  "rationale": "THIS one. a dot per day, merging as you zoom out",
+  "siteFolder": "sites/42F119BA-82E0-556A-83B8-E3B38B7098B1",
+  "sitePage": "timeline-scale.html",
+  "snapshot": "501faaa55dc23d0c0dcf4e9575da6adea09b6326",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "Day dots on a hairline that merge into week and month dots.",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Scale study 5: day dots",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-18T09:01:00Z",
+   "model": "demo",
+   "seen": "Claude Code: Timeline rail: a dot per day you worked, rolling into weeks and months as you zoom out.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "Timeline rail",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "baseSnapshot": "1fb15ff87224fdc2e73d022140f17233310ce62d",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-18T09:01:00Z",
+  "diffStat": "2 files \u00b7 +92 \u22126",
+  "id": "D40A4879-BBA2-5FA3-9698-A0E1BC9D5BE6",
+  "imageFile": "demo-margin-rail.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "bring the day dots into the app's timeline. zooming out, a week's dots roll into one, then a month's",
+  "rationale": "html prototype \u2192 app in like 10 min",
+  "snapshot": "5079911c90841c718d8e11e12a25eb1476d06942",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "Timeline rail: a dot per day you worked, rolling into weeks and months as you zoom out.",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Day dots in the app",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-18T17:03:00Z",
+   "model": "demo",
+   "seen": "Claude Code: Square corners for captured content everywhere; the interface stays rounded.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "Square corners for captured content everywhere",
+   "topic": "Identity"
+  },
+  "alternatives": "",
+  "baseSnapshot": "50bd704c1b46800b78feedd7451ab998ab47d662",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-18T17:03:00Z",
+  "diffStat": "7 files \u00b7 +17 \u221216",
+  "id": "E3E93898-BADA-5B52-BE34-9E97B131834B",
+  "imageFile": "demo-margin-square.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "captured content gets square corners everywhere. the ui stays rounded",
+  "rationale": "square for the work, round for the tool. you always know what's yours",
+  "snapshot": "85af7b710ef0be6cbefc8cd906976b6672b25ba5",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "Square corners for captured content everywhere; the interface stays rounded.",
+  "tab": "Identity",
+  "tags": [],
+  "title": "Square work, round tools",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-18T17:16:00Z",
+   "model": "demo",
+   "seen": "The archive shown side by side in light and dark mode.",
+   "tags": [
+    "light mode",
+    "dark mode",
+    "archive"
+   ],
+   "title": "Archive in light and dark",
+   "topic": "Identity"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-18T17:16:00Z",
+  "id": "AB299909-FA0A-51D4-81C3-81D5D5499D52",
+  "imageFile": "demo-margin-light-dark.jpg",
+  "kind": "figma",
+  "label": "Margin Archive \u00b7 Light & Dark",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=222-4699",
+  "project": "Margin",
+  "rationale": "paper + ink both modes. work stays loudest",
+  "sourceApp": "Figma",
+  "tab": "Identity",
+  "tags": [],
+  "title": "Light and dark",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-11-06T01:09:52Z",
+   "model": "gemini-3.5-flash-lite",
+   "seen": "Instructions detailing repository opening, card interaction, and deletion methods within the interface.",
+   "tags": [
+    "notes",
+    "instructions",
+    "ui"
+   ],
+   "title": "Little things app notes",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "body": "Little Things\n\nCapture anything repo opens up\nClick card after capture to open preview of capture\nHow to delete this",
+  "createdAt": "2026-10-18T17:19:00Z",
+  "id": "9E652C3F-17A3-556F-A996-C2A63DEF37DF",
+  "imageFile": "demo-margin-little-things.png",
+  "kind": "text",
+  "label": "Little Things",
+  "link": "",
+  "mediaFile": "demo-margin-little-things-media.rtf",
+  "project": "Margin",
+  "rationale": "small stuff before monday so it feels finished",
+  "sourceApp": "Notes",
+  "tab": "Focus",
+  "tags": [],
+  "title": "Little things before Monday",
+  "windowTitle": "All iCloud"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-18T17:22:00Z",
+   "model": "demo",
+   "seen": "Three ways to set a captured quote on a card.",
+   "tags": [
+    "text",
+    "quote",
+    "options"
+   ],
+   "title": "Quote card options",
+   "topic": "Capture",
+   "visibleText": "A Hanging open quote, B Large pair, C Typographic, hung"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-18T17:22:00Z",
+  "id": "CDE3D734-0023-59B4-9189-7AD9B111E21E",
+  "imageFile": "demo-margin-quote-options.png",
+  "kind": "capture",
+  "label": "Quote options \u00b7 hanging, large pair, typographic",
+  "link": "",
+  "project": "Margin",
+  "rationale": "text should read as WORDS not a screenshot of words. A or B?",
+  "sourceApp": "Figma",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Captured text as a quote",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-18T17:30:00Z",
+   "model": "demo",
+   "seen": "The archive switching between light and dark.",
+   "tags": [
+    "dark mode",
+    "minimal"
+   ],
+   "title": "Archive in both modes",
+   "topic": "Identity"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-18T17:30:00Z",
+  "duration": 10,
+  "id": "08CF8354-3F84-55AC-B135-803420C7CEAD",
+  "imageFile": "demo-margin-rec-dark-poster.jpg",
+  "kind": "recording",
+  "label": "Minimal, light and dark",
+  "link": "",
+  "mediaFile": "demo-margin-rec-dark.mp4",
+  "project": "Margin",
+  "rationale": "no extra styling. work in focus, light or dark",
+  "sourceApp": "Margin",
+  "tab": "Identity",
+  "tags": [],
+  "title": "Minimal in both modes",
+  "windowTitle": "Umbrella"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-11-06T01:09:52Z",
+   "model": "gemini-3.5-flash-lite",
+   "seen": "Explanation of a text preview rendering fix and status of continuous integration.",
+   "tags": [
+    "bugfix",
+    "preview",
+    "build"
+   ],
+   "title": "Text preview layout fix",
+   "topic": "Testing"
+  },
+  "alternatives": "",
+  "body": "I fixed the text preview for real this time: the off-white or gray paper now fills the whole box, with the text centered on it. It\u2019s on main. Since CI is off, the fix hasn\u2019t been compiled or tested anywhere yet; you\u2019ll be the first to see it after Update Margin. If the update fails, Margin keeps your current version and shows the error.\n\nWhat was wrong: the text picture is saved at double resolution, but the drawing code only filled a quarter of it. That left the text in the bottom-left corner and the rest of the box empty. This bug was older than my change last round, which is why that change made no visible difference.\n\nYour existing text captures: they still have the broken picture, so Margin redraws them once the first time it launches after the update. It runs in the background and takes a moment.\n\nWhat \u201cCI\u201d is: I think the \u201cCl\u201d you saw is CI, short for continuous integration. It\u2019s a GitHub service that builds and checks the app in the cloud whenever I push. For Margin it rents a Mac each time and:\n\nbuilds the app,\nruns about 130 automated tests,\nmakes one real call each to Gemini and OpenAI to confirm the keys work,\ncompiles the app icon file for Macs that can\u2019t do that themselves.\n\nDo we need it? Not to use Margin. Update Margin builds the app on each person\u2019s Mac, which is why your friends could pull without it. What you lose without CI:\n\nNo safety check: I can\u2019t confirm a change builds before you get it. A mistake would first show up as a failed Update Margin on your Mac, though your current version keeps working.\nNo icon refresh: the icon file only needs recompiling if we change the icon again.\n\nWhy the limit hit: builds on GitHub\u2019s Macs are expensive for private repos. GitHub counts each Mac minute as ten regular minutes. I\u2019ve also been triggering two builds per change, one per branch.\n\nWhat I\u2019d do: run CI only for main and only when app code changes, which roughly halves the usage. Then raise the spending limit a little before the deadline if you want the checks back. Or we skip CI until Monday and I\u2019m extra careful. Which do you prefer?",
+  "createdAt": "2026-10-18T18:10:00Z",
+  "id": "4FF1070E-D78A-5230-8423-D428E965ACEC",
+  "imageFile": "demo-margin-text-fix.png",
+  "kind": "text",
+  "label": "I fixed the text preview for real this time: the off-white or gray paper now fills the w\u2026",
+  "link": "https://claude.ai/chat/0dca9a92-0b54-4e91-802c-bee015b70a74?artifact=d9203d0b-1202-4078-ad57-764d78a9bf06",
+  "mediaFile": "demo-margin-text-fix-media.html",
+  "project": "Margin",
+  "rationale": "keeping claude's explanation. the why of a fix matters too",
+  "sourceApp": "Claude",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Why text previews were broken",
+  "windowTitle": "Claude"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-18T18:21:00Z",
+   "model": "demo",
+   "seen": "A desktop with a Margin notification asking to capture.",
+   "tags": [
+    "nudge",
+    "notification"
+   ],
+   "title": "Nudge notification mockup",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-18T18:21:00Z",
+  "id": "1F545521-F4D2-5A10-A8A5-AA95D63B216B",
+  "imageFile": "demo-margin-nudge-notif.jpg",
+  "kind": "figma",
+  "label": "Nudge \u00b7 as a notification",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=222-5338",
+  "project": "Margin",
+  "rationale": "notification = too loud. feels like every other app begging",
+  "sourceApp": "Figma",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Nudge as a notification? Too loud",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-18T18:23:00Z",
+   "model": "demo",
+   "seen": "Claude Code: Nudges as a small pill that fills as it counts down; click to capture, swipe up to dismiss, hover to keep.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "Nudges as a small pill that",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "baseSnapshot": "904dfb13704727d72dbe70896820c46988bfc0df",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-18T18:23:00Z",
+  "diffStat": "3 files \u00b7 +236 \u22120",
+  "id": "CF4AAC10-6E86-5294-9489-10A338EC6296",
+  "imageFile": "demo-margin-nudge-pill.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "bring nudges back as a small pill: after ten quiet minutes in figma or claude the mark drops in and opens into 'capture this?'. it fills as it counts down. swipe up to dismiss",
+  "rationale": "small pill that fills as it counts down. easy to ignore = the point",
+  "snapshot": "5042406223c0d7040a6126d187ba14fe791a01b0",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "Nudges as a small pill that fills as it counts down; click to capture, swipe up to dismiss, hover to keep.",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Nudge as a small pill",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-18T18:48:00Z",
+   "model": "demo",
+   "seen": "A small pill at the top asks whether to capture.",
+   "tags": [
+    "nudge",
+    "capture"
+   ],
+   "title": "Nudge pill",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-18T18:48:00Z",
+  "duration": 15.234,
+  "id": "F9D98D72-6BD0-5F13-9214-78E5DDCF3E9C",
+  "imageFile": "demo-margin-rec-nudge-poster.jpg",
+  "kind": "recording",
+  "link": "",
+  "mediaFile": "demo-margin-rec-nudge.mp4",
+  "project": "Margin",
+  "rationale": "asks once after a quiet stretch then gets out of the way",
+  "sourceApp": "Margin",
+  "tab": "Capture",
+  "tags": [],
+  "title": "The nudge",
+  "windowTitle": "Margin"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-18T19:05:00Z",
+   "model": "demo",
+   "seen": "Selected notes are captured as text.",
+   "tags": [
+    "text",
+    "capture"
+   ],
+   "title": "Capturing text",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-18T19:05:00Z",
+  "duration": 9.067,
+  "id": "86461AA2-D2F5-5FF6-9142-CCAF333090D2",
+  "imageFile": "demo-margin-rec-text-poster.jpg",
+  "kind": "recording",
+  "link": "",
+  "mediaFile": "demo-margin-rec-text.mp4",
+  "project": "Margin",
+  "rationale": "select text anywhere, \u2318\u2318. kept as words not a screenshot",
+  "sourceApp": "Notes",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Capture: raw text",
+  "windowTitle": "Notes"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-18T19:12:00Z",
+   "model": "demo",
+   "seen": "A selected URL is saved with a picture of the page.",
+   "tags": [
+    "link",
+    "capture"
+   ],
+   "title": "Capturing a website",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-18T19:12:00Z",
+  "duration": 6.767,
+  "id": "EB35CD72-3D55-5822-B843-CB1A20CB4341",
+  "imageFile": "demo-margin-rec-url-poster.jpg",
+  "kind": "recording",
+  "link": "",
+  "mediaFile": "demo-margin-rec-url.mp4",
+  "project": "Margin",
+  "rationale": "select the address \u2192 link + pic of the page",
+  "sourceApp": "Arc",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Capture: a website",
+  "windowTitle": "Arc"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-18T20:00:00Z",
+   "model": "demo",
+   "seen": "Captures arranged by idea, zooming into finer iterations.",
+   "tags": [
+    "archive",
+    "ideas"
+   ],
+   "title": "Idea progression view",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-18T20:00:00Z",
+  "duration": 28.367,
+  "id": "E78AC3EA-816E-540C-ADE1-523D05B8432B",
+  "imageFile": "demo-margin-rec-ideas-poster.jpg",
+  "kind": "recording",
+  "label": "Archive \u00b7 idea progression",
+  "link": "",
+  "mediaFile": "demo-margin-rec-ideas.mp4",
+  "project": "Margin",
+  "rationale": "sorted by idea... gets complicated fast. big picture hides too much",
+  "sourceApp": "Margin",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Archive v2: idea progression",
+  "windowTitle": "Umbrella"
+ },
+ {
+  "alternatives": "A button that writes the case study.",
+  "body": "Margin doesn't write the case study. It packs the archive, the designer's words and the decisions, so the designer's own agent can help build it. The words stay theirs.",
+  "createdAt": "2026-10-18T21:30:00Z",
+  "id": "0752E152-A8AD-5D86-9D32-AB5DCBA2B2ED",
+  "kind": "decision",
+  "link": "",
+  "project": "Margin",
+  "rationale": "we DON'T write the case study. pack everything so their own agent can help",
+  "tab": "Hand-off",
+  "tags": [
+   "hand-off",
+   "intention"
+  ],
+  "title": "Hand-off, not an AI case study"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-18T21:58:00Z",
+   "model": "demo",
+   "seen": "Claude Code: A handover window that packs the project and opens Claude Code in that folder with a first prompt.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "A handover window that packs the",
+   "topic": "Hand-off"
+  },
+  "alternatives": "",
+  "baseSnapshot": "9c746107bae06174c82cf58ac47f110c4f88fd33",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-18T21:58:00Z",
+  "diffStat": "5 files \u00b7 +614 \u22129",
+  "id": "EDB65B98-BF0D-552C-AACE-48DD5F61B04D",
+  "imageFile": "demo-margin-handover.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "handover: pack the project into a folder (a guide for the agent, the story, the captures) and open a new claude code session there with a first prompt",
+  "rationale": "guide + story + captures + decisions in one folder",
+  "snapshot": "14df2a0ec9636d1dcd161716ac265fb63da16978",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "A handover window that packs the project and opens Claude Code in that folder with a first prompt.",
+  "tab": "Hand-off",
+  "tags": [],
+  "title": "Pack the project for an agent",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-18T22:10:00Z",
+   "model": "demo",
+   "seen": "A project is packed and handed to Claude Code.",
+   "tags": [
+    "hand-off",
+    "agent"
+   ],
+   "title": "Hand-off to an agent",
+   "topic": "Hand-off"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-18T22:10:00Z",
+  "duration": 8.5,
+  "id": "7B944068-2DE8-58D3-B405-DD4145D9681B",
+  "imageFile": "demo-margin-rec-handoff-poster.jpg",
+  "kind": "recording",
+  "link": "",
+  "mediaFile": "demo-margin-rec-handoff.mp4",
+  "project": "Margin",
+  "rationale": "whole project \u2192 claude code in one click",
+  "sourceApp": "Margin",
+  "tab": "Hand-off",
+  "tags": [],
+  "title": "Hand-off in one click",
+  "windowTitle": "Umbrella"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-18T23:02:00Z",
+   "model": "demo",
+   "seen": "Claude Code: Capture menu with Screenshot and Record, new icons, a sliding chip and arrow keys.",
+   "tags": [
+    "code",
+    "claude code",
+    "Sarah"
+   ],
+   "title": "Capture menu with Screenshot and Record",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "baseSnapshot": "91ab208a29cb9bc129bd96b500162f5604f97ae0",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-18T23:02:00Z",
+  "diffStat": "8 files \u00b7 +452 \u2212116",
+  "id": "42BEC494-9247-5AF4-A4F9-712F6D08EC9E",
+  "imageFile": "demo-margin-capture-menu.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "capture menu: screenshot or record, on margin's own paper and ink surface. arrow keys to switch",
+  "rationale": "sarah's menu for when nothing's selected. screenshot or record",
+  "snapshot": "b0add9d375f5731a037520c287e2e02865e573c8",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "Capture menu with Screenshot and Record, new icons, a sliding chip and arrow keys.",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Capture menu: screenshot or record",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-18T23:03:00Z",
+   "model": "demo",
+   "seen": "A case study web page for Umbrella scrolling by.",
+   "tags": [
+    "case study",
+    "hand-off"
+   ],
+   "title": "Generated case study page",
+   "topic": "Hand-off"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-18T23:03:00Z",
+  "duration": 28.1,
+  "id": "8B7FA7D7-5956-53FC-B02B-A3BE60EB9A79",
+  "imageFile": "demo-margin-case-study-built.jpg",
+  "kind": "recording",
+  "label": "Umbrella case study, built from the hand-off",
+  "link": "",
+  "mediaFile": "demo-margin-case-study-built.mp4",
+  "project": "Margin",
+  "rationale": "it works!! claude made this umbrella page from the package, in my site's style",
+  "sourceApp": "Arc",
+  "tab": "Hand-off",
+  "tags": [],
+  "title": "A case study from the hand-off",
+  "windowTitle": "Umbrella \u00b7 Luis Somasundaram"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-18T23:08:00Z",
+   "model": "demo",
+   "seen": "The archive zoomed in to single captures per day.",
+   "tags": [
+    "archive",
+    "granular"
+   ],
+   "title": "Archive at granular level",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-18T23:08:00Z",
+  "id": "F5A1BB30-44B7-53AB-A0B0-674DB151F659",
+  "imageFile": "demo-margin-granular.png",
+  "kind": "figma",
+  "label": "Granular",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=258-6150",
+  "project": "Margin",
+  "rationale": "all the way in. every capture w/ title + why",
+  "sourceApp": "Figma",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Level 1: every capture",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-18T23:10:00Z",
+   "model": "demo",
+   "seen": "A small menu offering screenshot or screen recording.",
+   "tags": [
+    "capture mode",
+    "screenshot"
+   ],
+   "title": "Capture mode menu",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-18T23:10:00Z",
+  "duration": 6,
+  "id": "CCC3F885-3C8A-56AD-AF06-61923C849369",
+  "imageFile": "demo-margin-rec-capture-mode-poster.jpg",
+  "kind": "recording",
+  "link": "",
+  "mediaFile": "demo-margin-rec-capture-mode.mp4",
+  "project": "Margin",
+  "rationale": "nothing selected \u2192 \u2318\u2318 gives screenshot or record",
+  "sourceApp": "Margin",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Capture mode",
+  "windowTitle": "Margin"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-18T23:37:00Z",
+   "model": "demo",
+   "seen": "Claude Code: Hand off to agent, with an agent picker (Claude Code by default; Codex, Cursor or VS Code when installed).",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "Hand off to agent, with an",
+   "topic": "Hand-off"
+  },
+  "alternatives": "",
+  "baseSnapshot": "5a9e0f553ec6170ffca2afe688fa54517f4a4d86",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-18T23:37:00Z",
+  "diffStat": "2 files \u00b7 +145 \u221263",
+  "id": "69100BC8-D4F4-54DA-A0A9-971EECD8ED56",
+  "imageFile": "demo-margin-agent-picker.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "handoff button: our mark in the circle, 'hand off to agent', and pick the agent inside the pill. claude code by default",
+  "rationale": "claude code, codex, cursor... everyone has their own tool",
+  "snapshot": "6121b99f75903b63cccb9dcef8be1cdda944b85e",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "Hand off to agent, with an agent picker (Claude Code by default; Codex, Cursor or VS Code when installed).",
+  "tab": "Hand-off",
+  "tags": [],
+  "title": "Pick your own agent",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-18T23:55:00Z",
+   "model": "demo",
+   "seen": "Claude Code: Quieter automatic capture: only in Figma, at most every ten minutes, kept only when the design moved on.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "Quieter automatic capture",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "baseSnapshot": "6121b99f75903b63cccb9dcef8be1cdda944b85e",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-18T23:55:00Z",
+  "diffStat": "10 files \u00b7 +273 \u221228",
+  "id": "5759231C-DD0A-5CA7-82CB-7AC7B30E1C17",
+  "imageFile": "demo-margin-autocap-back.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "bring automatic capture back but quieter: only in figma, at most every ten minutes, and only keep it if the design actually moved on",
+  "rationale": "auto capture back but quiet. only figma, only when the design actually moved",
+  "snapshot": "b8ee7f3a628b63f747db3394da4bf210601cb1dc",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "Quieter automatic capture: only in Figma, at most every ten minutes, kept only when the design moved on.",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Auto capture v2: only real changes",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-19T00:02:00Z",
+   "model": "demo",
+   "seen": "A projects page with a few project cards.",
+   "tags": [
+    "projects",
+    "home"
+   ],
+   "title": "Projects page",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-19T00:02:00Z",
+  "id": "73814666-CF1B-578F-AD4A-7BCC5227D7CF",
+  "imageFile": "demo-margin-projects-granular.png",
+  "kind": "figma",
+  "label": "Projects",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=258-11423",
+  "project": "Margin",
+  "rationale": "projects as quiet cards. good",
+  "sourceApp": "Figma",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Projects page",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "alternatives": "",
+  "body": "Automatic captures are hidden by default and dimmed when you show them. The archive is what you chose; Margin's own captures are there when you need to fill a gap.",
+  "createdAt": "2026-10-19T00:05:00Z",
+  "id": "12B891CB-FA92-523B-AD24-803A3D14F4E6",
+  "kind": "decision",
+  "link": "",
+  "project": "Margin",
+  "rationale": "margin's own captures hidden by default. the archive = what YOU chose",
+  "tab": "Capture",
+  "tags": [
+   "auto capture",
+   "intention"
+  ],
+  "title": "Auto captures stay in the back"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-19T00:17:00Z",
+   "model": "demo",
+   "seen": "Claude Code: TASTE.md: the project's design language, written while packing the hand-off.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "TASTE.md",
+   "topic": "Hand-off"
+  },
+  "alternatives": "",
+  "baseSnapshot": "eafbb02964e406ba6743e55e9339c82071f66532",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-19T00:17:00Z",
+  "diffStat": "3 files \u00b7 +233 \u22126",
+  "id": "0EA1A37D-3CF9-5F76-8C6E-B6916AF800AB",
+  "imageFile": "demo-margin-taste.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "write a TASTE.md into the handoff: palette from the captures, type, layout, voice. preferences only from what i actually wrote",
+  "rationale": "palette, type, voice so the agent's output looks like us",
+  "snapshot": "207503d602012e2dc0d40b401fc5b6788d918ad2",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "TASTE.md: the project's design language, written while packing the hand-off.",
+  "tab": "Hand-off",
+  "tags": [],
+  "title": "TASTE.md: our taste for the agent",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-19T00:33:00Z",
+   "model": "demo",
+   "seen": "The archive zoomed out to a full year grid.",
+   "tags": [
+    "archive",
+    "year"
+   ],
+   "title": "Archive at year level",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-19T00:33:00Z",
+  "id": "4F11418B-5F64-503D-92AD-BA354489FB4F",
+  "imageFile": "demo-margin-year.png",
+  "kind": "figma",
+  "label": "Year",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=253-1013",
+  "project": "Margin",
+  "rationale": "all the way out. a year = rows of weeks, one line each",
+  "sourceApp": "Figma",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Level 4: a year",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-19T03:30:00Z",
+   "model": "demo",
+   "seen": "A short list of open design questions.",
+   "tags": [
+    "questions",
+    "to do"
+   ],
+   "title": "Open questions",
+   "topic": "Focus"
+  },
+  "alternatives": "",
+  "body": "Where does the hand-off entry point live?\nSettings\nAutomatic capture vs. nudge",
+  "createdAt": "2026-10-19T03:30:00Z",
+  "id": "1BC1D3A1-E960-5D23-AA55-11CC2005C1F5",
+  "kind": "text",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=330-1355",
+  "project": "Margin",
+  "rationale": "still open sunday night: where does hand-off live? settings? auto vs nudge?",
+  "sourceApp": "Figma",
+  "tab": "Focus",
+  "tags": [],
+  "title": "Open questions",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-19T03:47:00Z",
+   "model": "demo",
+   "seen": "The archive canvas before the new header.",
+   "tags": [
+    "archive",
+    "header"
+   ],
+   "title": "Archive before header",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-19T03:47:00Z",
+  "id": "67EA9F0B-3ED7-56CC-A08F-E2EF15920AAB",
+  "imageFile": "demo-margin-before-header.png",
+  "kind": "capture",
+  "label": "Before the header design",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=139-2",
+  "project": "Margin",
+  "rationale": "keeping this to compare w/ the new header",
+  "sourceApp": "Figma",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Before the header redesign",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-19T04:10:00Z",
+   "model": "demo",
+   "seen": "Claude's notes on how the loading card fills.",
+   "tags": [
+    "loading",
+    "spec"
+   ],
+   "title": "Loading card specification",
+   "topic": "Identity",
+   "visibleText": "No shimmer, Real progress when known, Estimate otherwise, Pacing"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-19T04:10:00Z",
+  "id": "E50735D5-3C83-5CE5-AB2B-C6E68BF0FBA8",
+  "imageFile": "demo-margin-loading-spec.png",
+  "kind": "capture",
+  "label": "Loading card spec",
+  "link": "",
+  "project": "Margin",
+  "rationale": "fills only when progress is real. otherwise just shimmer",
+  "sourceApp": "Claude",
+  "tab": "Identity",
+  "tags": [],
+  "title": "Loading fills only for real",
+  "windowTitle": "Claude"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-19T05:10:00Z",
+   "model": "demo",
+   "seen": "The archive zooming from days out to months with grouped sections.",
+   "tags": [
+    "timeline",
+    "zoom"
+   ],
+   "title": "Zoomable timeline",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-19T05:10:00Z",
+  "duration": 38.7,
+  "id": "F421FE3F-E388-583F-8F56-6880DDE846F9",
+  "imageFile": "demo-margin-rec-timeline-poster.jpg",
+  "kind": "recording",
+  "label": "Archive \u00b7 zoomable timeline",
+  "link": "",
+  "mediaFile": "demo-margin-rec-timeline.mp4",
+  "project": "Margin",
+  "rationale": "back to time but zoomable, day \u2192 year, groups itself. finally",
+  "sourceApp": "Margin",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Archive v3: a zoomable timeline",
+  "windowTitle": "Umbrella"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-19T07:42:00Z",
+   "model": "demo",
+   "seen": "Four rows of the capture menu with Image and Recording chips.",
+   "tags": [
+    "capture menu",
+    "states"
+   ],
+   "title": "Capture menu states",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-19T07:42:00Z",
+  "id": "2004FB59-74C6-576C-8C2C-C874E3862698",
+  "imageFile": "demo-margin-capture-menu-frame.jpg",
+  "kind": "figma",
+  "label": "Capture menu \u00b7 states",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=283-1353",
+  "project": "Margin",
+  "rationale": "4 chip states image \u2192 recording",
+  "sourceApp": "Figma",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Capture menu states",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-19T07:43:00Z",
+   "model": "demo",
+   "seen": "A dark Figma board with big and small to-dos.",
+   "tags": [
+    "to do",
+    "planning"
+   ],
+   "title": "To-do board",
+   "topic": "Focus"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-19T07:43:00Z",
+  "id": "9D361F56-BE49-57F1-BC3D-286A0742A67D",
+  "imageFile": "demo-margin-todo.jpg",
+  "kind": "figma",
+  "label": "To do \u00b7 big and small",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=169-4620",
+  "project": "Margin",
+  "rationale": "typefaces \u2713 nudge \u2713 motion \u2713. mobile next",
+  "sourceApp": "Figma",
+  "tab": "Focus",
+  "tags": [],
+  "title": "To do: big and small",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-19T07:49:00Z",
+   "model": "demo",
+   "seen": "Grey card groups arranged loosely on a canvas.",
+   "tags": [
+    "cluster",
+    "sketch"
+   ],
+   "title": "Cluster layout sketches",
+   "topic": "Sense-making"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-19T07:49:00Z",
+  "frames": [
+   {
+    "imageFile": "demo-margin-cluster-sketch-f1.jpg",
+    "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=139-861",
+    "name": "Frame 16",
+    "nodeID": "139:861"
+   },
+   {
+    "imageFile": "demo-margin-cluster-sketch-f2.jpg",
+    "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=139-878",
+    "name": "Frame 17",
+    "nodeID": "139:878"
+   },
+   {
+    "imageFile": "demo-margin-cluster-sketch-f3.jpg",
+    "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=164-3743",
+    "name": "Frame 19",
+    "nodeID": "164:3743"
+   },
+   {
+    "imageFile": "demo-margin-cluster-sketch-f4.jpg",
+    "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=139-839",
+    "name": "Frame 15",
+    "nodeID": "139:839"
+   }
+  ],
+  "id": "F5A06E2B-BBC6-5A40-B393-ECC98FA57C03",
+  "imageFile": "demo-margin-cluster-sketch-f1.jpg",
+  "kind": "figma",
+  "label": "Cluster sketches",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=139-861",
+  "project": "Margin",
+  "rationale": "captures as cards you can move. groups not folders",
+  "sourceApp": "Figma",
+  "tab": "Sense-making",
+  "tags": [],
+  "title": "Cluster sketches",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-19T17:20:00Z",
+   "model": "demo",
+   "seen": "A hand-made recording of the archive's zoom slider.",
+   "tags": [
+    "slider",
+    "motion"
+   ],
+   "title": "Slider recording",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-19T17:20:00Z",
+  "duration": 8.7,
+  "id": "7B18AAAB-88A5-5184-8160-049BBB6F47A8",
+  "imageFile": "demo-margin-hand-slider-poster.jpg",
+  "kind": "recording",
+  "label": "Granularity slider \u00b7 my recording",
+  "link": "",
+  "mediaFile": "demo-margin-hand-slider.mp4",
+  "project": "Margin",
+  "rationale": "recorded how it should feel by hand so claude can match it",
+  "sourceApp": "QuickTime Player",
+  "tab": "Archive",
+  "tags": [],
+  "title": "The zoom slider, by hand",
+  "windowTitle": "archive-slider"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-19T17:30:00Z",
+   "model": "demo",
+   "seen": "A study of how the zoom slider moves between levels.",
+   "tags": [
+    "slider",
+    "motion",
+    "study"
+   ],
+   "title": "Slider motion A",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-19T17:30:00Z",
+  "duration": 10,
+  "id": "52AA90A2-6167-5D18-BDD9-D7256F1F4C83",
+  "imageFile": "demo-margin-slider-a-poster.jpg",
+  "kind": "recording",
+  "link": "",
+  "mediaFile": "demo-margin-slider-a.mp4",
+  "project": "Margin",
+  "rationale": "steady. kinda robotic",
+  "sourceApp": "QuickTime Player",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Slider A: steady",
+  "windowTitle": "slider demos"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-19T17:34:00Z",
+   "model": "demo",
+   "seen": "A study of how the zoom slider moves between levels.",
+   "tags": [
+    "slider",
+    "motion",
+    "study"
+   ],
+   "title": "Slider motion B",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-19T17:34:00Z",
+  "duration": 10,
+  "id": "4C9B7AC6-FD7A-5C88-BF22-7B413AB77D7B",
+  "imageFile": "demo-margin-slider-b-poster.jpg",
+  "kind": "recording",
+  "link": "",
+  "mediaFile": "demo-margin-slider-b.mp4",
+  "project": "Margin",
+  "rationale": "gentle slowdown into each level. nicer",
+  "sourceApp": "QuickTime Player",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Slider B: gentle slowdown",
+  "windowTitle": "slider demos"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-19T17:38:00Z",
+   "model": "demo",
+   "seen": "A study of how the zoom slider moves between levels.",
+   "tags": [
+    "slider",
+    "motion",
+    "study"
+   ],
+   "title": "Slider motion C",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-19T17:38:00Z",
+  "duration": 10,
+  "id": "12328270-5FAE-590B-9613-885CF998A6A9",
+  "imageFile": "demo-margin-slider-c-poster.jpg",
+  "kind": "recording",
+  "link": "",
+  "mediaFile": "demo-margin-slider-c.mp4",
+  "project": "Margin",
+  "rationale": "snaps stop to stop. too jumpy",
+  "sourceApp": "QuickTime Player",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Slider C: stop to stop",
+  "windowTitle": "slider demos"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-19T17:42:00Z",
+   "model": "demo",
+   "seen": "A study of how the zoom slider moves between levels.",
+   "tags": [
+    "slider",
+    "motion",
+    "study"
+   ],
+   "title": "Slider motion D",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-19T17:42:00Z",
+  "duration": 10,
+  "id": "829EB205-D8BB-518F-820C-610007FEA1A4",
+  "imageFile": "demo-margin-slider-d-poster.jpg",
+  "kind": "recording",
+  "link": "",
+  "mediaFile": "demo-margin-slider-d.mp4",
+  "project": "Margin",
+  "rationale": "matched to my recording. this is the feel",
+  "sourceApp": "QuickTime Player",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Slider D: like my recording",
+  "windowTitle": "slider demos"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-19T17:46:06Z",
+   "model": "gemini-3.5-flash-lite",
+   "seen": "An interface displaying three control cards with sliders and text labels.",
+   "tags": [
+    "sliders",
+    "interface",
+    "controls"
+   ],
+   "title": "Zoom bar tuning interface",
+   "topic": "Archive",
+   "visibleText": "Zoom bar Close-up to big picture, tuned by hand Spring Ease 546 ms 1% overshoot Snappy Calm Bouncy Glide Quick Curve Feel Motion Stiffness Damping Mass Bar Handle Spacing Labels Look Height Corner radius Fill"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-19T17:46:00Z",
+  "id": "091BF345-1DA5-4C9C-B898-E20799ABBF73",
+  "imageFile": "demo-margin-zoom-tuner.jpg",
+  "kind": "iteration",
+  "label": "Zoom bar tuner",
+  "link": "",
+  "project": "Margin",
+  "rationale": "dials for spring, ease + the bar's look. tuned the zoom by feel, not by guessing numbers",
+  "siteFolder": "sites/091BF345-1DA5-4C9C-B898-E20799ABBF73",
+  "sitePage": "index.html",
+  "sourceApp": "Claude Code",
+  "tags": [],
+  "title": "Zoom bar tuner: dials for the feel",
+  "windowTitle": "zoom bar tuner",
+  "prompt": "make me a small tuner for the zoom bar. dials for the motion (spring or ease, stiffness, damping) and the look (height, radius, fill) so i can find the feel by hand",
+  "summary": "A tuner page with dials for the zoom bar's motion and look.",
+  "verdict": "keep",
+  "tab": "Archive"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-19T17:50:00Z",
+   "model": "demo",
+   "seen": "Three phone screens: Margin's home, the share sheet and a note.",
+   "tags": [
+    "mobile",
+    "share sheet"
+   ],
+   "title": "Margin on iPhone",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-19T17:50:00Z",
+  "frames": [
+   {
+    "imageFile": "demo-margin-phone-f1.png",
+    "name": "Home"
+   },
+   {
+    "imageFile": "demo-margin-phone-f2.png",
+    "name": "Share sheet"
+   },
+   {
+    "imageFile": "demo-margin-phone-f3.png",
+    "name": "With a note"
+   }
+  ],
+  "id": "66FC04C5-D27C-5558-8A26-4504FF78904A",
+  "imageFile": "demo-margin-phone-f1.png",
+  "kind": "capture",
+  "label": "iPhone \u00b7 home, share sheet, note",
+  "link": "",
+  "project": "Margin",
+  "rationale": "whiteboards + sketches happen away from the desk. share a photo in",
+  "sourceApp": "Simulator",
+  "tab": "Capture",
+  "tags": [],
+  "title": "On the phone: share into Margin",
+  "windowTitle": "Margin for iPhone"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-19T18:00:00Z",
+   "model": "demo",
+   "seen": "A phone shares a photo into Margin.",
+   "tags": [
+    "mobile",
+    "capture"
+   ],
+   "title": "Mobile capture",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-19T18:00:00Z",
+  "duration": 8,
+  "id": "27D0F88B-2517-54B4-8187-3EFA8D3EBBDC",
+  "imageFile": "demo-margin-rec-mobile-poster.jpg",
+  "kind": "recording",
+  "label": "Margin on the phone",
+  "link": "",
+  "mediaFile": "demo-margin-rec-mobile.mp4",
+  "project": "Margin",
+  "rationale": "phone \u2192 share \u2192 it's on the mac. so good for sketches",
+  "sourceApp": "Margin",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Capture from the phone",
+  "windowTitle": "Margin for iPhone"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-19T18:20:00Z",
+   "model": "demo",
+   "seen": "A new Claude build is captured into Margin.",
+   "tags": [
+    "claude",
+    "build"
+   ],
+   "title": "Capturing a build",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-19T18:20:00Z",
+  "duration": 12.2,
+  "id": "C072BA3E-4A5C-5BAD-BFF3-A7C721411A08",
+  "imageFile": "demo-margin-rec-claude-build-poster.jpg",
+  "kind": "recording",
+  "label": "Capturing a Claude build",
+  "link": "",
+  "mediaFile": "demo-margin-rec-claude-build.mp4",
+  "project": "Margin",
+  "rationale": "\u2318\u2318 after a new build, that version is kept + opens again",
+  "sourceApp": "Claude",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Capture: a Claude build",
+  "windowTitle": "Claude"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-19T19:30:00Z",
+   "model": "demo",
+   "seen": "A short onboarding teaches the capture shortcut.",
+   "tags": [
+    "onboarding",
+    "shortcut"
+   ],
+   "title": "Onboarding steps",
+   "topic": "Identity"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-19T19:30:00Z",
+  "duration": 9.5,
+  "id": "DA4059B6-D677-5E3A-BB93-BC056B74D322",
+  "imageFile": "demo-margin-rec-onboarding-poster.jpg",
+  "kind": "recording",
+  "label": "Onboarding",
+  "link": "",
+  "mediaFile": "demo-margin-rec-onboarding.mp4",
+  "project": "Margin",
+  "rationale": "3 steps. you learn \u2318\u2318 by doing it once",
+  "sourceApp": "Margin",
+  "tab": "Identity",
+  "tags": [],
+  "title": "Onboarding in three steps",
+  "windowTitle": "Margin"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-19T21:04:00Z",
+   "model": "demo",
+   "seen": "A single capture opened large with its details beside it.",
+   "tags": [
+    "focus",
+    "detail"
+   ],
+   "title": "Focus view",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-19T21:04:00Z",
+  "id": "E92D3488-E7A9-5CBA-A120-0D0A76FE4D0D",
+  "imageFile": "demo-margin-focus-view.png",
+  "kind": "figma",
+  "label": "Focus",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=258-7257",
+  "project": "Margin",
+  "rationale": "one capture big + its why + where it came from",
+  "sourceApp": "Figma",
+  "tab": "Archive",
+  "tags": [],
+  "title": "Focus: one capture, big",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-19T21:43:00Z",
+   "model": "demo",
+   "seen": "A professor says sensemaking is the creative part.",
+   "tags": [
+    "feedback",
+    "quote"
+   ],
+   "title": "Professor feedback",
+   "topic": "Testing"
+  },
+  "alternatives": "",
+  "body": "Sense making is the creative part. Why would I give that away?",
+  "createdAt": "2026-10-19T21:43:00Z",
+  "id": "BF974DFB-F5B0-5C24-B6CC-B2A6DD1FA669",
+  "kind": "text",
+  "link": "",
+  "project": "Margin",
+  "rationale": "asked how she'd feel if AI did the sense making. this changed our plan",
+  "sourceApp": "Notes",
+  "tab": "Testing",
+  "tags": [],
+  "title": "Professor: keep the sense-making",
+  "windowTitle": "Notes"
+ },
+ {
+  "alternatives": "Margin writes the themes and the story.",
+  "body": "Margin proposes groups, tabs and headlines. The designer accepts, moves or renames them. Nothing it writes becomes the story without them.",
+  "createdAt": "2026-10-19T22:00:00Z",
+  "id": "25FC8A70-BF2B-5E25-9A25-E6F0ABACE73C",
+  "kind": "decision",
+  "link": "",
+  "project": "Margin",
+  "rationale": "margin suggests, designer decides. nothing becomes the story w/o them",
+  "tab": "Sense-making",
+  "tags": [
+   "intelligence",
+   "mixed-initiative"
+  ],
+  "title": "Margin suggests, you decide"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-19T22:10:00Z",
+   "model": "demo",
+   "seen": "A list of HCI concepts behind clustering captures.",
+   "tags": [
+    "HCI",
+    "sensemaking"
+   ],
+   "title": "HCI terms for sensemaking",
+   "topic": "Sense-making"
+  },
+  "alternatives": "",
+  "body": "Sensemaking: collect, organize, find patterns, build a story (Pirolli and Card).\nSpatial hypertext: meaning comes from where things sit, not from folders.\nIncremental formalization: people resist structure early, so let it emerge.\nMixed-initiative interface: the AI suggests and the human decides.",
+  "createdAt": "2026-10-19T22:10:00Z",
+  "id": "B83850B7-F71B-5523-96C9-FC3847140C83",
+  "kind": "text",
+  "link": "",
+  "project": "Margin",
+  "rationale": "words for what our board already said. clusters emerge, folders are imposed",
+  "sourceApp": "Claude",
+  "tab": "Sense-making",
+  "tags": [],
+  "title": "Sense-making, in HCI terms",
+  "windowTitle": "Claude"
+ },
+ {
+  "alternatives": "Only a timeline. Let AI write the themes and the story.",
+  "body": "The timeline keeps the process as it happened. The cluster is where you get messy: drag captures between groups, make new ones, rename them. Margin makes the first grouping, the rest is yours.",
+  "createdAt": "2026-10-19T22:40:00Z",
+  "id": "51C43005-1BAB-5DA2-B24B-CE691AFBC9E2",
+  "kind": "decision",
+  "link": "",
+  "project": "Margin",
+  "rationale": "timeline = what happened. cluster = where you get messy",
+  "tab": "Sense-making",
+  "tags": [
+   "timeline",
+   "cluster",
+   "intelligence"
+  ],
+  "title": "Two views: timeline and cluster"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-19T23:58:00Z",
+   "model": "demo",
+   "seen": "Home showing project cards with cover images.",
+   "tags": [
+    "projects",
+    "grid"
+   ],
+   "title": "Project grid",
+   "topic": "Archive"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-19T23:58:00Z",
+  "id": "56404574-50A6-5877-95CB-CF9597C410B2",
+  "imageFile": "demo-margin-grid.png",
+  "kind": "capture",
+  "label": "Projects grid",
+  "link": "",
+  "project": "Margin",
+  "rationale": "all projects at a glance, covers from their own captures",
+  "sourceApp": "Figma",
+  "tab": "Archive",
+  "tags": [],
+  "title": "All projects at a glance",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-20T00:00:00Z",
+   "model": "demo",
+   "seen": "Captures arranged in themed groups on a canvas.",
+   "tags": [
+    "cluster",
+    "sensemaking"
+   ],
+   "title": "Cluster view",
+   "topic": "Sense-making"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-20T00:00:00Z",
+  "duration": 42.534,
+  "id": "98349E13-F85D-59BA-8B45-B144960C5161",
+  "imageFile": "demo-margin-rec-cluster-poster.jpg",
+  "kind": "recording",
+  "label": "Cluster view",
+  "link": "",
+  "mediaFile": "demo-margin-rec-cluster.mp4",
+  "project": "Margin",
+  "rationale": "margin makes the first themes. dragging + naming = yours",
+  "sourceApp": "Margin",
+  "tab": "Sense-making",
+  "tags": [],
+  "title": "The cluster view",
+  "windowTitle": "Umbrella"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-20T01:00:00Z",
+   "model": "demo",
+   "seen": "Minimal slides: five interviews, forgotten, scattered, reconstructed.",
+   "tags": [
+    "slides",
+    "research"
+   ],
+   "title": "Research slides",
+   "topic": "Presentation"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-20T01:00:00Z",
+  "frames": [
+   {
+    "imageFile": "demo-margin-video-slides-f1.jpg",
+    "link": "https://www.figma.com/design/Tuu3p4LDvWXsfeizUM73Yt/SVSD-Slides?node-id=10-2",
+    "name": "2",
+    "nodeID": "10:2"
+   },
+   {
+    "imageFile": "demo-margin-video-slides-f2.jpg",
+    "link": "https://www.figma.com/design/Tuu3p4LDvWXsfeizUM73Yt/SVSD-Slides?node-id=10-18",
+    "name": "3",
+    "nodeID": "10:18"
+   },
+   {
+    "imageFile": "demo-margin-video-slides-f3.jpg",
+    "link": "https://www.figma.com/design/Tuu3p4LDvWXsfeizUM73Yt/SVSD-Slides?node-id=10-23",
+    "name": "4",
+    "nodeID": "10:23"
+   },
+   {
+    "imageFile": "demo-margin-video-slides-f4.jpg",
+    "link": "https://www.figma.com/design/Tuu3p4LDvWXsfeizUM73Yt/SVSD-Slides?node-id=10-28",
+    "name": "5",
+    "nodeID": "10:28"
+   },
+   {
+    "imageFile": "demo-margin-video-slides-f5.jpg",
+    "link": "https://www.figma.com/design/Tuu3p4LDvWXsfeizUM73Yt/SVSD-Slides?node-id=10-35",
+    "name": "7",
+    "nodeID": "10:35"
+   },
+   {
+    "imageFile": "demo-margin-video-slides-f6.jpg",
+    "link": "https://www.figma.com/design/Tuu3p4LDvWXsfeizUM73Yt/SVSD-Slides?node-id=10-41",
+    "name": "9",
+    "nodeID": "10:41"
+   }
+  ],
+  "id": "9B7EA28B-E2A9-55DE-B669-CEE2724FCBDD",
+  "imageFile": "demo-margin-video-slides-f1.jpg",
+  "kind": "figma",
+  "label": "Video slides \u00b7 research",
+  "link": "https://www.figma.com/design/Tuu3p4LDvWXsfeizUM73Yt/SVSD-Slides?node-id=10-2",
+  "project": "Margin",
+  "rationale": "type only. one idea per slide, same line all the way through",
+  "sourceApp": "Figma",
+  "tab": "Presentation",
+  "tags": [],
+  "title": "Video slides: the research",
+  "windowTitle": "SVSD Slides"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-20T01:30:00Z",
+   "model": "demo",
+   "seen": "A desktop scene and the Margin logo reveal animation.",
+   "tags": [
+    "motion",
+    "logo",
+    "intro"
+   ],
+   "title": "Intro motion",
+   "topic": "Presentation"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-20T01:30:00Z",
+  "duration": 2.033333333333333,
+  "frames": [
+   {
+    "duration": 2.033333333333333,
+    "imageFile": "demo-margin-logo-reveal-f1.jpg",
+    "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=139-218",
+    "mediaFile": "demo-margin-logo-reveal-f1.mp4",
+    "name": "desktop",
+    "nodeID": "139:218"
+   },
+   {
+    "duration": 5.233333333333333,
+    "imageFile": "demo-margin-logo-reveal-f2.png",
+    "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=364-947",
+    "mediaFile": "demo-margin-logo-reveal-f2.mp4",
+    "name": "Margin \u00b7 logo reveal / 5.2s",
+    "nodeID": "364:947"
+   }
+  ],
+  "id": "B1A1709B-783F-5BF6-8EE3-8575C64428FE",
+  "imageFile": "demo-margin-logo-reveal-f1.jpg",
+  "kind": "figma",
+  "label": "Video intro \u00b7 desktop and logo reveal",
+  "link": "https://www.figma.com/design/tEO3GjK8Jcijru2LYcHvIL/SVSD-Competition?node-id=139-218",
+  "mediaFile": "demo-margin-logo-reveal-f1.mp4",
+  "project": "Margin",
+  "rationale": "desktop first, then the mark draws itself",
+  "sourceApp": "Figma",
+  "tab": "Presentation",
+  "tags": [],
+  "title": "Video intro: the mark draws itself",
+  "windowTitle": "SVSD Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-20T02:30:00Z",
+   "model": "demo",
+   "seen": "A student says not documenting would now feel like a disservice.",
+   "tags": [
+    "testing",
+    "quote"
+   ],
+   "title": "Student feedback",
+   "topic": "Testing"
+  },
+  "alternatives": "",
+  "body": "It would feel like a disservice to myself not to document the process as I go, because now it's effortless.",
+  "createdAt": "2026-10-20T02:30:00Z",
+  "id": "3FD82AEC-D5FE-5821-A948-D217D3E076D3",
+  "kind": "text",
+  "link": "",
+  "project": "Margin",
+  "rationale": "THIS is what we wanted to hear",
+  "sourceApp": "Notes",
+  "tab": "Testing",
+  "tags": [],
+  "title": "MDes testing: effortless",
+  "windowTitle": "Notes"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-20T03:10:00Z",
+   "model": "demo",
+   "seen": "A short teaser of Margin in use.",
+   "tags": [
+    "video",
+    "teaser"
+   ],
+   "title": "Video teaser",
+   "topic": "Presentation"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-20T03:10:00Z",
+  "duration": 8.95,
+  "id": "EE0BCD7A-7B42-53B9-A061-A2ECB3A5C817",
+  "imageFile": "demo-margin-rec-teaser-poster.jpg",
+  "kind": "recording",
+  "label": "Teaser (Sarah)",
+  "link": "",
+  "mediaFile": "demo-margin-rec-teaser.mp4",
+  "project": "Margin",
+  "rationale": "sarah's cut for the video",
+  "sourceApp": "QuickTime Player",
+  "tab": "Presentation",
+  "tags": [],
+  "title": "Teaser cut (Sarah)",
+  "windowTitle": "Sarah Margin Teaser"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-20T06:30:00Z",
+   "model": "demo",
+   "seen": "The Margin team introducing the app in their studio.",
+   "tags": [
+    "video",
+    "submission"
+   ],
+   "title": "Submission video",
+   "topic": "Presentation"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-20T06:30:00Z",
+  "id": "9E1E8BB0-C344-5F3A-963B-072525ED3F87",
+  "imageFile": "demo-margin-video.jpg",
+  "kind": "link",
+  "label": "Margin \u00b7 SVSD submission video",
+  "link": "https://youtu.be/9VwgX-TyuNA",
+  "project": "Margin",
+  "rationale": "submitted!! 9:41, just under 10",
+  "sourceApp": "Arc",
+  "tab": "Presentation",
+  "tags": [],
+  "title": "The submission video",
+  "windowTitle": "YouTube"
+ },
+ {
+  "alternatives": "",
+  "body": "Capture thoughts, ideas and artifacts together, as a team, so a project's story isn't only in one person's head.",
+  "createdAt": "2026-10-20T06:45:00Z",
+  "id": "313379FB-288D-5C24-91C3-32C0CF7CF0DD",
+  "kind": "note",
+  "link": "",
+  "project": "Margin",
+  "rationale": "next: teams. one project's story in everyone's head, not just one",
+  "tab": "Focus",
+  "tags": [
+   "next"
+  ],
+  "title": "Next: teams"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-21T02:18:00Z",
+   "model": "demo",
+   "seen": "Claude Code: The Figma plugin finds animation itself and exports video again.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "The Figma plugin finds animation itself",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "baseSnapshot": "d7576799d4a936c8c46dfeb7bda4fe5eed6ff354",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-21T02:18:00Z",
+  "diffStat": "3 files \u00b7 +65 \u221213",
+  "id": "3F96D6F7-0D8A-5E01-B695-4F8FBEF6E4B0",
+  "imageFile": "demo-margin-plugin-video.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "the plugin should find animation by itself and export video again",
+  "rationale": "motion broke in the demo rush. back",
+  "snapshot": "02b8d622f72401bb3c5723eee35ab1723a25a81f",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "The Figma plugin finds animation itself and exports video again.",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Motion export, fixed",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-21T02:31:00Z",
+   "model": "demo",
+   "seen": "Claude Code: A video capture plays on the card, silent and on a loop.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "A video capture plays on the",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "baseSnapshot": "02b8d622f72401bb3c5723eee35ab1723a25a81f",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-21T02:31:00Z",
+  "diffStat": "1 file \u00b7 +72 \u22124",
+  "id": "FDA5EB5B-220C-57BE-BC22-D891DBEBF583",
+  "imageFile": "demo-margin-card-video.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "a video capture should play on the card, silent and on a loop",
+  "rationale": "see the motion you just saved while you write the why",
+  "snapshot": "c34832f65eda19ee85b1d24926a678a281914d47",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "A video capture plays on the card, silent and on a loop.",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Videos play on the card",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-22T05:32:00Z",
+   "model": "demo",
+   "seen": "Claude Code: A one-page download and install guide in Margin's archive style.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "A one-page download and install guide",
+   "topic": "Website"
+  },
+  "alternatives": "",
+  "baseSnapshot": "ad873683e1459c8a3e32e5bdcf70a80ad29ad7a8",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-22T05:32:00Z",
+  "diffStat": "21 files \u00b7 +332 \u22120",
+  "id": "F7F98634-006A-5A92-B111-B38F2DA657C3",
+  "imageFile": "demo-margin-web-1.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "one page website: download and install guide in margin's archive style",
+  "rationale": "way too much text. nobody reads a feature list first",
+  "siteFolder": "sites/F7F98634-006A-5A92-B111-B38F2DA657C3",
+  "sitePage": "index.html",
+  "snapshot": "e93eb05b73cac8261d3cd372029c9a2844b8efdf",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "A one-page download and install guide in Margin's archive style.",
+  "tab": "Website",
+  "tags": [],
+  "title": "Website v1: an install guide",
+  "verdict": "notQuite",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-22T05:44:00Z",
+   "model": "demo",
+   "seen": "Claude Code: No feature section, Montserrat, a download link ready for the hosted zip. Live on Vercel.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "No feature section, Montserrat, a download",
+   "topic": "Website"
+  },
+  "alternatives": "",
+  "baseSnapshot": "e93eb05b73cac8261d3cd372029c9a2844b8efdf",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-22T05:44:00Z",
+  "diffStat": "23 files \u00b7 +12 \u2212108",
+  "id": "C072E843-2AB9-5E9E-80C1-3A4099E01FFB",
+  "imageFile": "demo-margin-web-2.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "drop the what it does section. montserrat from google fonts. make the download link ready for a hosted zip",
+  "rationale": "shorter. download first \u2713",
+  "siteFolder": "sites/C072E843-2AB9-5E9E-80C1-3A4099E01FFB",
+  "sitePage": "index.html",
+  "snapshot": "f3722074de6a976fd7ca783e520f4fad5ce75c39",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "No feature section, Montserrat, a download link ready for the hosted zip. Live on Vercel.",
+  "tab": "Website",
+  "tags": [],
+  "title": "Website v2: download first",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-22T05:47:00Z",
+   "model": "demo",
+   "seen": "Claude Code: Release download, real demo projects and capture fixes.",
+   "tags": [
+    "code",
+    "claude code",
+    "Sarah"
+   ],
+   "title": "Release download, real demo projects and",
+   "topic": "Website"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-22T05:47:00Z",
+  "diffStat": "54 files \u00b7 +1069 \u221276",
+  "id": "137D6AE7-C35C-577D-BC6C-8701B4284628",
+  "imageFile": "demo-margin-release.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "package the release: the download, the real demo projects and the capture fixes",
+  "rationale": "sarah's release + demo projects. people can actually try it",
+  "sourceApp": "Claude Code",
+  "summary": "Release download, real demo projects and capture fixes.",
+  "tab": "Website",
+  "tags": [],
+  "title": "The release",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-22T06:01:00Z",
+   "model": "demo",
+   "seen": "Claude Code: Margin.zip downloads straight from the site; install steps match the release.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "Margin.zip downloads straight from the site",
+   "topic": "Website"
+  },
+  "alternatives": "",
+  "baseSnapshot": "a5a9f920d053925f41f13560889b326c19ae25c7",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-22T06:01:00Z",
+  "diffStat": "3 files \u00b7 +5 \u22124",
+  "id": "43497B34-470D-5ECB-850C-D93336357004",
+  "imageFile": "demo-margin-web-3.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "margin.zip downloads straight from the site. install steps should match the release",
+  "rationale": "one click download. steps match the release",
+  "siteFolder": "sites/43497B34-470D-5ECB-850C-D93336357004",
+  "sitePage": "index.html",
+  "snapshot": "439f3fb8776c5b241c6b2c6e411d6fe137d0f5af",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "Margin.zip downloads straight from the site; install steps match the release.",
+  "tab": "Website",
+  "tags": [],
+  "title": "Website v3: one-click download",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-22T06:45:00Z",
+   "model": "demo",
+   "seen": "Claude Code: The YouTube video, thumbnail first, player on click.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "The YouTube video, thumbnail first, player",
+   "topic": "Website"
+  },
+  "alternatives": "",
+  "baseSnapshot": "439f3fb8776c5b241c6b2c6e411d6fe137d0f5af",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-22T06:45:00Z",
+  "diffStat": "1 file \u00b7 +17 \u22126",
+  "id": "75B0A1D9-9827-5790-B680-344192176CA3",
+  "imageFile": "demo-margin-web-4.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "put the youtube video on it. thumbnail first, the player only on click",
+  "rationale": "page stays light until you click the video",
+  "siteFolder": "sites/75B0A1D9-9827-5790-B680-344192176CA3",
+  "sitePage": "index.html",
+  "snapshot": "76da23a565b588fa537b9a14ab02903486ec8593",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "The YouTube video, thumbnail first, player on click.",
+  "tab": "Website",
+  "tags": [],
+  "title": "Website v4: the video",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-10-22T06:49:00Z",
+   "model": "demo",
+   "seen": "Claude Code: Fixed the button width; our names in the footer link to our sites.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "Fixed the button width",
+   "topic": "Website"
+  },
+  "alternatives": "",
+  "baseSnapshot": "5337da29da35e6375da9123cd9098fea3b93e5ed",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-10-22T06:49:00Z",
+  "diffStat": "1 file \u00b7 +4 \u22122",
+  "id": "08635AD3-1F98-5E1E-9B6C-74494CC62A9B",
+  "imageFile": "demo-margin-web-5.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "buttons are broken, the play style leaked into them. and link our names in the footer",
+  "rationale": "buttons fixed + our names link to our sites",
+  "siteFolder": "sites/08635AD3-1F98-5E1E-9B6C-74494CC62A9B",
+  "sitePage": "index.html",
+  "snapshot": "26a9555e6d8adcb20a0f0d4d8aa1e0791135fe8e",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "Fixed the button width; our names in the footer link to our sites.",
+  "tab": "Website",
+  "tags": [],
+  "title": "Website v5: fixes and our names",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-10-22T06:55:00Z",
+   "model": "demo",
+   "seen": "Margin's one-page site with a download button and the video.",
+   "tags": [
+    "website",
+    "download"
+   ],
+   "title": "Margin website",
+   "topic": "Website",
+   "visibleText": "Document your design process while you work."
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-10-22T06:55:00Z",
+  "id": "2F6E709B-8ABB-59B4-97C7-ED3CAC22110D",
+  "imageFile": "demo-margin-site-link.png",
+  "kind": "link",
+  "label": "margin-svsd.vercel.app",
+  "link": "https://margin-svsd.vercel.app",
+  "project": "Margin",
+  "rationale": "live!",
+  "sourceApp": "Arc",
+  "tab": "Website",
+  "tags": [],
+  "title": "margin-svsd.vercel.app",
+  "windowTitle": "margin-svsd.vercel.app"
+ },
+ {
+  "alternatives": "",
+  "body": "We made the finalists. NYC, November 6 to 8. The crit is the video as a talk, and people get to try Margin.",
+  "createdAt": "2026-10-22T18:20:00Z",
+  "id": "8B6BC2C7-3E2C-5CB0-B020-C82366008C1E",
+  "kind": "note",
+  "link": "",
+  "project": "Margin",
+  "rationale": "FINALISTS. nyc nov 6\u20138",
+  "tab": "Presentation",
+  "tags": [
+   "finalist",
+   "NYC"
+  ],
+  "title": "Finalists"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-11-03T23:00:00Z",
+   "model": "demo",
+   "seen": "A line morphs through the research slides one by one.",
+   "tags": [
+    "motion",
+    "slides"
+   ],
+   "title": "Slide animation reel",
+   "topic": "Motion"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-11-03T23:00:00Z",
+  "duration": 38.8,
+  "id": "D87637E4-16C0-57C9-A9C5-A103713BB321",
+  "imageFile": "demo-margin-anim-reel-poster.jpg",
+  "kind": "recording",
+  "label": "Slide motion \u00b7 the research as one line",
+  "link": "",
+  "mediaFile": "demo-margin-anim-reel.mp4",
+  "project": "Margin",
+  "rationale": "one line through all the research slides. each clip stops on its end frame",
+  "sourceApp": "QuickTime Player",
+  "tags": [],
+  "title": "Slide motion: one line",
+  "windowTitle": "Margin Slide Animations"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-11-03T23:30:00Z",
+   "model": "demo",
+   "seen": "Brackets on a line gain small labels.",
+   "tags": [
+    "motion",
+    "slides",
+    "intention"
+   ],
+   "title": "Intention slide motion",
+   "topic": "Motion"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-11-03T23:30:00Z",
+  "duration": 3.05,
+  "id": "82E780D6-C68C-5346-B127-ECFFF9C27848",
+  "imageFile": "demo-margin-anim-intention-poster.jpg",
+  "kind": "recording",
+  "label": "The thinking stays with the designer",
+  "link": "",
+  "mediaFile": "demo-margin-anim-intention.mp4",
+  "project": "Margin",
+  "rationale": "after intelligence: brackets get names. that part stays ours",
+  "sourceApp": "QuickTime Player",
+  "tags": [],
+  "title": "The thinking stays with you",
+  "windowTitle": "Margin Slide Animations"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-11-04T18:50:00Z",
+   "model": "demo",
+   "seen": "The Margin dot and bracket ease onto a white slide.",
+   "tags": [
+    "motion",
+    "logo"
+   ],
+   "title": "Logo in",
+   "topic": "Motion"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-11-04T18:50:00Z",
+  "duration": 2.867,
+  "id": "2BC23521-ECC8-597D-BE5E-60C6A240C1D6",
+  "imageFile": "demo-margin-anim-logo-in-poster.jpg",
+  "kind": "recording",
+  "label": "Hand-off \u00b7 the logo comes in",
+  "link": "",
+  "mediaFile": "demo-margin-anim-logo-in.mp4",
+  "project": "Margin",
+  "rationale": "dot first, then bracket. slow in, no bounce",
+  "sourceApp": "QuickTime Player",
+  "tags": [],
+  "title": "Hand-off slide: the mark comes in",
+  "windowTitle": "Margin Slide Animations"
+ },
+ {
+  "ai": {
+   "createdAt": "2026-11-04T19:00:00Z",
+   "model": "demo",
+   "seen": "The logo's brackets close and widen to frame a screenshot area.",
+   "tags": [
+    "motion",
+    "logo",
+    "hand-off"
+   ],
+   "title": "Logo to case study",
+   "topic": "Motion"
+  },
+  "alternatives": "",
+  "body": "",
+  "createdAt": "2026-11-04T19:00:00Z",
+  "duration": 3.917,
+  "id": "0D5A70ED-116E-56D6-885B-CBC219F4F252",
+  "imageFile": "demo-margin-anim-logo-case-poster.jpg",
+  "kind": "recording",
+  "label": "Hand-off \u00b7 the logo opens into the case study",
+  "link": "",
+  "mediaFile": "demo-margin-anim-logo-case.mp4",
+  "project": "Margin",
+  "rationale": "closes, then opens up to frame the case study. smooth",
+  "sourceApp": "QuickTime Player",
+  "tags": [],
+  "title": "Hand-off slide: to case study",
+  "windowTitle": "Margin Slide Animations"
+ },
+ {
+  "agent": "Claude Code",
+  "ai": {
+   "createdAt": "2026-11-05T19:39:00Z",
+   "model": "demo",
+   "seen": "Claude Code: The Figma plugin runs only while it exports; Claude captures copy the HTML site into Margin.",
+   "tags": [
+    "code",
+    "claude code"
+   ],
+   "title": "The Figma plugin runs only while",
+   "topic": "Capture"
+  },
+  "alternatives": "",
+  "baseSnapshot": "05738ca27c760b015df96b9571feded2ace71cfc",
+  "body": "",
+  "codeRoot": "/Users/designer/SVSD_Competition",
+  "createdAt": "2026-11-05T19:39:00Z",
+  "diffStat": "10 files \u00b7 +558 \u221220",
+  "id": "B12FA35D-0345-5135-ADCB-FF4BB3918D1C",
+  "imageFile": "demo-margin-plugin-hidden.png",
+  "kind": "iteration",
+  "link": "",
+  "project": "Margin",
+  "prompt": "the figma plugin should only run while it exports, no 'plugin running' at the bottom. and when i capture a local html project from claude, copy its files into margin so it opens in the browser later",
+  "rationale": "nothing running in figma anymore + every claude build opens again",
+  "snapshot": "7d372a83761a55c272975ede97c2bf6d53b5ab04",
+  "snapshotSource": "repo",
+  "sourceApp": "Claude Code",
+  "summary": "The Figma plugin runs only while it exports; Claude captures copy the HTML site into Margin.",
+  "tab": "Capture",
+  "tags": [],
+  "title": "Plugin out of the way, builds live",
+  "verdict": "keep",
+  "windowTitle": "SVSD_Competition"
+ },
+ {
+  "alternatives": "Only screenshots. Open everything in the browser.",
+  "body": "A Claude build or a captured website opens as the real page inside Margin, in a laptop-sized frame, with the saved screenshot one click away.",
+  "createdAt": "2026-11-05T23:30:00Z",
+  "id": "43871435-4CBA-5A2F-90B9-DE2BF39AB22F",
+  "kind": "decision",
+  "link": "",
+  "project": "Margin",
+  "rationale": "builds + websites play live in a laptop frame, screenshot one click away",
+  "tab": "Capture",
+  "tags": [
+   "live",
+   "claude code",
+   "websites"
+  ],
+  "title": "Builds and websites play live"
+ }
+]

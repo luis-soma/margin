@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zoom Bar Tuner</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FAFAFA; --ink:#1b1b1a; --muted:#8d8c88; --faint:#b9b8b3;
+  --panel:#FFFFFF; --track:#EEEDEA; --tick:#dad9d4;
+  --sans:"DM Sans",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow:hidden}
+button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+
+/* header */
+.title{position:fixed;left:28px;top:24px;font-size:13px;display:flex;gap:8px;align-items:baseline;z-index:5}
+.title b{font-weight:600}
+.title span{color:var(--muted)}
+.actions{position:fixed;right:28px;top:22px;display:flex;gap:2px;z-index:5;font-size:12px}
+.actions button{color:var(--muted);padding:4px 9px;border-radius:999px;transition:color .15s,background .15s}
+.actions button:hover{color:var(--ink);background:rgba(0,0,0,.04)}
+.actions button.on{color:var(--ink);background:rgba(0,0,0,.06)}
+
+/* stage */
+.stage{position:fixed;left:0;right:0;top:0;bottom:var(--dock,300px);display:flex;flex-direction:column;justify-content:center;
+  padding:0 max(32px, 6vw);user-select:none}
+.value{text-align:center;margin-top:20px;font:400 10px/1 var(--mono);letter-spacing:.16em;color:var(--faint);text-transform:uppercase}
+
+/* the zoom bar */
+.bar{position:relative;width:100%;max-width:1240px;margin:0 auto;touch-action:none}
+.seg{position:absolute;top:0;bottom:0;overflow:hidden;display:flex;align-items:center;
+  font-family:var(--mono);font-weight:500;text-transform:uppercase;white-space:nowrap;cursor:pointer}
+.seg.left{left:0}
+.seg.right{justify-content:flex-end}
+.handle{position:absolute;top:50%;width:28px;height:64px;margin-top:-32px;cursor:ew-resize;display:flex;justify-content:center;align-items:center}
+.grip{border-radius:2px;transition:transform .18s cubic-bezier(.3,.7,.3,1),filter .18s}
+.handle:hover .grip{filter:brightness(.7)}
+.detent{position:absolute;top:50%;border-radius:50%;cursor:pointer}
+.detent::after{content:"";position:absolute;inset:-10px}
+
+/* dock */
+.dock{position:fixed;left:0;right:0;bottom:28px;display:flex;justify-content:center;gap:10px;padding:0 16px;z-index:4;flex-wrap:wrap}
+.panel{width:300px;background:var(--panel);border-radius:16px;padding:14px 16px 16px;
+  box-shadow:0 0 0 1px rgba(0,0,0,.035),0 1px 2px rgba(0,0,0,.03),0 14px 36px -12px rgba(0,0,0,.12)}
+.ph{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;color:var(--muted);margin-bottom:12px;height:14px}
+.ph .r{display:flex;gap:6px;align-items:baseline}
+.ph .r b{color:var(--ink);font-weight:600;font-family:var(--sans)}
+.tabs{display:flex;gap:10px}
+.tabs button{color:var(--faint);font-size:11px;transition:color .15s}
+.tabs button:hover{color:var(--muted)}
+.tabs button.on{color:var(--ink)}
+canvas{display:block;width:100%;height:118px;background:var(--track);border-radius:10px}
+.chips{display:flex;gap:4px;margin-top:10px;flex-wrap:wrap}
+.chip{font-size:11px;padding:3px 8px;border-radius:999px;color:var(--muted);transition:.15s}
+.chip:hover{color:var(--ink);background:rgba(0,0,0,.04)}
+.chip.on{color:var(--ink);background:rgba(0,0,0,.065)}
+
+.sl{display:block}
+.sl + .sl{margin-top:10px}
+.slh{display:flex;justify-content:space-between;font-size:11px;color:#55544f;margin-bottom:6px}
+.slh b{font-weight:400;color:var(--faint)}
+.track{position:relative;height:28px;background:var(--track);border-radius:9px}
+.track::before{content:"";position:absolute;left:13px;right:13px;top:9px;height:10px;
+  background:repeating-linear-gradient(90deg,var(--tick) 0 1px,transparent 1px calc(10% - .1px))}
+.track input{position:relative;-webkit-appearance:none;appearance:none;width:100%;height:28px;margin:0;background:transparent;cursor:pointer;padding:0 7px}
+.track input:focus{outline:none}
+.track input::-webkit-slider-runnable-track{height:28px;background:transparent}
+.track input::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:22px;margin-top:3px;border-radius:5px;
+  background:linear-gradient(#fff,#fff) center/1.5px 10px no-repeat,#1b1b1a;box-shadow:0 1px 3px rgba(0,0,0,.22);transition:transform .12s}
+.track input:active::-webkit-slider-thumb{transform:scaleX(1.12) scaleY(.92)}
+.track input::-moz-range-track{height:28px;background:transparent}
+.track input::-moz-range-thumb{width:12px;height:22px;border:0;border-radius:5px;
+  background:linear-gradient(#fff,#fff) center/1.5px 10px no-repeat,#1b1b1a}
+.track input:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 3px rgba(27,27,26,.18)}
+.group{display:none}
+.group.on{display:block}
+
+.toast{position:fixed;left:50%;top:22px;transform:translate(-50%,-10px);opacity:0;background:var(--ink);color:#fff;font-size:12px;
+  padding:6px 12px;border-radius:999px;transition:.25s;pointer-events:none;z-index:9}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:700px){
+  html,body{overflow:auto}
+  .title span{display:none}
+  .stage{position:relative;height:300px;bottom:auto;padding:0 20px}
+  .dock{position:relative;bottom:auto;padding:0 12px 24px}
+  .panel{width:100%}
+}
+</style>
+</head>
+<body>
+<div class="title"><b>Zoom bar</b><span>Close-up to big picture, tuned by hand</span></div>
+<div class="actions">
+  <button id="bPlay" title="Space">Toggle</button>
+  <button id="bLoop">Loop</button>
+  <button id="bSlow" title="S">0.25×</button>
+  <button id="bCopy">Copy</button>
+  <button id="bReset">Reset</button>
+</div>
+
+<div class="stage" id="stage">
+  <div class="bar" id="bar">
+    <div class="seg left" id="segL"><span id="lblL">Close-up</span></div>
+    <div class="seg right" id="segR"><span id="lblR">Big picture</span></div>
+    <div id="detents"></div>
+    <div class="handle" id="handle"><div class="grip" id="grip"></div></div>
+  </div>
+  <div class="value" id="value"></div>
+</div>
+
+<div class="dock" id="dock">
+  <div class="panel">
+    <div class="ph">
+      <div class="tabs" id="modes"><button data-m="spring">Spring</button><button data-m="ease">Ease</button></div>
+      <div class="r" id="info"></div>
+    </div>
+    <canvas id="graph"></canvas>
+    <div class="chips" id="presets"></div>
+  </div>
+  <div class="panel">
+    <div class="ph"><div class="tabs" data-for="motion"></div><span>Motion</span></div>
+    <div id="motion"></div>
+  </div>
+  <div class="panel">
+    <div class="ph"><div class="tabs" data-for="look"></div><span>Look</span></div>
+    <div id="look"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+const DEFAULTS = {
+  h:36, radius:8, gap:6, pill:237, hw:4, hh:1, handle:80, dot:5, labelSize:13, tracking:.12, labelInk:62, pad:18,
+  mode:'spring', k:260, c:26, m:1, dur:420, ein:.3, eout:.85, squash:.2, rubber:.5, detents:5,
+};
+const KEY = 'zoom-bar-tuner:v1';
+let P = {...DEFAULTS};
+try { Object.assign(P, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch(e){}
+if (!P.fiveDots){ P.detents = 5; P.fiveDots = 1; } // one-time move to five snap points, keeping other tuning
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch(e){} };
+
+const PRESETS = [
+  {n:'Snappy', p:{mode:'spring',k:420,c:38,m:1}},
+  {n:'Calm',   p:{mode:'spring',k:140,c:24,m:1}},
+  {n:'Bouncy', p:{mode:'spring',k:300,c:14,m:1}},
+  {n:'Glide',  p:{mode:'ease',dur:620,ein:.25,eout:.92}},
+  {n:'Quick',  p:{mode:'ease',dur:220,ein:.3,eout:.7}},
+];
+
+const $ = s => document.querySelector(s);
+const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
+const lerp = (a,b,t) => a + (b-a)*t;
+const smooth = (a,b,x) => { const t = clamp((x-a)/(b-a),0,1); return t*t*(3-2*t); };
+const grey = v => `rgb(${v},${v},${v-2})`;
+const hex = v => '#' + Math.round(v).toString(16).padStart(2,'0').repeat(3);
+
+/* ---------- curve ---------- */
+function bezier(x1,y1,x2,y2){
+  const cx=3*x1, bx=3*(x2-x1)-cx, ax=1-cx-bx, cy=3*y1, by=3*(y2-y1)-cy, ay=1-cy-by;
+  const sx=t=>((ax*t+bx)*t+cx)*t, sy=t=>((ay*t+by)*t+cy)*t;
+  return x => { if (x<=0) return 0; if (x>=1) return 1; let lo=0, hi=1, t=x;
+    for (let i=0;i<30;i++){ const v=sx(t); if (Math.abs(v-x)<1e-6) break; v<x?lo=t:hi=t; t=(lo+hi)/2; } return sy(t); };
+}
+let C, dirty = true;
+function buildCurve(){
+  if (P.mode === 'spring'){
+    const dt=1/240, h=dt/4; let x=0, v=0, t=0; const s=[0];
+    while (t < 5){ for (let i=0;i<4;i++){ v += (-P.k*(x-1) - P.c*v)/P.m*h; x += v*h; } t += dt; s.push(x);
+      if (Math.abs(1-x) < .0015 && Math.abs(v) < .02) break; }
+    const T=t*1000, n=s.length-1;
+    C = {T, f: ms => { if (ms<=0) return 0; if (ms>=T) return 1; const i=ms/T*n, j=Math.floor(i); return lerp(s[j], s[j+1], i-j); }};
+  } else {
+    const b = bezier(P.ein,0,1-P.eout,1); C = {T:P.dur, f: ms => ms<=0?0 : ms>=P.dur?1 : b(ms/P.dur)};
+  }
+  let mx=1, mn=0; for (let i=0;i<=200;i++){ const y=C.f(C.T*i/200); mx=Math.max(mx,y); mn=Math.min(mn,y); }
+  C.max=mx; C.min=mn;
+  $('#info').innerHTML = `<b>${Math.round(C.T)} ms</b><span>· ${mx>1.002 ? Math.round((mx-1)*100)+'% overshoot' : 'no overshoot'}</span>`;
+  dirty = true;
+}
+
+/* ---------- bar ---------- */
+const bar=$('#bar'), segL=$('#segL'), segR=$('#segR'), handle=$('#handle'), grip=$('#grip'), lblL=$('#lblL'), lblR=$('#lblR'), detEl=$('#detents');
+let Z = .3, anim = null, vt = 0, timeScale = 1;
+const detentList = () => P.detents < 2 ? [] : Array.from({length:P.detents}, (_,i) => i/(P.detents-1));
+const snap = z => { const d = detentList(); return d.length ? d.reduce((a,b) => Math.abs(b-z)<Math.abs(a-z)?b:a) : clamp(z,0,1); };
+const animateTo = to => { anim = {t0:vt, from:Z, to}; dirty = true; };
+
+const minL = () => lblL.offsetWidth + P.pad*2;
+const minR = () => lblR.offsetWidth + P.pad*2;
+const zToX = z => minL() + z*(bar.clientWidth - minL() - minR());
+const xToZ = x => (x - minL()) / (bar.clientWidth - minL() - minR());
+
+function buildDetents(){
+  detEl.innerHTML = '';
+  detentList().slice(1,-1).forEach(z => {
+    const d = document.createElement('div'); d.className='detent'; d.dataset.z=z;
+    d.addEventListener('pointerdown', e => e.stopPropagation());
+    d.addEventListener('click', () => animateTo(z));
+    detEl.appendChild(d);
+  });
+}
+
+function render(){
+  bar.style.height = P.h+'px';
+  [segL,segR].forEach(s => { s.style.borderRadius=P.radius+'px'; s.style.background=grey(P.pill);
+    s.style.fontSize=P.labelSize+'px'; s.style.letterSpacing=P.tracking+'em'; s.style.color=grey(P.labelInk); });
+  segL.style.paddingLeft = segR.style.paddingRight = P.pad+'px';
+  const bw = bar.clientWidth, hx = zToX(clamp(Z,-.2,1.2)), half = P.hw/2 + P.gap;
+  segL.style.width = Math.max(0, hx-half)+'px';
+  segR.style.left = (hx+half)+'px'; segR.style.width = Math.max(0, bw-hx-half)+'px';
+  handle.style.left = (hx-14)+'px';
+  grip.style.width = P.hw+'px'; grip.style.height = P.h*P.hh+'px'; grip.style.background = grey(P.handle);
+  grip.style.borderRadius = Math.min(P.hw/2, 3)+'px';
+  const l = 1 - smooth(.3,.7,Z);
+  lblL.style.opacity = .45+.55*l; lblR.style.opacity = .45+.55*(1-l);
+  for (const d of detEl.children){
+    const z=+d.dataset.z; d.style.left=(zToX(z)-P.dot/2)+'px'; d.style.width=d.style.height=P.dot+'px';
+    d.style.marginTop=(-P.dot/2)+'px'; d.style.background=grey(Math.max(0,P.pill-50));
+    d.style.opacity = smooth(0,.06,Math.abs(z-Z));
+  }
+  $('#value').textContent = `zoom ${Math.max(0,Z).toFixed(2)}`;
+}
+
+/* ---------- graph ---------- */
+const cv=$('#graph'), g=cv.getContext('2d');
+function drawGraph(){
+  const dpr=devicePixelRatio||1, w=cv.clientWidth, h=cv.clientHeight;
+  if (cv.width!==w*dpr){ cv.width=w*dpr; cv.height=h*dpr; }
+  g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,w,h);
+  const p=14, lo=C.min, hi=Math.max(1.08,C.max+.04), X=ms=>p+ms/C.T*(w-p*2), Y=v=>h-p-(v-lo)/(hi-lo)*(h-p*2);
+  g.strokeStyle='#dcdbd6'; g.lineWidth=1;
+  [0,1].forEach(v=>{ g.beginPath(); g.moveTo(p,Y(v)); g.lineTo(w-p,Y(v)); g.stroke(); });
+  g.beginPath(); g.moveTo(X(C.T), p-6); g.lineTo(X(C.T), h-p+6); g.stroke();
+  g.strokeStyle='#1b1b1a'; g.lineWidth=1.5; g.beginPath();
+  for (let i=0;i<=140;i++){ const ms=C.T*i/140; i?g.lineTo(X(ms),Y(C.f(ms))):g.moveTo(X(ms),Y(C.f(ms))); } g.stroke();
+  const ms = anim ? clamp(vt-anim.t0,0,C.T) : C.T;
+  g.fillStyle='#1b1b1a'; g.beginPath(); g.arc(X(ms),Y(C.f(ms)),3,0,7); g.fill();
+}
+
+/* ---------- controls ---------- */
+function slider(host, key, label, min, max, step, fmt, cb){
+  const w=document.createElement('label'); w.className='sl';
+  w.innerHTML=`<div class="slh"><span>${label}</span><b></b></div><div class="track"><input type="range" min="${min}" max="${max}" step="${step}"></div>`;
+  const i=w.querySelector('input'), o=w.querySelector('b'); i.value=P[key]; o.textContent=fmt(P[key]);
+  i.addEventListener('input',()=>{ P[key]=+i.value; o.textContent=fmt(P[key]); save(); cb&&cb(); });
+  host.appendChild(w);
+}
+const px = v => v+' px', pct = v => Math.round(v*100)+'%';
+
+// a panel with small tabs, each tab a group of three or four sliders
+function tabbed(name, groups, active){
+  const host = $('#'+name), tabs = document.querySelector(`.tabs[data-for="${name}"]`);
+  host.innerHTML = ''; tabs.innerHTML = '';
+  const memo = 'tab:'+name; let cur = active;
+  try { cur = localStorage.getItem(memo) || active; } catch(e){}
+  if (!groups[cur]) cur = Object.keys(groups)[0];
+  Object.entries(groups).forEach(([label, build]) => {
+    const grp = document.createElement('div'); grp.className = 'group'; build(grp); host.appendChild(grp);
+    const b = document.createElement('button'); b.textContent = label; tabs.appendChild(b);
+    const show = () => { [...host.children].forEach(x => x.classList.toggle('on', x === grp)); [...tabs.children].forEach(x => x.classList.toggle('on', x === b));
+      try { localStorage.setItem(memo, label); } catch(e){} };
+    b.addEventListener('click', show); if (label === cur) show();
+  });
+}
+function buildLook(){
+  tabbed('look', {
+    Bar: g => {
+      slider(g,'h','Height',24,56,1,px);
+      slider(g,'radius','Corner radius',0,28,1,px);
+      slider(g,'pill','Fill',215,250,1,hex);
+    },
+    Handle: g => {
+      slider(g,'hw','Width',2,12,.5,px);
+      slider(g,'hh','Height',.5,1.5,.01,pct);
+      slider(g,'handle','Shade',20,180,1,hex);
+    },
+    Spacing: g => {
+      slider(g,'gap','Gap around handle',0,20,1,px);
+      slider(g,'pad','Label padding',8,32,1,px);
+      slider(g,'dot','Snap dot',0,10,.5,px);
+    },
+    Labels: g => {
+      slider(g,'labelSize','Size',9,16,.5,px);
+      slider(g,'tracking','Letter spacing',0,.3,.01,v=>(+v).toFixed(2)+' em');
+      slider(g,'labelInk','Shade',20,170,1,hex);
+    },
+  }, 'Bar');
+}
+function buildMotion(){
+  const re = () => { buildCurve(); markPreset(); };
+  tabbed('motion', {
+    Curve: g => {
+      if (P.mode==='spring'){
+        slider(g,'k','Stiffness',40,700,5,v=>v,re);
+        slider(g,'c','Damping',4,70,1,v=>v,re);
+        slider(g,'m','Mass',.3,4,.1,v=>(+v).toFixed(1),re);
+      } else {
+        slider(g,'dur','Duration',80,1200,10,v=>v+' ms',re);
+        slider(g,'ein','Ease in',0,1,.01,v=>(+v).toFixed(2),re);
+        slider(g,'eout','Ease out',0,1,.01,v=>(+v).toFixed(2),re);
+      }
+    },
+    Feel: g => {
+      slider(g,'squash','Press squash',0,.5,.01,pct);
+      slider(g,'rubber','Stretch past the ends',0,1,.01,pct);
+      slider(g,'detents','Snap points',1,5,1,v=>v<2?'free':v,buildDetents);
+    },
+  }, 'Curve');
+}
+function setMode(mode){
+  P.mode=mode; save();
+  document.querySelectorAll('#modes button').forEach(b=>b.classList.toggle('on', b.dataset.m===mode));
+  buildCurve(); buildMotion(); markPreset();
+}
+document.querySelectorAll('#modes button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.m)));
+PRESETS.forEach(pr=>{ const b=document.createElement('button'); b.className='chip'; b.textContent=pr.n;
+  b.addEventListener('click',()=>{ Object.assign(P,pr.p); save(); setMode(P.mode); animateTo(Z>.5?0:1); });
+  pr.b=b; $('#presets').appendChild(b); });
+function markPreset(){ PRESETS.forEach(pr=>pr.b.classList.toggle('on', Object.entries(pr.p).every(([k,v])=>P[k]===v))); }
+
+/* ---------- interaction ---------- */
+let drag=null;
+const press = on => grip.style.transform = on ? `scaleY(${1-P.squash}) scaleX(${1+P.squash*2})` : '';
+bar.addEventListener('pointerdown', e => {
+  bar.setPointerCapture(e.pointerId);
+  drag = {x0:e.clientX, z0:Z, moved:false, onHandle:handle.contains(e.target), target:e.target, lx:e.clientX, lt:performance.now(), v:0};
+  if (drag.onHandle){ press(true); anim=null; }
+});
+bar.addEventListener('pointermove', e => {
+  if (!drag) return;
+  if (!drag.moved && Math.abs(e.clientX-drag.x0) > 3){ drag.moved=true; drag.x0=e.clientX; drag.z0=Z; anim=null; press(true); }
+  if (!drag.moved) return;
+  const range = bar.clientWidth - minL() - minR();
+  let z = drag.z0 + (e.clientX-drag.x0)/range;
+  const rb = d => P.rubber*d/(1+d*6);
+  if (z>1) z = 1+rb(z-1); else if (z<0) z = -rb(-z);
+  const now=performance.now(); drag.v = lerp(drag.v, (e.clientX-drag.lx)/range/Math.max(1,now-drag.lt)*1000, .5); drag.lx=e.clientX; drag.lt=now;
+  Z = z;
+});
+const end = e => {
+  if (!drag) return; press(false);
+  if (drag.moved){ const t = P.detents<2 ? clamp(Z,0,1) : snap(Z + drag.v*.15); if (t!==Z) animateTo(t); }
+  else if (!drag.onHandle){
+    animateTo(segL.contains(drag.target) ? 0 : segR.contains(drag.target) ? 1 : snap(xToZ(e.clientX - bar.getBoundingClientRect().left)));
+  }
+  drag=null;
+};
+bar.addEventListener('pointerup', end); bar.addEventListener('pointercancel', end);
+
+const toggle = () => animateTo((anim?anim.to:Z) > .5 ? 0 : 1);
+$('#bPlay').addEventListener('click', toggle);
+let loop=null;
+$('#bLoop').addEventListener('click', e => {
+  if (loop){ clearTimeout(loop); loop=null; e.target.classList.remove('on'); return; }
+  e.target.classList.add('on'); const go=()=>{ toggle(); loop=setTimeout(go, C.T/timeScale+700); }; go();
+});
+const slow = () => { timeScale = timeScale===1 ? .25 : 1; $('#bSlow').classList.toggle('on', timeScale!==1); };
+$('#bSlow').addEventListener('click', slow);
+document.addEventListener('keydown', e => {
+  if (e.target.tagName==='INPUT') return;
+  if (e.key===' '){ e.preventDefault(); toggle(); }
+  if (e.key==='s'||e.key==='S') slow();
+});
+$('#bReset').addEventListener('click', () => { P={...DEFAULTS}; save(); buildLook(); setMode(P.mode); buildDetents(); toast('Reset'); });
+
+$('#bCopy').addEventListener('click', async () => {
+  let easing;
+  if (P.mode==='ease') easing = `cubic-bezier(${P.ein}, 0, ${+(1-P.eout).toFixed(2)}, 1)`;
+  else { const pts=[]; for (let i=0;i<=40;i++) pts.push(+C.f(C.T*i/40).toFixed(4)); easing = `linear(${pts.join(', ')})`; }
+  const out = {
+    look:{ barHeight:P.h, cornerRadius:P.radius, fill:hex(P.pill), handleWidth:P.hw, handleHeight:Math.round(P.h*P.hh), handleColor:hex(P.handle),
+      handleGap:P.gap, labelPadding:P.pad, snapDot:P.dot, labelSize:P.labelSize, letterSpacingEm:P.tracking, labelColor:hex(P.labelInk) },
+    motion: P.mode==='spring' ? {type:'spring', stiffness:P.k, damping:P.c, mass:P.m} : {type:'ease', durationMs:P.dur, easeIn:P.ein, easeOut:P.eout},
+    durationMs:Math.round(C.T), css:`transition: left ${Math.round(C.T)}ms ${easing};`,
+    pressSquash:P.squash, rubberBand:P.rubber, snapPoints:P.detents<2?'free':P.detents,
+  };
+  const text = JSON.stringify(out,null,2);
+  try { await navigator.clipboard.writeText(text); } catch(err){ const t=document.createElement('textarea'); t.value=text; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); }
+  toast('Values copied');
+});
+let tt; function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('show'),1400); }
+
+/* ---------- layout + loop ---------- */
+function layout(){ if (innerWidth > 700) document.documentElement.style.setProperty('--dock', ($('#dock').offsetHeight + 28) + 'px'); dirty = true; }
+addEventListener('resize', layout);
+let last=performance.now();
+function frame(now){
+  vt += Math.min(64, now-last)*timeScale; last=now;
+  if (anim){ const el=vt-anim.t0; Z = lerp(anim.from, anim.to, C.f(el)); if (el>=C.T){ Z=anim.to; anim=null; } dirty=true; }
+  render();
+  if (dirty){ drawGraph(); dirty = !!anim; }
+  requestAnimationFrame(frame);
+}
+buildLook(); setMode(P.mode); buildDetents(); layout();
+document.fonts && document.fonts.ready.then(layout);
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<meta charset='utf-8'><p dir="ltr">I fixed the text preview for real this time: the off-white or gray paper now fills the whole box, with the text centered on it. It’s on <code dir="ltr">main</code>. Since CI is off, the fix hasn’t been compiled or tested anywhere yet; you’ll be the first to see it after Update Margin. If the update fails, Margin keeps your current version and shows the error.</p>
+<p dir="ltr"><strong>What was wrong:</strong> the text picture is saved at double resolution, but the drawing code only filled a quarter of it. That left the text in the bottom-left corner and the rest of the box empty. This bug was older than my change last round, which is why that change made no visible difference.</p>
+<p dir="ltr"><strong>Your existing text captures:</strong> they still have the broken picture, so Margin redraws them once the first time it launches after the update. It runs in the background and takes a moment.</p>
+<p dir="ltr"><strong>What “CI” is:</strong> I think the “Cl” you saw is CI, short for continuous integration. It’s a GitHub service that builds and checks the app in the cloud whenever I push. For Margin it rents a Mac each time and:</p>
+<ul dir="ltr">
+<li>builds the app,</li>
+<li>runs about 130 automated tests,</li>
+<li>makes one real call each to Gemini and OpenAI to confirm the keys work,</li>
+<li>compiles the app icon file for Macs that can’t do that themselves.</li>
+</ul>
+<p dir="ltr"><strong>Do we need it?</strong> Not to use Margin. Update Margin builds the app on each person’s Mac, which is why your friends could pull without it. What you lose without CI:</p>
+<ul dir="ltr">
+<li><strong>No safety check:</strong> I can’t confirm a change builds before you get it. A mistake would first show up as a failed Update Margin on your Mac, though your current version keeps working.</li>
+<li><strong>No icon refresh:</strong> the icon file only needs recompiling if we change the icon again.</li>
+</ul>
+<p dir="ltr"><strong>Why the limit hit:</strong> builds on GitHub’s Macs are expensive for private repos. GitHub counts each Mac minute as ten regular minutes. I’ve also been triggering two builds per change, one per branch.</p>
+<p dir="ltr"><strong>What I’d do:</strong> run CI only for <code dir="ltr">main</code> and only when app code changes, which roughly halves the usage. Then raise the spending limit a little before the deadline if you want the checks back. Or we skip CI until Monday and I’m extra careful. Which do you prefer?</p>
