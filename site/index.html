@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Margin</title>
+<meta name="description" content="Margin is a Mac app that documents your design process while you work. Double-press ⌘, add one line about why, and it lands in an archive.">
+<meta property="og:title" content="Margin">
+<meta property="og:description" content="Document your design process while you work. A Mac app.">
+<meta property="og:image" content="{{ASSETS}}media/margin-hero-poster.jpg">
+<meta name="color-scheme" content="light">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23111'/%3E%3Cpath d='M13 8H9v16h4' fill='none' stroke='%23fff' stroke-width='2.4'/%3E%3Ccircle cx='19' cy='16' r='2.8' fill='%23fff'/%3E%3C/svg%3E">
+<style>
+/* Margin's own design language: Mona Sans to read, Geist Mono for small
+   facts, one neutral grey ramp, ink buttons, 8 pt controls, 12 pt cards,
+   square corners on work. */
+@font-face { font-family: "Mona"; src: url({{ASSETS}}fonts/MonaSans-Regular.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Mona"; src: url({{ASSETS}}fonts/MonaSans-Medium.woff2) format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Mona Display"; src: url({{ASSETS}}fonts/MonaSansDisplay-Medium.woff2) format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Geist Mono"; src: url({{ASSETS}}fonts/GeistMono-Regular.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+:root {
+  --paper: #fff; --raised: #f7f7f7; --ink: #111; --ink2: rgba(17,17,17,.6); --ink3: rgba(17,17,17,.4);
+  --hair: rgba(17,17,17,.08); --fill: rgba(17,17,17,.04); --fill-hover: rgba(17,17,17,.06);
+  --read: "Mona", ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --display: "Mona Display", var(--read);
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --ease: cubic-bezier(.23, 1, .32, 1);
+}
+* { box-sizing: border-box; }
+html { background: var(--paper); }
+body { margin: 0; color: var(--ink); font: 400 15px/1.55 var(--read); -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+.wrap { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+
+header { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 500; }
+.brand svg { width: 22px; height: 22px; }
+.nav { display: flex; gap: 4px; }
+.nav a { height: 28px; padding: 0 10px; border-radius: 8px; display: inline-flex; align-items: center; text-decoration: none; color: var(--ink2); font-size: 13px; transition: background .12s ease-out, color .12s ease-out; }
+.nav a:hover { background: var(--fill-hover); color: var(--ink); }
+
+h1 { margin: 56px 0 0; font: 500 40px/1.1 var(--display); letter-spacing: -.015em; }
+.lead { margin: 14px 0 0; font-size: 18px; line-height: 1.5; color: var(--ink2); max-width: 560px; }
+
+/* The film: the one place colour and depth come from */
+.film { margin: 40px -24px 0; aspect-ratio: 2560 / 1184; border-radius: 14px; overflow: hidden; background: #0d0d0e; }
+.film video { display: block; width: 100%; height: 100%; object-fit: cover; }
+@media (min-width: 900px) { .film { margin-left: -120px; margin-right: -120px; } }
+
+section { margin-top: 64px; }
+h2 { margin: 0 0 14px; font: 500 15px/1.3 var(--read); }
+.label { font: 400 11px/1.3 var(--mono); color: var(--ink3); margin-bottom: 8px; }
+
+/* Tell your agent: the prompt, and one ink button to copy it */
+.prompt { display: flex; align-items: flex-start; gap: 12px; padding: 14px 14px 14px 16px; border-radius: 12px; background: var(--raised); box-shadow: inset 0 0 0 1px var(--hair); }
+.prompt code { flex: 1; font: 400 13px/1.6 var(--mono); color: var(--ink); word-break: break-word; padding-top: 3px; }
+.btn { flex: none; height: 32px; padding: 0 14px; border: 0; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; font: 500 13px/1 var(--read); text-decoration: none; cursor: pointer; transition: background .12s ease-out, transform .1s ease-out; }
+.btn:active { transform: scale(.97); }
+.btn.ink { background: var(--ink); color: var(--paper); }
+.btn.ink:hover { background: #2a2a2a; }
+.btn.line { background: var(--paper); color: var(--ink); box-shadow: inset 0 0 0 1px var(--hair); }
+.btn.line:hover { background: var(--fill); }
+.btn svg { width: 13px; height: 13px; }
+.or { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 16px; }
+.meta { font: 400 12px/1.4 var(--mono); color: var(--ink3); }
+.note { margin-top: 10px; font-size: 13px; color: var(--ink2); }
+
+/* How it works */
+ol.how { list-style: none; margin: 0; padding: 0; counter-reset: n; }
+ol.how li { counter-increment: n; display: grid; grid-template-columns: 32px 1fr; padding: 14px 0; border-top: 1px solid var(--hair); }
+ol.how li:first-child { border-top: 0; padding-top: 0; }
+ol.how li::before { content: counter(n, decimal-leading-zero); font: 400 11px/1.9 var(--mono); color: var(--ink3); }
+ol.how b { font-weight: 500; }
+ol.how span { color: var(--ink2); }
+
+footer { margin: 96px 0 48px; padding-top: 18px; border-top: 1px solid var(--hair); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--ink2); }
+footer nav { display: flex; gap: 14px; }
+footer a { text-decoration: none; }
+footer a:hover { color: var(--ink); }
+
+.copied { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 8px); opacity: 0; height: 32px; padding: 0 12px; border-radius: 8px; background: var(--ink); color: var(--paper); font-size: 13px; display: flex; align-items: center; transition: opacity .2s var(--ease), transform .2s var(--ease); pointer-events: none; }
+.copied.on { opacity: 1; transform: translate(-50%, 0); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="/"><svg viewBox="0 0 32 32"><path d="M13 7H8v18h5" fill="none" stroke="currentColor" stroke-width="2.6"/><circle cx="19.5" cy="16" r="3" fill="currentColor"/></svg>Margin</a>
+    <nav class="nav"><a href="#start">Install</a><a href="https://github.com/luis-soma/margin">GitHub</a></nav>
+  </header>
+
+  <h1>Document your design process while you work.</h1>
+  <p class="lead">Margin is a Mac app for designers. Double-press ⌘ on whatever you’re working on, add one line about why, and it lands in an archive you can read from a single step to the whole project.</p>
+
+  <div class="film"><video src="{{ASSETS}}media/margin-hero.mp4" poster="{{ASSETS}}media/margin-hero-poster.jpg" autoplay muted loop playsinline aria-label="Capturing a Figma frame with Margin, adding a note, and finding it in the archive"></video></div>
+
+  <section id="start">
+    <h2>Get started</h2>
+    <div class="label">Tell your coding agent</div>
+    <div class="prompt">
+      <code id="prompt">Install Margin by following https://raw.githubusercontent.com/luis-soma/margin/main/INSTALL.md</code>
+      <button class="btn ink" id="copy" type="button"><svg viewBox="0 0 14 14"><rect x="4.5" y="4.5" width="8" height="8" rx="1.8" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M9.5 2.5V2a1 1 0 0 0-1-1H2.5a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h.5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>Copy</button>
+    </div>
+    <div class="or">
+      <a class="btn line" href="https://github.com/luis-soma/margin/releases/latest/download/Margin.dmg"><svg viewBox="0 0 14 14"><path d="M7 1.5v7m0 0L4.2 5.7M7 8.5l2.8-2.8M2 12h10" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Download for Mac</a>
+      <span class="meta">macOS 13 or later · Apple silicon and Intel · free</span>
+    </div>
+    <p class="note">Margin isn’t notarized yet. The first time you open it, allow it in System Settings → Privacy &amp; Security. Your agent takes care of that for you.</p>
+  </section>
+
+  <section>
+    <h2>How it works</h2>
+    <ol class="how">
+      <li><div><b>Capture.</b> <span>One gesture for everything: double-press ⌘. A Figma frame, a website, a selection, a screen area or a short recording, saved with where it came from.</span></div></li>
+      <li><div><b>Add the why.</b> <span>A small card asks for one line, typed or spoken. Esc keeps just the capture.</span></div></li>
+      <li><div><b>Keep documenting.</b> <span>Reminder or Automatic: Margin asks after a quiet stretch, or keeps a capture whenever your design moves on.</span></div></li>
+      <li><div><b>Read it back.</b> <span>A timeline you zoom from close-up to big picture, and Themes, where Margin suggests groups and you decide what they mean.</span></div></li>
+      <li><div><b>Hand it off.</b> <span>The project as a folder your coding agent can read: the story by day, your decisions, the look and every capture.</span></div></li>
+    </ol>
+  </section>
+
+  <footer>
+    <span>Made by Luis Somasundaram, Edna Ho and Sarah Kwakkelaar. Winner, SVSD Design Competition 2026.</span>
+    <nav><a href="https://github.com/luis-soma/margin">GitHub</a><a href="https://github.com/luis-soma/margin/blob/main/INSTALL.md">Install guide</a><a href="https://github.com/luis-soma/margin/releases">Releases</a></nav>
+  </footer>
+</div>
+<div class="copied" id="copied">Copied. Paste it to your agent.</div>
+<script>
+  const btn = document.getElementById('copy'), toast = document.getElementById('copied');
+  btn.addEventListener('click', async () => {
+    const text = document.getElementById('prompt').textContent;
+    try { await navigator.clipboard.writeText(text); } catch (e) {
+      const r = document.createRange(); r.selectNodeContents(document.getElementById('prompt'));
+      const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.execCommand('copy'); s.removeAllRanges();
+    }
+    toast.classList.add('on'); clearTimeout(btn._t); btn._t = setTimeout(() => toast.classList.remove('on'), 1600);
+  });
+</script>
+</body>
+</html>
