@@ -7,7 +7,6 @@
 <meta name="description" content="Margin is a Mac app that documents your design process while you work. Double-press ⌘, add one line about why, and it lands in an archive.">
 <meta property="og:title" content="Margin">
 <meta property="og:description" content="Document your design process while you work. A Mac app.">
-<meta property="og:image" content="{{ASSETS}}media/margin-hero-poster.jpg">
 <meta name="color-scheme" content="light">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23111'/%3E%3Cpath d='M13 8H9v16h4' fill='none' stroke='%23fff' stroke-width='2.4'/%3E%3Ccircle cx='19' cy='16' r='2.8' fill='%23fff'/%3E%3C/svg%3E">
 <style>
@@ -42,10 +41,6 @@ header { display: flex; align-items: center; justify-content: space-between; hei
 h1 { margin: 56px 0 0; font: 500 40px/1.1 var(--display); letter-spacing: -.015em; }
 .lead { margin: 14px 0 0; font-size: 18px; line-height: 1.5; color: var(--ink2); max-width: 560px; }
 
-/* The film: the one place colour and depth come from */
-.film { margin: 40px -24px 0; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; background: #0d0d0e; }
-.film video { display: block; width: 100%; height: 100%; object-fit: cover; }
-@media (min-width: 900px) { .film { margin-left: -120px; margin-right: -120px; } }
 
 section { margin-top: 64px; }
 h2 { margin: 0 0 14px; font: 500 15px/1.3 var(--read); }
@@ -93,7 +88,6 @@ footer a:hover { color: var(--ink); }
   <h1>Document your design process while you work.</h1>
   <p class="lead">Margin is a Mac app for designers. Double-press ⌘ on whatever you’re working on, add one line about why, and it lands in an archive you can read from a single step to the whole project.</p>
 
-  <div class="film"><video poster="{{ASSETS}}media/margin-long-poster.jpg" autoplay muted loop playsinline preload="auto" aria-label="Capturing a Figma frame with Margin, adding a note, finding it in the archive and handing the project to a coding agent"><source src="{{ASSETS}}media/margin-long-1920.mp4" type="video/mp4" media="(min-width: 1100px)"><source src="{{ASSETS}}media/margin-long-1280.mp4" type="video/mp4"></video></div>
 
   <section id="start">
     <h2>Get started</h2>
