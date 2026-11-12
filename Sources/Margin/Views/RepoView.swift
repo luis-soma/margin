@@ -841,7 +841,7 @@ private final class HopMotion {
     /// The labels at the ends, in sentence case, at the control size every
     /// switch uses.
     static let labels = ["Close-up", "Big picture"]
-    static let labelFont = Theme.Typography.ui(Theme.Typography.control)
+    static let labelFont: Font = Theme.Typography.ui(Theme.Typography.control)
     static let labelTracking: CGFloat = 0
     /// Notch on each side of the handle, label inset, room a label keeps
     /// from the notch, and how far the first and last stops sit from the ends.

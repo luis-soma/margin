@@ -26,10 +26,10 @@ final class NotchPulse {
     /// How far it spreads at full strength: a little to the sides, barely
     /// down, its edges meeting the menu bar in a small soft flare. Quiet, like
     /// the rest of Margin's motion; no belly, no overshoot.
-    static let grow: CGFloat = 6
-    static let depth: CGFloat = 1.5
-    static let flare: CGFloat = 3
-    static let belly: CGFloat = 0
+    nonisolated static let grow: CGFloat = 6
+    nonisolated static let depth: CGFloat = 1.5
+    nonisolated static let flare: CGFloat = 3
+    nonisolated static let belly: CGFloat = 0
     /// Off switch: false and the notch never moves.
     static let enabled = false
 
