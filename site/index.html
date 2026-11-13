@@ -10,190 +10,106 @@
 <meta name="color-scheme" content="light">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23111'/%3E%3Cpath d='M13 8H9v16h4' fill='none' stroke='%23fff' stroke-width='2.4'/%3E%3Ccircle cx='19' cy='16' r='2.8' fill='%23fff'/%3E%3C/svg%3E">
 <style>
-/* Margin's own language: Mona Sans to read, Geist Mono for small facts,
-   one neutral grey ramp, ink buttons, 8 pt controls, 12 pt surfaces,
-   square corners on work. One screen, no scroll. */
-@font-face { font-family: "Mona"; src: url({{ASSETS}}fonts/MonaSans-Regular.woff2) format("woff2"); font-weight: 400; font-display: swap; }
-@font-face { font-family: "Mona"; src: url({{ASSETS}}fonts/MonaSans-Medium.woff2) format("woff2"); font-weight: 500; font-display: swap; }
-@font-face { font-family: "Mona Display"; src: url({{ASSETS}}fonts/MonaSansDisplay-Medium.woff2) format("woff2"); font-weight: 500; font-display: swap; }
-@font-face { font-family: "Geist Mono"; src: url({{ASSETS}}fonts/GeistMono-Regular.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+/* One message, two buttons, the real app. Nothing else. */
 :root {
-  --paper: #fff; --stage: #f4f4f3; --ink: #111; --ink2: rgba(17,17,17,.58); --ink3: rgba(17,17,17,.38);
-  --hair: rgba(17,17,17,.08); --fill: rgba(17,17,17,.045); --fill-hover: rgba(17,17,17,.07);
-  --read: "Mona", ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
-  --display: "Mona Display", var(--read);
-  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
-  --slide: cubic-bezier(.32, .72, 0, 1);
-  --pad: clamp(16px, 3vw, 40px);
+  --ink: #000; --ink2: rgba(0,0,0,.58); --ink3: rgba(0,0,0,.42);
+  --glass: rgba(255,255,255,.62); --glass-hover: rgba(255,255,255,.9);
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+  --ease: cubic-bezier(.22, .8, .2, 1);
 }
 * { box-sizing: border-box; }
-html, body { height: 100%; margin: 0; overflow: hidden; background: var(--paper); }
-body { color: var(--ink); font: 400 15px/1.5 var(--read); -webkit-font-smoothing: antialiased; }
+html { background: #efefed; }
+body {
+  margin: 0; min-height: 100vh; color: var(--ink); font: 400 15px/1.45 var(--sans); -webkit-font-smoothing: antialiased;
+  /* A quiet, neutral light: brighter at the top, settling into grey */
+  background:
+    radial-gradient(120% 70% at 50% -10%, #fff 0%, rgba(255,255,255,0) 60%),
+    radial-gradient(60% 50% at 85% 70%, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 70%),
+    linear-gradient(#f7f7f6, #ececea);
+  background-attachment: fixed;
+  display: flex; flex-direction: column;
+}
 a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 
-/* Two panels side by side; the track slides between them. */
-.viewport { position: fixed; inset: 0; overflow: hidden; }
-.track { display: flex; width: 200%; height: 100%; transition: transform .7s var(--slide); }
-body.how .track { transform: translateX(-50%); }
-.panel { width: 50%; height: 100%; display: flex; flex-direction: column; padding: 0 var(--pad) var(--pad); transition: opacity .5s ease; }
-body.how .panel.home, body:not(.how) .panel.more { opacity: .35; }
-body.how .panel.home *, body:not(.how) .panel.more * { pointer-events: none; }
+header { display: flex; align-items: center; justify-content: space-between; padding: 18px clamp(16px, 2.4vw, 28px); }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand a { display: flex; align-items: center; gap: 7px; font: 700 17px/1 var(--display); letter-spacing: -.01em; }
+.brand svg { width: 20px; height: 20px; }
+.pill { height: 22px; padding: 0 9px; border-radius: 999px; background: var(--glass); display: inline-flex; align-items: center; font-size: 12px; font-weight: 500; color: var(--ink2); }
+.nav { height: 40px; padding: 0 16px; border-radius: 999px; background: var(--glass); display: inline-flex; align-items: center; font-size: 15px; font-weight: 500; transition: background .15s ease; }
+.nav:hover { background: var(--glass-hover); }
 
-header { flex: none; height: 64px; display: flex; align-items: center; justify-content: space-between; }
-.brand { display: flex; align-items: center; gap: 10px; font-weight: 500; }
-.brand svg { width: 22px; height: 22px; }
-.links { display: flex; gap: 2px; }
-.links a, .ghost { height: 30px; padding: 0 11px; border: 0; border-radius: 8px; background: none; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink2); cursor: pointer; transition: background .15s ease-out, color .15s ease-out; }
-.links a:hover, .ghost:hover { background: var(--fill-hover); color: var(--ink); }
-.ghost svg { width: 12px; height: 12px; }
-
-/* Home */
-.intro { flex: none; text-align: center; padding-top: clamp(4px, 2.2vh, 28px); }
-h1 { margin: 0; font: 500 clamp(26px, 3.4vw, 44px)/1.08 var(--display); letter-spacing: -.018em; text-wrap: balance; }
-.lead { margin: 10px auto 0; max-width: 520px; font-size: clamp(14px, 1.25vw, 17px); color: var(--ink2); }
-.actions { flex: none; display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: clamp(14px, 2.6vh, 28px); }
-.prompt { display: flex; align-items: center; gap: 4px; height: 40px; padding: 0 4px 0 14px; max-width: min(460px, 100%); border-radius: 10px; background: var(--stage); box-shadow: inset 0 0 0 1px var(--hair); }
-.prompt code { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: 400 12.5px/1 var(--mono); color: var(--ink2); }
-.prompt code b { font-weight: 400; color: var(--ink); }
-.btn { flex: none; height: 32px; padding: 0 13px; border: 0; border-radius: 8px; display: inline-flex; align-items: center; gap: 7px; font: 500 13px/1 var(--read); cursor: pointer; white-space: nowrap; transition: background .15s ease-out, transform .1s ease-out; }
+main { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; padding: clamp(20px, 5vh, 56px) 16px 0; }
+h1 { margin: 0; font: 700 clamp(38px, 4.6vw, 60px)/.96 var(--display); letter-spacing: -.025em; text-wrap: balance; }
+.sub { margin: 18px 0 0; max-width: 30em; font-size: clamp(16px, 1.4vw, 19px); line-height: 1.45; color: var(--ink2); text-wrap: balance; }
+.cta { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 28px; }
+.btn { position: relative; height: 52px; padding: 0 26px; border: 0; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; gap: 9px; font-size: 16px; font-weight: 500; cursor: pointer; transition: background .15s ease, transform .12s ease; }
 .btn:active { transform: scale(.97); }
-.btn svg { width: 13px; height: 13px; }
-.btn.ink { background: var(--ink); color: var(--paper); }
-.btn.ink:hover { background: #2b2b2b; }
-.btn.big { height: 40px; padding: 0 16px; border-radius: 10px; }
-.btn.line { background: var(--paper); box-shadow: inset 0 0 0 1px var(--hair); }
-.btn.line:hover { background: var(--fill); }
+.btn svg { width: 16px; height: 16px; }
+.btn.dark { background: var(--ink); color: #fff; }
+.btn.dark:hover { background: #262626; }
+.btn.light { background: var(--glass); }
+.btn.light:hover { background: var(--glass-hover); }
+/* "Copied" replaces the label in place, so the button never changes width */
+.btn .now { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .15s ease; }
+.btn .was { transition: opacity .15s ease; }
+.btn.done .now { opacity: 1; } .btn.done .was { opacity: 0; }
 
-/* The hero: a real recording of Margin on a MacBook screen, cropped at the bottom */
-.stage { flex: 1; min-height: 0; margin-top: clamp(8px, 2vh, 24px); display: flex; align-items: flex-end; justify-content: center; overflow: hidden; }
-.film { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center bottom; background: var(--paper); mix-blend-mode: multiply; }
-/* Tall, narrow screens: fill the space and keep the middle of the screen */
-@media (max-aspect-ratio: 4/5) { .film { object-fit: cover; object-position: 50% 100%; } }
-.foot { flex: none; display: flex; justify-content: space-between; gap: 12px; padding-top: 12px; border-top: 1px solid var(--hair); font: 400 11px/1.3 var(--mono); color: var(--ink3); }
+/* The app, floating */
+.window { width: min(1080px, 100%); margin-top: clamp(36px, 7vh, 72px); border-radius: 14px; overflow: hidden; background: #fff;
+  box-shadow: 0 0 0 .5px rgba(0,0,0,.14), 0 40px 90px -30px rgba(0,0,0,.35), 0 12px 30px -12px rgba(0,0,0,.12);
+  animation: rise 1s var(--ease) .1s both; }
+.window video { display: block; width: 100%; height: auto; aspect-ratio: 1920 / 1246; }
+@keyframes rise { from { opacity: 0; transform: translateY(24px); } }
 
-/* How it works */
-.more .body { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; max-width: 1080px; width: 100%; margin: 0 auto; }
-.more h2 { margin: 0; font: 500 clamp(22px, 2.6vw, 34px)/1.1 var(--display); letter-spacing: -.012em; }
-.more .sub { margin: 8px 0 0; color: var(--ink2); }
-.steps { list-style: none; margin: clamp(20px, 4.5vh, 48px) 0 0; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
-.steps li { border-radius: 12px; background: var(--stage); padding: 16px 16px 18px; }
-.steps .n { font: 400 11px/1 var(--mono); color: var(--ink3); }
-.steps b { display: block; margin-top: clamp(16px, 4vh, 44px); font-weight: 500; }
-.steps span { display: block; margin-top: 4px; font-size: 13.5px; line-height: 1.45; color: var(--ink2); }
-.faq { margin-top: clamp(20px, 4.5vh, 48px); display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 28px; }
-.faq div { border-top: 1px solid var(--hair); padding-top: 12px; }
-.faq b { display: block; font-weight: 500; font-size: 13.5px; }
-.faq span { display: block; margin-top: 3px; font-size: 13px; line-height: 1.45; color: var(--ink2); }
+footer { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: clamp(32px, 6vh, 56px) clamp(16px, 2.4vw, 28px) 22px; font-size: 13px; color: var(--ink2); }
+footer nav { display: flex; gap: 22px; }
+footer a:hover { color: var(--ink); }
 
-.copied { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 8px); opacity: 0; height: 32px; padding: 0 12px; border-radius: 8px; background: var(--ink); color: var(--paper); font-size: 13px; display: flex; align-items: center; transition: opacity .2s ease, transform .25s var(--slide); pointer-events: none; z-index: 2; }
-.copied.on { opacity: 1; transform: translate(-50%, 0); }
-
-/* Small screens: same two panels, tighter. */
-@media (max-width: 900px) {
-  .steps { grid-template-columns: 1fr 1fr; }
-  .steps li:last-child { grid-column: span 2; }
-  .steps b { margin-top: 10px; }
-  .faq { grid-template-columns: 1fr 1fr; }
-}
-@media (max-width: 560px) {
-  header { height: 56px; }
+@media (max-width: 600px) {
   h1 br { display: none; }
-  .links a.gh { display: none; }
-  .prompt { width: 100%; }
-  .actions .btn.big { flex: 1; justify-content: center; }
-  .steps { gap: 8px; margin-top: 16px; }
-  .steps li { padding: 11px 12px 12px; }
-  .steps span { font-size: 12.5px; }
-  .faq { margin-top: 16px; gap: 10px 16px; }
-  .faq span { font-size: 12px; }
-  .foot span:last-child { display: none; }
+  .cta { flex-direction: column; width: 100%; max-width: 360px; }
+  .window { border-radius: 10px; }
+  footer { flex-direction: column-reverse; }
 }
-/* Only if a screen is genuinely too short, let the explanation scroll rather than clip. */
-@media (max-height: 640px), (max-width: 560px) and (max-height: 780px) { .more .body { justify-content: flex-start; overflow-y: auto; padding-bottom: 8px; } }
-@media (prefers-reduced-motion: reduce) { .track, .panel { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .window { animation: none; } }
 </style>
 </head>
 <body>
-<div class="viewport">
-  <div class="track">
-
-    <main class="panel home" aria-hidden="false">
-      <header>
-        <a class="brand" href="/"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M13 7H8v18h5" fill="none" stroke="currentColor" stroke-width="2.6"/><circle cx="19.5" cy="16" r="3" fill="currentColor"/></svg>Margin</a>
-        <nav class="links"><button class="ghost" data-go="how" type="button">How it works</button><a class="gh" href="https://github.com/luis-soma/margin">GitHub</a></nav>
-      </header>
-
-      <div class="intro">
-        <h1>Document your design process <br>while you work.</h1>
-        <p class="lead">Double-press ⌘ on what you’re working on, add one line about why, and Margin keeps it in an archive of your whole project.</p>
-      </div>
-
-      <div class="actions">
-        <div class="prompt" title="Paste this to Claude Code, Codex or any coding agent">
-          <code id="prompt"><b>Install Margin</b> by following https://raw.githubusercontent.com/luis-soma/margin/main/INSTALL.md</code>
-          <button class="btn ink" id="copy" type="button"><svg viewBox="0 0 14 14" aria-hidden="true"><rect x="4.5" y="4.5" width="8" height="8" rx="1.8" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M9.5 2.5V2a1 1 0 0 0-1-1H2.5a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h.5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>Copy for your agent</button>
-        </div>
-        <a class="btn line big" href="https://github.com/luis-soma/margin/releases/latest/download/Margin.dmg"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1.5v7m0 0L4.2 5.7M7 8.5l2.8-2.8M2 12h10" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Download for Mac</a>
-      </div>
-
-      <div class="stage">
-        <video class="film" src="{{ASSETS}}media/margin-capture.mp4" poster="{{ASSETS}}media/margin-capture.jpg" autoplay muted loop playsinline preload="auto" aria-label="Selecting a Figma frame, double-pressing ⌘, typing one line about why and pressing return"></video>
-      </div>
-
-      <div class="foot"><span>Free and open source · macOS 13 or later</span><span>Luis Somasundaram, Edna Ho and Sarah Kwakkelaar · Winner, SVSD Design Competition 2026</span></div>
-    </main>
-
-    <section class="panel more" aria-hidden="true">
-      <header>
-        <button class="ghost" data-go="home" type="button"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M7.5 2.5 4 6l3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Back</button>
-        <a class="btn ink" href="https://github.com/luis-soma/margin/releases/latest/download/Margin.dmg">Download for Mac</a>
-      </header>
-
-      <div class="body">
-        <h2>How Margin works</h2>
-        <p class="sub">One gesture to keep the work, one line to keep the reason.</p>
-
-        <ol class="steps">
-          <li><div class="n">01</div><b>Capture</b><span>Double-press ⌘ on a Figma frame, a website, a selection or any part of the screen.</span></li>
-          <li><div class="n">02</div><b>Add the why</b><span>A small card asks for one line, typed or spoken. Esc keeps just the capture.</span></li>
-          <li><div class="n">03</div><b>Keep documenting</b><span>Reminder asks after a quiet stretch. Automatic keeps a capture when your design moves on.</span></li>
-          <li><div class="n">04</div><b>Read it back</b><span>Zoom the timeline from close-up to big picture. Themes suggests groups and you decide what they mean.</span></li>
-          <li><div class="n">05</div><b>Hand it off</b><span>Your project as a folder a coding agent can read: the story by day, your decisions and every capture.</span></li>
-        </ol>
-
-        <div class="faq">
-          <div><b>Is it free?</b><span>Yes. Margin is free and open source.</span></div>
-          <div><b>Where do captures live?</b><span>On your Mac, in Margin’s own folder, not in iCloud.</span></div>
-          <div><b>Does it use AI?</b><span>Only with your own API key, and only once you turn it on.</span></div>
-          <div><b>Why the security prompt?</b><span>Margin isn’t notarized yet. Allow it once in Privacy &amp; Security.</span></div>
-        </div>
-      </div>
-    </section>
-
+<header>
+  <div class="brand">
+    <a href="/"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M13 7H8v18h5" fill="none" stroke="currentColor" stroke-width="2.8"/><circle cx="19.5" cy="16" r="3.2" fill="currentColor"/></svg>margin</a>
+    <span class="pill">v0.4.0</span>
   </div>
-</div>
-<div class="copied" id="copied" role="status">Copied. Paste it to your agent.</div>
-<script>
-  const body = document.body, home = document.querySelector('.home'), more = document.querySelector('.more');
-  function go(where) {
-    const how = where === 'how';
-    body.classList.toggle('how', how);
-    home.setAttribute('aria-hidden', how); more.setAttribute('aria-hidden', !how);
-    try { history.replaceState(null, '', how ? '#how' : location.pathname); } catch (e) {}
-  }
-  document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
-  addEventListener('keydown', e => { if (e.key === 'Escape' && body.classList.contains('how')) go('home'); });
-  if (location.hash === '#how') go('how');
+  <a class="nav" href="https://github.com/luis-soma/margin">GitHub</a>
+</header>
 
-  const btn = document.getElementById('copy'), toast = document.getElementById('copied');
-  btn.addEventListener('click', async () => {
-    const text = document.getElementById('prompt').textContent;
-    try { await navigator.clipboard.writeText(text); } catch (e) {
-      const r = document.createRange(); r.selectNodeContents(document.getElementById('prompt'));
-      const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.execCommand('copy'); s.removeAllRanges();
-    }
-    toast.classList.add('on'); clearTimeout(btn._t); btn._t = setTimeout(() => toast.classList.remove('on'), 1600);
+<main>
+  <h1>Document your design <br>process while you work</h1>
+  <p class="sub">Double-press ⌘ on whatever you’re working on and add one line about why. Margin keeps the story of your project.</p>
+  <div class="cta">
+    <a class="btn dark" href="https://github.com/luis-soma/margin/releases/latest/download/Margin.dmg"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8m0 0L5 7m3 3 3-3M2.5 13.5h11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Download for Mac</a>
+    <button class="btn light" id="copy" type="button" title="Install Margin by following https://raw.githubusercontent.com/luis-soma/margin/main/INSTALL.md"><span class="was">Copy agent prompt</span><span class="now" aria-hidden="true">Copied</span></button>
+  </div>
+
+  <div class="window">
+    <video src="{{ASSETS}}media/margin-capture-screen.mp4" poster="{{ASSETS}}media/margin-capture-screen.jpg" autoplay muted loop playsinline preload="auto" aria-label="Selecting a Figma frame, double-pressing ⌘, typing one line about why and pressing return"></video>
+  </div>
+</main>
+
+<footer>
+  <span>Free and open source, for macOS 13 or later. By Luis Somasundaram, Edna Ho and Sarah Kwakkelaar.</span>
+  <nav><a href="https://github.com/luis-soma/margin/blob/main/INSTALL.md">Install guide</a><a href="https://github.com/luis-soma/margin/releases">Releases</a></nav>
+</footer>
+
+<script>
+  const copy = document.getElementById('copy');
+  copy.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(copy.title); } catch (e) { return; }
+    copy.classList.add('done'); clearTimeout(copy.t); copy.t = setTimeout(() => copy.classList.remove('done'), 1600);
   });
 </script>
 </body>
