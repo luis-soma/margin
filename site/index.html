@@ -10,47 +10,49 @@
 <meta name="color-scheme" content="light">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23111'/%3E%3Cpath d='M13 8H9v16h4' fill='none' stroke='%23fff' stroke-width='2.4'/%3E%3Ccircle cx='19' cy='16' r='2.8' fill='%23fff'/%3E%3C/svg%3E">
 <style>
-/* One message, two buttons, the real app. Nothing else. */
+/* One screen, no scroll: one message, two buttons, the real app on a MacBook. */
+@font-face { font-family: "Mona"; src: url({{ASSETS}}fonts/MonaSans-Regular.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Mona"; src: url({{ASSETS}}fonts/MonaSans-Medium.woff2) format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Mona Display"; src: url({{ASSETS}}fonts/MonaSansDisplay-Medium.woff2) format("woff2"); font-weight: 500; font-display: swap; }
 :root {
-  --ink: #000; --ink2: rgba(0,0,0,.58); --ink3: rgba(0,0,0,.42);
-  --glass: rgba(255,255,255,.62); --glass-hover: rgba(255,255,255,.9);
-  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
-  --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+  --ink: #111; --ink2: rgba(17,17,17,.58); --ink3: rgba(17,17,17,.42);
+  --glass: rgba(255,255,255,.66); --glass-hover: rgba(255,255,255,.95);
+  --read: "Mona", ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --display: "Mona Display", var(--read);
   --ease: cubic-bezier(.22, .8, .2, 1);
 }
 * { box-sizing: border-box; }
-html { background: #efefed; }
+html, body { height: 100%; margin: 0; overflow: hidden; }
 body {
-  margin: 0; min-height: 100vh; color: var(--ink); font: 400 15px/1.45 var(--sans); -webkit-font-smoothing: antialiased;
+  color: var(--ink); font: 400 15px/1.45 var(--read); -webkit-font-smoothing: antialiased;
   /* A quiet, neutral light: brighter at the top, settling into grey */
   background:
     radial-gradient(120% 70% at 50% -10%, #fff 0%, rgba(255,255,255,0) 60%),
-    radial-gradient(60% 50% at 85% 70%, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 70%),
+    radial-gradient(60% 50% at 85% 75%, rgba(255,255,255,.5) 0%, rgba(255,255,255,0) 70%),
     linear-gradient(#f7f7f6, #ececea);
-  background-attachment: fixed;
   display: flex; flex-direction: column;
 }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; }
 :focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 
-header { display: flex; align-items: center; justify-content: space-between; padding: 18px clamp(16px, 2.4vw, 28px); }
+header { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 16px clamp(16px, 2.4vw, 28px); }
 .brand { display: flex; align-items: center; gap: 10px; }
-.brand a { display: flex; align-items: center; gap: 7px; font: 700 17px/1 var(--display); letter-spacing: -.01em; }
-.brand svg { width: 20px; height: 20px; }
+.brand a { display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 16px; }
+.brand svg { width: 21px; height: 21px; }
 .pill { height: 22px; padding: 0 9px; border-radius: 999px; background: var(--glass); display: inline-flex; align-items: center; font-size: 12px; font-weight: 500; color: var(--ink2); }
-.nav { height: 40px; padding: 0 16px; border-radius: 999px; background: var(--glass); display: inline-flex; align-items: center; font-size: 15px; font-weight: 500; transition: background .15s ease; }
+.nav { height: 38px; padding: 0 16px; border-radius: 999px; background: var(--glass); display: inline-flex; align-items: center; font-size: 14px; font-weight: 500; transition: background .15s ease; }
 .nav:hover { background: var(--glass-hover); }
 
-main { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; padding: clamp(20px, 5vh, 56px) 16px 0; }
-h1 { margin: 0; font: 700 clamp(38px, 4.6vw, 60px)/.96 var(--display); letter-spacing: -.025em; text-wrap: balance; }
-.sub { margin: 18px 0 0; max-width: 30em; font-size: clamp(16px, 1.4vw, 19px); line-height: 1.45; color: var(--ink2); text-wrap: balance; }
-.cta { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 28px; }
-.btn { position: relative; height: 52px; padding: 0 26px; border: 0; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; gap: 9px; font-size: 16px; font-weight: 500; cursor: pointer; transition: background .15s ease, transform .12s ease; }
+main { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; text-align: center; padding: clamp(4px, 3vh, 40px) 16px 0; }
+h1 { margin: 0; font: 500 clamp(32px, 4.2vw, 56px)/1.02 var(--display); letter-spacing: -.022em; text-wrap: balance; }
+.sub { margin: 14px 0 0; max-width: 30em; font-size: clamp(15px, 1.3vw, 18px); line-height: 1.45; color: var(--ink2); text-wrap: balance; }
+.cta { flex: none; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: clamp(16px, 3vh, 28px); }
+.btn { position: relative; height: 48px; padding: 0 24px; border: 0; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; gap: 9px; font-size: 15px; font-weight: 500; cursor: pointer; transition: background .15s ease, transform .12s ease; }
 .btn:active { transform: scale(.97); }
-.btn svg { width: 16px; height: 16px; }
+.btn svg { width: 15px; height: 15px; }
 .btn.dark { background: var(--ink); color: #fff; }
-.btn.dark:hover { background: #262626; }
+.btn.dark:hover { background: #2a2a2a; }
 .btn.light { background: var(--glass); }
 .btn.light:hover { background: var(--glass-hover); }
 /* "Copied" replaces the label in place, so the button never changes width */
@@ -58,52 +60,39 @@ h1 { margin: 0; font: 700 clamp(38px, 4.6vw, 60px)/.96 var(--display); letter-sp
 .btn .was { transition: opacity .15s ease; }
 .btn.done .now { opacity: 1; } .btn.done .was { opacity: 0; }
 
-/* The app, floating */
-.window { width: min(1080px, 100%); margin-top: clamp(36px, 7vh, 72px); border-radius: 14px; overflow: hidden; background: #fff;
-  box-shadow: 0 0 0 .5px rgba(0,0,0,.14), 0 40px 90px -30px rgba(0,0,0,.35), 0 12px 30px -12px rgba(0,0,0,.12);
-  animation: rise 1s var(--ease) .1s both; }
-.window video { display: block; width: 100%; height: auto; aspect-ratio: 1920 / 1246; }
+/* The real app on a display-only MacBook, running off the bottom of the screen */
+.stage { flex: 1; min-height: 0; width: 100%; margin-top: clamp(16px, 4vh, 44px); display: flex; align-items: flex-end; justify-content: center; }
+.stage video { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center bottom; mix-blend-mode: multiply; animation: rise 1s var(--ease) .1s backwards; }
+@media (max-aspect-ratio: 4/5) { .stage video { object-fit: cover; object-position: 50% 100%; } }
 @keyframes rise { from { opacity: 0; transform: translateY(24px); } }
-
-footer { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: clamp(32px, 6vh, 56px) clamp(16px, 2.4vw, 28px) 22px; font-size: 13px; color: var(--ink2); }
-footer nav { display: flex; gap: 22px; }
-footer a:hover { color: var(--ink); }
 
 @media (max-width: 600px) {
   h1 br { display: none; }
   .cta { flex-direction: column; width: 100%; max-width: 360px; }
-  .window { border-radius: 10px; }
-  footer { flex-direction: column-reverse; }
 }
-@media (prefers-reduced-motion: reduce) { .window { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .stage video { animation: none; } }
 </style>
 </head>
 <body>
 <header>
   <div class="brand">
-    <a href="/"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M13 7H8v18h5" fill="none" stroke="currentColor" stroke-width="2.8"/><circle cx="19.5" cy="16" r="3.2" fill="currentColor"/></svg>margin</a>
+    <a href="/"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M13 7H8v18h5" fill="none" stroke="currentColor" stroke-width="2.6"/><circle cx="19.5" cy="16" r="3" fill="currentColor"/></svg>Margin</a>
     <span class="pill">v0.4.0</span>
   </div>
   <a class="nav" href="https://github.com/luis-soma/margin">GitHub</a>
 </header>
 
 <main>
-  <h1>Document your design <br>process while you work</h1>
-  <p class="sub">Double-press ⌘ on whatever you’re working on and add one line about why. Margin keeps the story of your project.</p>
+  <h1>Document your design process <br>while you work</h1>
+  <p class="sub">Double-press ⌘ on whatever you’re working on and add one line about why. Free and open source for your Mac.</p>
   <div class="cta">
     <a class="btn dark" href="https://github.com/luis-soma/margin/releases/latest/download/Margin.dmg"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8m0 0L5 7m3 3 3-3M2.5 13.5h11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Download for Mac</a>
     <button class="btn light" id="copy" type="button" title="Install Margin by following https://raw.githubusercontent.com/luis-soma/margin/main/INSTALL.md"><span class="was">Copy agent prompt</span><span class="now" aria-hidden="true">Copied</span></button>
   </div>
-
-  <div class="window">
-    <video src="{{ASSETS}}media/margin-capture-screen.mp4" poster="{{ASSETS}}media/margin-capture-screen.jpg" autoplay muted loop playsinline preload="auto" aria-label="Selecting a Figma frame, double-pressing ⌘, typing one line about why and pressing return"></video>
+  <div class="stage">
+    <video src="{{ASSETS}}media/margin-capture.mp4" poster="{{ASSETS}}media/margin-capture.jpg" autoplay muted loop playsinline preload="auto" aria-label="Selecting a Figma frame, double-pressing ⌘, typing one line about why and pressing return"></video>
   </div>
 </main>
-
-<footer>
-  <span>Free and open source, for macOS 13 or later. By Luis Somasundaram, Edna Ho and Sarah Kwakkelaar.</span>
-  <nav><a href="https://github.com/luis-soma/margin/blob/main/INSTALL.md">Install guide</a><a href="https://github.com/luis-soma/margin/releases">Releases</a></nav>
-</footer>
 
 <script>
   const copy = document.getElementById('copy');
