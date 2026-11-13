@@ -14,9 +14,14 @@
 @font-face { font-family: "Mona"; src: url({{ASSETS}}fonts/MonaSans-Regular.woff2) format("woff2"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "Mona"; src: url({{ASSETS}}fonts/MonaSans-Medium.woff2) format("woff2"); font-weight: 500; font-display: swap; }
 @font-face { font-family: "Mona Display"; src: url({{ASSETS}}fonts/MonaSansDisplay-Medium.woff2) format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Geist Mono"; src: url({{ASSETS}}fonts/GeistMono-Regular.woff2) format("woff2"); font-weight: 400; font-display: swap; }
 :root {
-  --ink: #111; --ink2: rgba(17,17,17,.58); --ink3: rgba(17,17,17,.42);
-  --glass: rgba(255,255,255,.66); --glass-hover: rgba(255,255,255,.95);
+  /* Margin's own tokens (Theme.swift): one neutral ramp, ink controls, 8 pt corners */
+  --paper: #fff; --ink: #111; --ink2: rgba(17,17,17,.6); --ink3: rgba(17,17,17,.4);
+  --hair: rgba(17,17,17,.08); --fill: rgba(17,17,17,.04); --fill-hover: rgba(17,17,17,.06);
+  --control: 8px; --chip: 4px;
+  --card-shadow: 0 1px 2px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.06);
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
   --read: "Mona", ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
   --display: "Mona Display", var(--read);
   --ease: cubic-bezier(.22, .8, .2, 1);
@@ -40,21 +45,26 @@ header { flex: none; display: flex; align-items: center; justify-content: space-
 .brand { display: flex; align-items: center; gap: 10px; }
 .brand a { display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 16px; }
 .brand svg { width: 21px; height: 21px; }
-.pill { height: 22px; padding: 0 9px; border-radius: 999px; background: var(--glass); display: inline-flex; align-items: center; font-size: 12px; font-weight: 500; color: var(--ink2); }
-.nav { height: 38px; padding: 0 16px; border-radius: 999px; background: var(--glass); display: inline-flex; align-items: center; font-size: 14px; font-weight: 500; transition: background .15s ease; }
-.nav:hover { background: var(--glass-hover); }
+/* The version is data, so it is set in Geist Mono on a chip */
+.pill { height: 20px; padding: 0 6px; border-radius: var(--chip); background: var(--fill); display: inline-flex; align-items: center; font: 400 11px/1 var(--mono); color: var(--ink2); }
+/* A header tool: no fill at rest, the fill on hover */
+.nav { height: 32px; padding: 0 12px; border-radius: var(--control); display: inline-flex; align-items: center; font-size: 14px; font-weight: 500; color: var(--ink2); transition: background .12s ease-out, color .12s ease-out; }
+.nav:hover { background: var(--fill-hover); color: var(--ink); }
 
 main { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; text-align: center; padding: clamp(4px, 3vh, 40px) 16px 0; }
 h1 { margin: 0; font: 500 clamp(32px, 4.2vw, 56px)/1.02 var(--display); letter-spacing: -.022em; text-wrap: balance; }
 .sub { margin: 14px 0 0; max-width: 30em; font-size: clamp(15px, 1.3vw, 18px); line-height: 1.45; color: var(--ink2); text-wrap: balance; }
 .cta { flex: none; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: clamp(16px, 3vh, 28px); }
-.btn { position: relative; height: 48px; padding: 0 24px; border: 0; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; gap: 9px; font-size: 15px; font-weight: 500; cursor: pointer; transition: background .15s ease, transform .12s ease; }
+/* Margin's buttons: 8 pt continuous corners, Mona Sans medium, a press to 0.97 */
+.btn { position: relative; height: 40px; padding: 0 16px; border: 0; border-radius: var(--control); display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: 500 14px/1 var(--read); cursor: pointer; transition: background-color .12s ease-out, opacity .12s ease-out, transform .1s ease-out; }
 .btn:active { transform: scale(.97); }
-.btn svg { width: 15px; height: 15px; }
-.btn.dark { background: var(--ink); color: #fff; }
-.btn.dark:hover { background: #2a2a2a; }
-.btn.light { background: var(--glass); }
-.btn.light:hover { background: var(--glass-hover); }
+.btn svg { width: 14px; height: 14px; }
+/* Primary: ink, words reversed out; dims a touch on hover */
+.btn.dark { background: var(--ink); color: var(--paper); }
+.btn.dark:hover { opacity: .86; }
+/* Secondary: a floating control, white with a hairline and the card shadow */
+.btn.light { background: var(--paper); color: var(--ink); box-shadow: inset 0 0 0 1px var(--hair), var(--card-shadow); }
+.btn.light:hover { background: linear-gradient(var(--fill), var(--fill)) var(--paper); }
 /* "Copied" replaces the label in place, so the button never changes width */
 .btn .now { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .15s ease; }
 .btn .was { transition: opacity .15s ease; }
@@ -68,7 +78,7 @@ h1 { margin: 0; font: 500 clamp(32px, 4.2vw, 56px)/1.02 var(--display); letter-s
 
 @media (max-width: 600px) {
   h1 br { display: none; }
-  .cta { flex-direction: column; width: 100%; max-width: 360px; }
+  .cta { flex-direction: column; width: 100%; max-width: 360px; gap: 8px; }
 }
 @media (prefers-reduced-motion: reduce) { .stage video { animation: none; } }
 </style>
