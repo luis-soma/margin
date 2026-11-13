@@ -73,7 +73,7 @@ h1 { margin: 0; font: 500 clamp(32px, 4.2vw, 56px)/1.02 var(--display); letter-s
 /* Agent marks, if their files are in media/agents: drawn black, side by side */
 .agents { display: inline-flex; gap: 5px; }
 .agents:empty { display: none; }
-.agents img { width: 15px; height: 15px; object-fit: contain; filter: brightness(0); }
+.agents img { width: 15px; height: 15px; object-fit: contain; }
 
 /* The team, small, at the very bottom */
 .team { flex: none; padding: 10px 16px 14px; text-align: center; font-size: 12px; color: var(--ink3); }
@@ -107,14 +107,14 @@ h1 { margin: 0; font: 500 clamp(32px, 4.2vw, 56px)/1.02 var(--display); letter-s
   <p class="sub">Double-press ⌘ on whatever you’re working on and add one line about why. Free and open source for your Mac.</p>
   <div class="cta">
     <a class="btn dark" href="https://github.com/luis-soma/margin/releases/latest/download/Margin.dmg"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8m0 0L5 7m3 3 3-3M2.5 13.5h11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Download for Mac</a>
-    <button class="btn light" id="copy" type="button" data-prompt="Install Margin by following https://raw.githubusercontent.com/luis-soma/margin/main/INSTALL.md. Then read https://raw.githubusercontent.com/luis-soma/margin/main/README.md and explain to me what Margin can do and how to set it up, step by step."><span class="was"><span class="agents" aria-hidden="true"><img src="{{ASSETS}}media/agents/claude.svg" alt="" onerror="this.remove()"><img src="{{ASSETS}}media/agents/codex.svg" alt="" onerror="this.remove()"><img src="{{ASSETS}}media/agents/cursor.svg" alt="" onerror="this.remove()"></span>Copy agent prompt</span><span class="now" aria-hidden="true">Copied</span></button>
+    <button class="btn light" id="copy" type="button" data-prompt="Install Margin by following https://raw.githubusercontent.com/luis-soma/margin/main/INSTALL.md. Then read https://raw.githubusercontent.com/luis-soma/margin/main/README.md and explain to me what Margin can do and how to set it up, step by step."><span class="was"><span class="agents" aria-hidden="true"><img src="{{ASSETS}}media/agents/claude.png" alt="" onerror="this.remove()"><img src="{{ASSETS}}media/agents/codex.png" alt="" onerror="this.remove()"><img src="{{ASSETS}}media/agents/cursor.png" alt="" onerror="this.remove()"></span>Copy agent prompt</span><span class="now" aria-hidden="true">Copied</span></button>
   </div>
   <div class="stage">
     <video src="{{ASSETS}}media/margin-capture.mp4" poster="{{ASSETS}}media/margin-capture.jpg" autoplay muted loop playsinline preload="auto" aria-label="Selecting a Figma frame, double-pressing ⌘, typing one line about why and pressing return"></video>
   </div>
 </main>
 
-<footer class="team">By <a href="https://luissoma.com">Luis Somasundaram</a>, <a href="https://ednaho.com">Edna Ho</a> and <a href="https://sarah-mei.com">Sarah Kwakkelaar</a></footer>
+<footer class="team">By <a href="https://ednaho.com">Edna Ho</a>, <a href="https://sarah-mei.com">Sarah Kwakkelaar</a> and <a href="https://luissoma.com">Luis Somasundaram</a></footer>
 
 <script>
   const copy = document.getElementById('copy');
