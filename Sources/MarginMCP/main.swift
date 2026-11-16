@@ -73,6 +73,18 @@ let tools: [[String: Any]] = [
         ],
     ],
     [
+        "name": "margin_about",
+        "description": "Sets a Margin project's About text: what the project is, who it's for, what the designer is trying to find out. Ask, the hand off and Claude read it. Replaces the text; margin_project shows the current one, and the answer returns what it was before.",
+        "inputSchema": [
+            "type": "object",
+            "properties": [
+                "project": ["type": "string", "description": "The Margin project's name."],
+                "about": ["type": "string", "description": "The full About text, a few short paragraphs at most."],
+            ],
+            "required": ["project", "about"],
+        ],
+    ],
+    [
         "name": "margin_add",
         "description": "Adds captures to a Margin project's timeline, each at the date it happened. Up to 20 per call, oldest first. A project that doesn't exist yet is made. Margin fetches pictures itself: Figma frames from figma_url, pictures from image_url, websites from link. Captures already in the project are skipped.",
         "inputSchema": [
@@ -153,6 +165,11 @@ func runTool(_ name: String, _ arguments: [String: Any]) -> [String: Any] {
         var components = URLComponents(url: base.appendingPathComponent("margin/project"), resolvingAgainstBaseURL: false)!
         components.queryItems = [URLQueryItem(name: "name", value: arguments["name"] as? String ?? "")]
         return call(components.url!).map { text($0) } ?? text("Margin didn't answer.", isError: true)
+    case "margin_about":
+        guard let answer = call(base.appendingPathComponent("margin/about"), method: "POST", body: arguments, timeout: 30) else {
+            return text("Margin didn't answer.", isError: true)
+        }
+        return text(answer, isError: answer["error"] != nil)
     case "margin_add":
         guard let answer = call(base.appendingPathComponent("margin/captures"), method: "POST", body: arguments, timeout: 240) else {
             return text("Margin didn't answer in time. Some captures may have been added: check the project with margin_project before trying again.", isError: true)

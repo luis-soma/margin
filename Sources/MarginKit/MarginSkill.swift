@@ -17,7 +17,7 @@ public enum MarginSkill {
 
 Turn what you know about this work into a process archive in Margin: what was explored, made, referenced and decided, each at the time it happened, so the designer can see how the project got here.
 
-This needs Margin's tools (`margin_projects`, `margin_project`, `margin_add`). They come from Margin on the designer's Mac once it's connected (Margin › Settings › Claude app › Connect, then reopen Claude) and Margin is open. If the tools aren't there, say so in one line and stop: don't write the archive as a document instead.
+This needs Margin's tools (`margin_projects`, `margin_project`, `margin_add`, `margin_about`). They come from Margin on the designer's Mac once it's connected (Margin › Settings › Claude app › Connect, then reopen Claude) and Margin is open. If the tools aren't there, say so in one line and stop: don't write the archive as a document instead.
 
 ## 1. Find the Margin project
 - Use the project the designer named. If they didn't, call `margin_projects` and pick the one that matches this work; if none does, ask once, or use a short name for the work (a new project is made by adding to it).
@@ -55,7 +55,12 @@ Call `margin_add` with up to 20 captures at a time, oldest first. For each:
 - `alternatives` for decisions: what else was considered.
 - `source`: where it came from ("Claude chat", "Figma", "Claude project file").
 
-## 6. Report back
-Say in two or three lines what you added (how many, over which dates), what you left out and anything that came in without a picture.
+## 6. Update the project's About
+`margin_project` shows the project's About text (`about`): what it is, who it's for, what the designer is trying to find out. Ask, the hand off and Claude read it.
+- Empty: write one from the material with `margin_about`. Two or three short paragraphs: what the project is, who it's for, the question or goal, and where it stands now. Plain words, facts from the material.
+- Already written: it's the designer's text. Keep their words, and only add what's clearly new (a changed goal, the current stage). Say what you changed. If nothing is new, leave it.
+
+## 7. Report back
+Say in two or three lines what you added (how many, over which dates), what you left out, anything that came in without a picture and whether you wrote or changed the About.
 """
 }

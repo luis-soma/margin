@@ -53,6 +53,16 @@ final class ClaudeImport {
                 return HookServer.Response(status: 400, body: Data(#"{"error":"The body isn't JSON."}"#.utf8))
             }
             return .json(await add(json, to: store))
+        case ("POST", "/margin/about"):
+            guard let json = try? JSONSerialization.jsonObject(with: request.body) as? [String: Any],
+                  let project = (json["project"] as? String)?.trimmed, !project.isEmpty,
+                  let about = json["about"] as? String else {
+                return HookServer.Response(status: 400, body: Data(#"{"error":"Send a project and its about text."}"#.utf8))
+            }
+            let before = ProjectNotes.shared.about(project)
+            ProjectNotes.shared.setAbout(about.trimmed, for: project)
+            MarginLog.info("Claude: updated the about text of \(project)")
+            return .json(["saved": true, "before": before])
         default:
             return HookServer.Response(status: 404, body: Data(#"{"error":"No such route."}"#.utf8))
         }
