@@ -18,21 +18,21 @@ struct MarginMenu<Content: View>: View {
     }
 }
 
-/// One row: an icon, the name, a shortcut at the end. 32 tall, the fill
-/// nested in the card's curve on hover.
-struct MarginMenuItem: View {
+/// One row: one of Margin's drawn icons, the name, a shortcut at the end.
+/// 32 tall, the fill nested in the card's curve on hover: the profile
+/// menu's rows.
+struct MarginMenuItem<Icon: View>: View {
     let title: String
-    let symbol: String
     var shortcut: String? = nil
     let action: () -> Void
+    @ViewBuilder let icon: () -> Icon
     @State private var hovering = false
 
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: Theme.Radius.inside(Theme.Radius.card, by: Theme.Space.x1 + 2), style: .continuous)
         Button(action: action) {
             HStack(spacing: Theme.Space.x2 + 2) {
-                Image(systemName: symbol)
-                    .font(.system(size: 12, weight: .regular))
+                icon()
                     .frame(width: 16, height: 16)
                     .foregroundStyle(hovering ? Theme.Palette.ink : Theme.Palette.ink2)
                 Text(title)

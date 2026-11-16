@@ -281,15 +281,15 @@ struct ProjectSidebar: View {
         func run(_ action: @escaping () -> Void) -> () -> Void {
             { withAnimation(Theme.Motion.exit) { menuFor = nil }; action() }
         }
-        return MarginMenu(width: 248) {
+        return MarginMenu(width: 236) {
             if let projectSettings {
-                MarginMenuItem(title: "Project settings", symbol: "slider.horizontal.3", shortcut: "⌘I", action: run { projectSettings(name) })
+                MarginMenuItem(title: "Project settings", shortcut: "⌘I", action: run { projectSettings(name) }) { SettingsGlyph() }
                 MarginMenuRule()
             }
-            MarginMenuItem(title: isPinned ? "Unpin" : "Pin", symbol: isPinned ? "pin.slash" : "pin", action: run { togglePin(name) })
-            MarginMenuItem(title: "Choose icon…", symbol: "photo", action: run { icons.choose(for: name, store: store) })
+            MarginMenuItem(title: isPinned ? "Unpin" : "Pin", action: run { togglePin(name) }) { PinGlyph(crossed: isPinned) }
+            MarginMenuItem(title: "Choose icon…", action: run { icons.choose(for: name, store: store) }) { PictureGlyph() }
             if icons.hasOwn(name, store: store) {
-                MarginMenuItem(title: "Use a picture from the project", symbol: "arrow.uturn.backward", action: run { icons.automatic(for: name, store: store) })
+                MarginMenuItem(title: "Use a project picture", action: run { icons.automatic(for: name, store: store) }) { CropGlyph() }
             }
         }
     }
@@ -704,6 +704,65 @@ struct SettingsGlyph: View {
                 context.fill(knob, with: .color(Theme.Palette.paper))
                 context.stroke(knob, with: .foreground, style: style)
             }
+        }
+    }
+}
+
+/// Pin: a pushpin, its head, its bar and its point. Crossed out to unpin.
+struct PinGlyph: View {
+    var crossed = false
+    var body: some View {
+        Canvas { context, size in
+            let u = size.width / 16
+            let style = StrokeStyle(lineWidth: glyphLine, lineCap: .round, lineJoin: .round)
+            var pin = Path()
+            pin.move(to: CGPoint(x: 6 * u, y: 2.5 * u)); pin.addLine(to: CGPoint(x: 10 * u, y: 2.5 * u))
+            pin.move(to: CGPoint(x: 6.5 * u, y: 2.5 * u)); pin.addLine(to: CGPoint(x: 6.5 * u, y: 7 * u))
+            pin.move(to: CGPoint(x: 9.5 * u, y: 2.5 * u)); pin.addLine(to: CGPoint(x: 9.5 * u, y: 7 * u))
+            pin.move(to: CGPoint(x: 4 * u, y: 9.5 * u)); pin.addLine(to: CGPoint(x: 6.5 * u, y: 7 * u))
+            pin.addLine(to: CGPoint(x: 9.5 * u, y: 7 * u)); pin.addLine(to: CGPoint(x: 12 * u, y: 9.5 * u))
+            pin.closeSubpath()
+            pin.move(to: CGPoint(x: 8 * u, y: 9.5 * u)); pin.addLine(to: CGPoint(x: 8 * u, y: 14 * u))
+            if crossed {
+                pin.move(to: CGPoint(x: 2.5 * u, y: 2.5 * u)); pin.addLine(to: CGPoint(x: 13.5 * u, y: 13.5 * u))
+            }
+            context.stroke(pin, with: .foreground, style: style)
+        }
+    }
+}
+
+/// A picture: a frame, a sun and a hill.
+struct PictureGlyph: View {
+    var body: some View {
+        Canvas { context, size in
+            let u = size.width / 16
+            let style = StrokeStyle(lineWidth: glyphLine, lineCap: .round, lineJoin: .round)
+            context.stroke(Path(roundedRect: CGRect(x: 2 * u, y: 3 * u, width: 12 * u, height: 10 * u), cornerRadius: 2 * u), with: .foreground, style: style)
+            context.stroke(Path(ellipseIn: CGRect(x: 4.6 * u, y: 5.2 * u, width: 2.4 * u, height: 2.4 * u)), with: .foreground, style: style)
+            var hill = Path()
+            hill.move(to: CGPoint(x: 2.5 * u, y: 12 * u))
+            hill.addLine(to: CGPoint(x: 7 * u, y: 8.5 * u))
+            hill.addLine(to: CGPoint(x: 10 * u, y: 10.5 * u))
+            hill.addLine(to: CGPoint(x: 13.5 * u, y: 8 * u))
+            context.stroke(hill, with: .foreground, style: style)
+        }
+    }
+}
+
+/// A crop: two corner marks around Margin's dot, for the part of a
+/// picture Margin picks.
+struct CropGlyph: View {
+    var body: some View {
+        Canvas { context, size in
+            let u = size.width / 16
+            let style = StrokeStyle(lineWidth: glyphLine, lineCap: .round, lineJoin: .round)
+            var marks = Path()
+            marks.move(to: CGPoint(x: 4.5 * u, y: 1.5 * u)); marks.addLine(to: CGPoint(x: 4.5 * u, y: 11.5 * u))
+            marks.addLine(to: CGPoint(x: 14.5 * u, y: 11.5 * u))
+            marks.move(to: CGPoint(x: 1.5 * u, y: 4.5 * u)); marks.addLine(to: CGPoint(x: 11.5 * u, y: 4.5 * u))
+            marks.addLine(to: CGPoint(x: 11.5 * u, y: 14.5 * u))
+            context.stroke(marks, with: .foreground, style: style)
+            context.fill(Path(ellipseIn: CGRect(x: 7 * u, y: 7 * u, width: 2 * u, height: 2 * u)), with: .foreground)
         }
     }
 }

@@ -533,6 +533,9 @@ struct RepoView: View {
                 if inProject {
                     GranularitySlider(step: stepBinding, steps: TimeScale.allCases.count, live: clustering ? mapDepth : pinchZoom,
                                       continuous: clustering, onValue: { mapDepth = $0 })
+                        // On the sidebar's frosted card, like the switch below.
+                        .padding(.horizontal, Theme.Space.x1)
+                        .background(FloatingSurface(shape: RoundedRectangle(cornerRadius: Theme.Radius.floating, style: .continuous), frosted: true))
                         .tourAnchor("slider")
                         .frame(width: slider)
                         .offset(x: shift)
@@ -1276,13 +1279,15 @@ private struct ModeSwitch: View {
     var body: some View {
         // The same switch as everywhere else, only lifted off the page
         // because it floats.
-        let shape = RoundedRectangle(cornerRadius: Theme.Floating.radius, style: .continuous)
+        // The sidebar's surface: the same frosted card and shadow, the
+        // chosen side a light fill like a chosen row.
+        let shape = RoundedRectangle(cornerRadius: Theme.Radius.floating, style: .continuous)
         HStack(spacing: 0) {
             segment(0, label: "Timeline", help: "Every step, in order") { TimelineGlyph() }
             segment(1, label: "Themes", help: "The big picture, grouped by theme") { ThemesGlyph() }
         }
         .padding(Theme.Floating.padding)
-        .background(ControlSurface(shape: shape))
+        .background(FloatingSurface(shape: shape, frosted: true))
         .animation(Theme.Motion.hover, value: hovered)
         // Changed from elsewhere (the tour): the thumb follows.
         .onChange(of: clustering) { on in
@@ -1303,15 +1308,20 @@ private struct ModeSwitch: View {
         } label: {
             HStack(spacing: 7) {
                 icon().frame(width: Theme.Floating.icon, height: Theme.Floating.icon)
-                Text(label).font(Theme.Typography.ui(Theme.Floating.text))
+                Text(label).font(Theme.Typography.ui(Theme.Floating.text, selected ? .medium : .regular))
             }
-            .foregroundStyle(Theme.Segmented.label(selected, hovered: hovered == index))
+            .foregroundStyle(selected || hovered == index ? Theme.Palette.ink : Theme.Palette.ink2)
             .padding(.leading, Theme.Space.x3 + 2)
             .padding(.trailing, Theme.Space.x4)
             .frame(height: Theme.Floating.segment)
             .background {
                 if selected {
-                    SegmentThumb(radius: Theme.Floating.thumbRadius).matchedGeometryEffect(id: "chip", in: chip)
+                    RoundedRectangle(cornerRadius: Theme.Radius.floating - Theme.Floating.padding, style: .continuous)
+                        .fill(Theme.Palette.fillSelected)
+                        .matchedGeometryEffect(id: "chip", in: chip)
+                } else if hovered == index {
+                    RoundedRectangle(cornerRadius: Theme.Radius.floating - Theme.Floating.padding, style: .continuous)
+                        .fill(Theme.Palette.fillHover.opacity(0.6))
                 }
             }
             .contentShape(Rectangle())
