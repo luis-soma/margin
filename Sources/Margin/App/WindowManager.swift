@@ -73,6 +73,7 @@ final class WindowManager {
             mainMenu.addItem(NSMenuItem()) // app menu placeholder
             NSApp.mainMenu = mainMenu
         }
+        addFilmMenu(to: mainMenu)
         guard mainMenu.item(withTitle: "Edit") == nil else { return }
 
         let edit = NSMenu(title: "Edit")
@@ -87,6 +88,22 @@ final class WindowManager {
 
         let item = NSMenuItem(title: "Edit", action: nil, keyEquivalent: "")
         item.submenu = edit
+        mainMenu.addItem(item)
+    }
+
+    /// Team builds: the film studio, which films Margin for the case study.
+    private func addFilmMenu(to mainMenu: NSMenu) {
+        guard !BuildInfo.isRelease, mainMenu.item(withTitle: "Film") == nil else { return }
+        let film = NSMenu(title: "Film")
+        let studio = FilmStudio.shared
+        for (title, action) in [("Preview Hero Film", #selector(FilmStudio.previewHero)),
+                                ("Record Hero Film", #selector(FilmStudio.recordHero)),
+                                ("Stop Film", #selector(FilmStudio.stopFilm))] {
+            let entry = film.addItem(withTitle: title, action: action, keyEquivalent: "")
+            entry.target = studio
+        }
+        let item = NSMenuItem(title: "Film", action: nil, keyEquivalent: "")
+        item.submenu = film
         mainMenu.addItem(item)
     }
 

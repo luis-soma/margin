@@ -453,12 +453,8 @@ struct CardHost: View {
                     .background {
                         // Still: the card sits on solid white with the card shadow.
                         if settled {
-                            FloatingSurface(shape: shape)
+                            FloatingSurface(shape: shape, solid: true)
                         }
-                    }
-                    .overlay {
-                        shape.strokeBorder(ink.hairline, lineWidth: 1)
-                            .opacity(lined ? 1 : 0)
                     }
             }
         }
@@ -612,11 +608,16 @@ struct CaptureCardView: View {
     var onChoice: ((String?, String) -> Void)? = nil
     let onSave: (String) -> Void
     let onDismiss: () -> Void
+    /// The film studio types the note itself (FilmStudio); the card shows
+    /// it exactly as if it were typed here.
+    var filmText: Binding<String>? = nil
     @State private var choice: String?
     /// Answered or dismissed: ignore further ticks while the card fades out.
     @State private var finished = false
 
     @State private var text = ""
+    /// What's in the field: typed here, or by the film.
+    private var typedText: String { filmText?.wrappedValue ?? text }
     @State private var lastActivity = Date()
     @FocusState private var focused: Bool
     /// Speaking the note: what was typed before, so heard words go after it.
@@ -699,13 +700,21 @@ struct CaptureCardView: View {
             // capture is already saved, so skipping costs nothing.
             HStack(spacing: Theme.Space.x2) {
                 VoiceButton(voice: voice, toggle: toggleVoice)
-                TextField("", text: $text, prompt: Text(voice.listening && text.isEmpty ? "Listening…" : placeholder ?? (prompt == nil ? "Why this?" : "One line")).foregroundColor(ink.muted))
+                TextField("", text: filmText ?? $text, prompt: Text(voice.listening && text.isEmpty ? "Listening…" : placeholder ?? (prompt == nil ? "Why this?" : "One line")).foregroundColor(ink.muted))
                     .textFieldStyle(.plain)
                     .font(Archive.sans(Theme.Typography.body))
                     .foregroundStyle(ink.text)
                     .focused($focused)
                     .onSubmit(submit)
                     .onExitCommand { voice.cancel(); onDismiss() }
+                    // The film studio's pointer clicks into the field.
+                    .background {
+                        if filmText != nil {
+                            GeometryReader { geo in
+                                Color.clear.preference(key: FilmFieldKey.self, value: geo.frame(in: .named(FilmStage.space)))
+                            }
+                        }
+                    }
             }
             .unfoldIn(2)
         }
@@ -762,13 +771,13 @@ struct CaptureCardView: View {
             Spacer(minLength: 8)
             // The key in its little outline, as before: esc, or return once
             // you've typed something.
-            if text.trimmed.isEmpty {
+            if typedText.trimmed.isEmpty {
                 KeyHint(key: "esc", label: "to dismiss", ink: ink)
             } else {
                 KeyHint(key: "return", label: "to save", ink: ink)
             }
         }
-        .animation(Brand.quick, value: text.trimmed.isEmpty)
+        .animation(Brand.quick, value: typedText.trimmed.isEmpty)
     }
 
     @ViewBuilder
@@ -881,8 +890,7 @@ struct CaptureCardView: View {
             .foregroundStyle(ink.text)
             .padding(.horizontal, 7)
             .frame(height: 19)
-            .background(Capsule().fill(ink.surface))
-            .overlay(Capsule().strokeBorder(ink.hairline, lineWidth: 1))
+            .background(RoundedRectangle(cornerRadius: Theme.Radius.tiny, style: .continuous).fill(ink.surface))
             .padding(7)
             .allowsHitTesting(false)
     }
@@ -1169,12 +1177,9 @@ private struct ChoiceChip: View {
                 .frame(height: 26)
                 .foregroundStyle(selected ? Brand.background : Color.primary.opacity(0.85))
                 .background(
-                    RoundedRectangle(cornerRadius: 7, style: .continuous).fill(selected ? Color.primary.opacity(0.88) : Color.primary.opacity(hovering ? 0.07 : 0.0))
+                    RoundedRectangle(cornerRadius: Theme.Radius.chip, style: .continuous).fill(selected ? Color.primary.opacity(0.88) : Color.primary.opacity(hovering ? 0.08 : 0.05))
                 )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 7, style: .continuous).strokeBorder(Color.primary.opacity(selected ? 0 : 0.14), lineWidth: 1)
-                )
-                .contentShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+                .contentShape(RoundedRectangle(cornerRadius: Theme.Radius.chip, style: .continuous))
         }
         .buttonStyle(.plain)
         .onHover { hovering = $0 }
@@ -1193,7 +1198,7 @@ struct KeyHint: View {
                 .font(Theme.Typography.mono(9, .medium))
                 .padding(.horizontal, 5)
                 .frame(height: 17)
-                .overlay(RoundedRectangle(cornerRadius: 4, style: .continuous).strokeBorder(ink.hairline, lineWidth: 1))
+                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.tiny, style: .continuous).strokeBorder(ink.hairline, lineWidth: 1))
             Text(label)
                 .font(Archive.sans(12))
         }
@@ -1238,4 +1243,20 @@ private struct UnfoldIn: ViewModifier {
 
 extension View {
     fileprivate func unfoldIn(_ order: Int) -> some View { modifier(UnfoldIn(order: order)) }
+}
+
+// MARK: - For the film studio
+
+extension CardHost {
+    /// The card's host for FilmStudio, which isn't in this file.
+    static func film(_ stage: CardStage) -> CardHost { CardHost(stage: stage) }
+}
+
+extension CaptureCardView {
+    /// A fresh capture's card for FilmStudio: "Captured", the picture and
+    /// the field, its note typed by the film.
+    static func film(store: EntryStore, entryID: UUID, image: NSImage, text: Binding<String>) -> CaptureCardView {
+        CaptureCardView(store: store, entryID: entryID, image: image, status: "Captured", prompt: nil, detail: nil,
+                        idleTimeout: 100_000, onSave: { _ in }, onDismiss: {}, filmText: text)
+    }
 }

@@ -16,6 +16,13 @@ let package = Package(
             dependencies: ["MarginKit"],
             path: "Sources/Margin"
         ),
+        // margin-mcp: the helper the Claude app starts so a chat can
+        // document a project into Margin. Foundation only.
+        .executableTarget(
+            name: "MarginMCP",
+            dependencies: ["MarginKit"],
+            path: "Sources/MarginMCP"
+        ),
         .testTarget(
             name: "MarginKitTests",
             dependencies: ["MarginKit"],

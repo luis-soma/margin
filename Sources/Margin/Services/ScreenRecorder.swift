@@ -247,8 +247,8 @@ private struct RecordingControls: View {
                     }
                     .padding(.horizontal, 9)
                     .frame(height: 24)
-                    .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).strokeBorder(ink.hairline, lineWidth: 1))
-                    .contentShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                    .background(RoundedRectangle(cornerRadius: Theme.Radius.chip, style: .continuous).fill(ink.hairline))
+                    .contentShape(RoundedRectangle(cornerRadius: Theme.Radius.chip, style: .continuous))
                 }
                 .buttonStyle(.plain)
                 .help("Stop recording (esc, or the Margin shortcut)")
@@ -262,7 +262,6 @@ private struct RecordingControls: View {
         .padding(.trailing, 6)
         .frame(height: Island.pillHeight)
         .background(shape.fill(ink.surface))
-        .overlay(shape.strokeBorder(ink.hairline, lineWidth: 1))
         .shadow(color: .black.opacity(shadow.0), radius: 1.5, y: 1)
         .shadow(color: .black.opacity(shadow.1), radius: 18, y: 8)
         .padding(.top, 6)

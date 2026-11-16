@@ -48,7 +48,7 @@ final class SelectionCapture {
         let bundleID = app.bundleIdentifier ?? ""
         let ax = await Task.detached { SelectionReader.read(pid: pid) }.value
         let axText = ax.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        MarginLog.info("Selection in \(app.localizedName ?? bundleID): AX reports \(ax.reportsSelection ? "\(axText.count) chars" : "nothing"), url \(ax.url?.absoluteString ?? "none")")
+        MarginLog.info("Selection in \(app.localizedName ?? bundleID): AX reports \(ax.reportsSelection ? "\(axText.count) chars" : "nothing") in \(ax.role ?? "?"), url \(ax.url?.absoluteString ?? "none")")
 
         // Google Docs, Sheets and Slides draw their text on a canvas and keep
         // an empty hidden field for the cursor, so Accessibility always says
@@ -67,7 +67,7 @@ final class SelectionCapture {
         let changed = await pasteboard.waitForChange(from: before, timeout: axText.isEmpty && !canvasEditor ? 0.35 : 0.9)
         guard changed else {
             if let url = LinkDetector.url(in: axText) {
-                return .link(url, isCurrentPage: Self.browsers.contains(bundleID) && ax.isInField)
+                return .link(url, isCurrentPage: Self.browsers.contains(bundleID) && ax.isAddressLike)
             }
             return axText.isEmpty ? nil : .text(.plain(ax.text ?? axText, sourceURL: ax.url))
         }
@@ -88,7 +88,7 @@ final class SelectionCapture {
         }
 
         // A single web address: a website capture, not text.
-        let isCurrentPage = Self.browsers.contains(bundleID) && ax.isInField
+        let isCurrentPage = Self.browsers.contains(bundleID) && ax.isAddressLike
         if case .text(let rich)? = clip, let url = LinkDetector.url(in: rich.plain) {
             return .link(url, isCurrentPage: isCurrentPage)
         }

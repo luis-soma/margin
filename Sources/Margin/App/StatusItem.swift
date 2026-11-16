@@ -1,5 +1,6 @@
 import AppKit
 import Combine
+import MarginKit
 import SwiftUI
 
 /// The bracket in the menu bar.
@@ -131,7 +132,11 @@ final class MarginAppDelegate: NSObject, NSApplicationDelegate {
             // Launching (and relaunching after an update) opens the repo.
             DispatchQueue.main.async {
                 Self.closeStrayWindows()
-                if AppModel.shared.wantsOnboarding {
+                // Reopened after an automatic update: back in the menu bar
+                // only, so nothing jumps in front of your work.
+                if CommandLine.arguments.contains("--background") {
+                    MarginLog.info("Updated to build \(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?")")
+                } else if AppModel.shared.wantsOnboarding {
                     AppModel.shared.showOnboarding()
                 } else {
                     AppModel.shared.showRepo()
@@ -139,6 +144,10 @@ final class MarginAppDelegate: NSObject, NSApplicationDelegate {
                     // repo comes back snapped to the right half, as you work.
                     if CommandLine.arguments.contains("--right-half") {
                         AppModel.shared.snapRepoToRightHalf()
+                    }
+                    // Team builds: --film-hero records the case study's hero film.
+                    if !BuildInfo.isRelease, CommandLine.arguments.contains("--film-hero") {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { FilmStudio.shared.recordHero() }
                     }
                 }
             }

@@ -472,6 +472,29 @@ final class TimeZoomModel: ObservableObject {
         offset = clamped(offset - delta)
     }
 
+    /// Ask found something: glide so it sits in the upper part of the view,
+    /// on the same soft curve as the zoom.
+    private var glideTimer: Timer?
+    func glide(toShow id: UUID) {
+        guard let rect = layout(settled).frames[id] else { return }
+        let target = clamped(rect.minY - size.height * 0.24)
+        let from = offset
+        guard abs(target - from) > 2 else { return }
+        glideTimer?.invalidate()
+        let started = Date()
+        let duration = 0.7
+        let timer = Timer(timeInterval: 1.0 / 120, repeats: true) { [weak self] timer in
+            MainActor.assumeIsolated {
+                guard let self else { timer.invalidate(); return }
+                let t = CGFloat(min(1, Date().timeIntervalSince(started) / duration))
+                self.offset = from + (target - from) * Self.ease(t)
+                if t >= 1 { timer.invalidate(); self.glideTimer = nil }
+            }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        glideTimer = timer
+    }
+
     /// Pinching past the closest or farthest scale: the whole page gives a
     /// little, growing or shrinking about your fingers, and springs back
     /// when you let go (Photos does the same).
@@ -516,7 +539,7 @@ final class TimeZoomModel: ObservableObject {
     }
 
     /// Animates to a scale, keeping what's at `anchor` in place.
-    func settle(on level: Int, anchor: CGPoint? = nil) {
+    func settle(on level: Int, anchor: CGPoint? = nil, duration fixed: Double? = nil) {
         let target = min(max(level, 0), TimeScale.allCases.count - 1)
         settled = target
         onSettle?(target)
@@ -530,7 +553,7 @@ final class TimeZoomModel: ObservableObject {
         stopAnimating()
         let started = Date()
         // Eased in and out, no bounce; a little longer for a longer way.
-        let duration = 0.42 + 0.14 * Double(min(abs(to - from), 3) - 1)
+        let duration = fixed ?? 0.42 + 0.14 * Double(min(abs(to - from), 3) - 1)
         let timer = Timer(timeInterval: 1.0 / 120, repeats: true) { [weak self] timer in
             MainActor.assumeIsolated {
                 guard let self else { timer.invalidate(); return }
@@ -606,6 +629,12 @@ struct TimeZoomView: View {
     @State private var canvasUp = false
     @EnvironmentObject private var intelligence: Intelligence
     @EnvironmentObject private var store: EntryStore
+    /// What Ask is showing: answers lit, the rest quiet.
+    @Environment(\.askLook) private var askLook
+    /// The film studio's capture: outlined like an answer you've stepped to.
+    @Environment(\.filmFocus) private var filmFocus
+    @Environment(\.filmTarget) private var filmTarget
+    @Environment(\.filmZoom) private var filmZoom
 
     init(entries: [Entry], level: Binding<Int>, pinchZoom: Binding<CGFloat?> = .constant(nil), interactive: Bool, clustering: Bool = false,
          mapDepth: Binding<CGFloat> = .constant(0)) {
@@ -637,6 +666,27 @@ struct TimeZoomView: View {
         }
         .onAppear { model.onSettle = { level = $0 } }
         .onChange(of: clustering) { on in if on { canvasUp = true } }
+        // Ask found something: bring the first answer into view.
+        .onReceive(NotificationCenter.default.publisher(for: AskModel.reveal)) { note in
+            guard !clustering, let id = note.object as? UUID else { return }
+            model.glide(toShow: id)
+        }
+        // Team builds: the film studio zooms as a slow pinch would, the
+        // slider riding along.
+        .onChange(of: filmZoom) { zoom in
+            guard let target = zoom?.scale else { return }
+            model.settle(on: target, duration: zoom?.duration)
+            let timer = Timer(timeInterval: 1.0 / 60, repeats: true) { timer in
+                MainActor.assumeIsolated {
+                    pinchZoom = model.zoom
+                    if abs(model.zoom - CGFloat(target)) < 0.002 {
+                        timer.invalidate()
+                        pinchZoom = nil
+                    }
+                }
+            }
+            RunLoop.main.add(timer, forMode: .common)
+        }
         // The welcome tour zooms for you: the timeline glides to the scale and
         // the slider rides the very same zoom, frame by frame, like a pinch.
         .onReceive(NotificationCenter.default.publisher(for: OnboardingTour.zoomTo)) { note in
@@ -688,6 +738,8 @@ struct TimeZoomView: View {
                     .opacity(item.opacity)
             }
             ForEach(visible, id: \.0.id) { entry, rect in
+                // The answer you've stepped to: outlined.
+                let answer: Bool = (askLook?.phase == .found && askLook?.current == entry.id) || filmFocus == entry.id
                 ZoomThumb(entry: entry, size: rect.size)
                     .overlay(alignment: .topTrailing) {
                         // Mark top right: where it lives (Figma, a build, a link).
@@ -698,12 +750,33 @@ struct TimeZoomView: View {
                                 .opacity(linkOpacity)
                         }
                     }
+                    // Ask: the answer you're on gets an ink outline, a step outside its edge.
+                    .overlay(
+                        Rectangle()
+                            .strokeBorder(Archive.ink, lineWidth: 1.5)
+                            .padding(-4)
+                            .opacity(answer ? 1 : 0)
+                            .scaleEffect(answer ? 1 : 1.03)
+                            .allowsHitTesting(false)
+                    )
+                    .opacity(askLook?.opacity(entry.id) ?? 1)
+                    .animation(askLook?.motion(entry.id) ?? .easeInOut(duration: 0.3), value: askLook)
+                    // The film studio's pointer needs to know where this capture is.
+                    .background {
+                        if filmTarget == entry.id {
+                            GeometryReader { geo in
+                                Color.clear.preference(key: FilmTargetKey.self, value: geo.frame(in: .named(FilmStage.space)))
+                            }
+                        }
+                    }
                     .offset(x: rect.minX, y: rect.minY - model.offset)
                 if noteOpacity > 0.01 {
                     // Under the picture, as wide as it (rows are justified,
                     // so the picture's edge is the note's edge).
                     DetailNote(entry: entry)
                         .frame(width: max(rect.width, 1), alignment: .leading)
+                        .opacity(askLook?.opacity(entry.id) ?? 1)
+                        .animation(askLook?.motion(entry.id) ?? .easeInOut(duration: 0.3), value: askLook)
                         .offset(x: rect.minX, y: rect.maxY + Archive.Timeline.annotationGap - model.offset)
                         .opacity(noteOpacity)
                         .allowsHitTesting(false)
@@ -885,8 +958,7 @@ struct CornerMark: View {
         }
         .foregroundStyle(Archive.ink)
         .frame(width: 18, height: 18)
-        .background(Archive.paper.opacity(0.88), in: RoundedRectangle(cornerRadius: 3, style: .continuous))
-        .help(help)
+        .background(Archive.paper.opacity(0.88), in: RoundedRectangle(cornerRadius: Theme.Radius.tiny, style: .continuous))
         .allowsHitTesting(false)
     }
 }
@@ -1205,7 +1277,8 @@ private struct ZoomThumb: View {
             }
         }
         .onDisappear { pendingHover?.cancel() }
-        .help(entry.displayTitle)
+        // No hover title: the day scale writes it under the picture, and a
+        // system tooltip here was the one grey tooltip among Margin's ink ones.
     }
 }
 

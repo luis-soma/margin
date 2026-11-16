@@ -146,15 +146,22 @@ private struct SoundBars: View {
 
     var body: some View {
         TimelineView(.animation) { timeline in
-            let t = timeline.date.timeIntervalSinceReferenceDate
+            let t: Double = timeline.date.timeIntervalSinceReferenceDate
             HStack(spacing: 2) {
                 ForEach(0..<4, id: \.self) { i in
-                    let wobble = 0.5 + 0.5 * sin(t * 9 + Double(i) * 1.7)
-                    let h = 3 + (9 * level + 2) * CGFloat(0.35 + 0.65 * wobble)
-                    Capsule().frame(width: 2, height: min(13, h))
+                    Capsule().frame(width: 2, height: Self.height(t: t, bar: i, level: level))
                 }
             }
             .frame(height: 14)
         }
+    }
+
+    /// One bar's height: rising with the voice, a little out of step.
+    private static func height(t: Double, bar: Int, level: CGFloat) -> CGFloat {
+        let phase: Double = t * 9 + Double(bar) * 1.7
+        let wobble: Double = 0.5 + 0.5 * sin(phase)
+        let reach: CGFloat = 9 * level + 2
+        let h: CGFloat = 3 + reach * CGFloat(0.35 + 0.65 * wobble)
+        return min(13, h)
     }
 }

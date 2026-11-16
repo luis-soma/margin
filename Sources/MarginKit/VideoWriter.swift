@@ -22,13 +22,13 @@ public final class VideoWriter {
     private var lastBuffer: CVPixelBuffer?
     public private(set) var frameCount = 0
 
-    public init(url: URL, width: Int, height: Int, frameRate: Int = 30) throws {
+    public init(url: URL, width: Int, height: Int, frameRate: Int = 30, bitRate: Int? = nil) throws {
         self.url = url
         self.width = width
         self.height = height
         try? FileManager.default.removeItem(at: url)
         writer = try AVAssetWriter(outputURL: url, fileType: .mp4)
-        let bitRate = max(2_000_000, min(width * height * 4, 24_000_000))
+        let bitRate = bitRate ?? max(2_000_000, min(width * height * 4, 24_000_000))
         input = AVAssetWriterInput(mediaType: .video, outputSettings: [
             AVVideoCodecKey: AVVideoCodecType.h264,
             AVVideoWidthKey: width,

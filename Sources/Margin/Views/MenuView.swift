@@ -89,7 +89,7 @@ struct MenuView: View {
                         .font(Theme.Typography.ui(11, .medium))
                         .padding(.horizontal, 10)
                         .padding(.vertical, 5)
-                        .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Brand.fill))
+                        .background(RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous).fill(Brand.fill))
                 }
                 .menuStyle(.borderlessButton)
                 .menuIndicator(.hidden)
@@ -371,7 +371,7 @@ struct MenuView: View {
             .menuIndicator(.hidden)
             .fixedSize()
         }
-        .toggleStyle(.switch)
+        .toggleStyle(InkSwitch())
         .controlSize(.mini)
         .font(.system(size: 11))
     }
@@ -517,7 +517,7 @@ struct KindBadge: View {
             .foregroundStyle(.white)
             .padding(.horizontal, 5)
             .padding(.vertical, 2)
-            .background(Capsule().fill(.black.opacity(0.55)))
+            .background(RoundedRectangle(cornerRadius: Theme.Radius.tiny, style: .continuous).fill(.black.opacity(0.55)))
         }
     }
 

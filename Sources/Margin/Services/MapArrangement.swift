@@ -215,6 +215,32 @@ extension ProjectMaps {
         saveArrangements()
     }
 
+    /// Ask, in the Themes view: the whole map sorted again around what you
+    /// asked, named from the answer. Every group counts as yours, so Margin
+    /// won't rename it; Undo brings back the map as it was.
+    func steer(project: String, map: ProjectMap, layout r: TreeLayout.Result, titles: [String: String],
+               replacing: Bool = false) {
+        // Replacing a sorting you haven't kept: Undo still goes to the map before it.
+        if !(replacing && previousArrangement[project] != nil), let before = arrangements[project] {
+            previousArrangement[project] = before
+        }
+        var a = Arrangement(themes: [], patterns: [], themeOf: [:], patternOf: [:], far: r.far, near: r.near,
+                            fit: r.fit, ratio: r.ratio, touched: true, notesRoom: true)
+        for theme in map.themes {
+            a.themes.append(MapGroup(key: theme.key, title: titles[theme.key] ?? "", mine: true,
+                                     label: r.themeLabels[theme.key] ?? MapPoint(x: 0, y: 0)))
+            for id in theme.members { a.themeOf[id] = theme.key }
+        }
+        for pattern in map.patterns {
+            let parent = pattern.parent.flatMap { map.themes.indices.contains($0) ? map.themes[$0].key : nil }
+            a.patterns.append(MapGroup(key: pattern.key, title: titles[pattern.key] ?? "", mine: true, parent: parent,
+                                       label: r.patternLabels[pattern.key] ?? MapPoint(x: 0, y: 0)))
+            for id in pattern.members { a.patternOf[id] = pattern.key }
+        }
+        arrangements[project] = a
+        saveArrangements()
+    }
+
     /// Until you change something, Margin's names follow its model as they
     /// arrive. After that they're left alone.
     func followNames(project: String) {

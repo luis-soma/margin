@@ -46,7 +46,16 @@ struct RepoView: View {
     /// The time scale: 0 a day (with titles and descriptions), 1 the days of
     /// a week, 2 weeks, 3 months. A new key: the earlier ones counted other
     /// scales.
-    @AppStorage("repoTimeScale7") private var step = 0
+    @AppStorage("repoTimeScale7") private var storedStep = 0
+    /// Team builds: the film studio's archive keeps its own scale, so
+    /// filming never changes the one you have open.
+    @Environment(\.filmZoom) private var filmZoom
+    @State private var filmStep = 2
+    private var step: Int {
+        get { filmZoom == nil ? storedStep : filmStep }
+        nonmutating set { if filmZoom == nil { storedStep = newValue } else { filmStep = newValue } }
+    }
+    private var stepBinding: Binding<Int> { Binding(get: { step }, set: { step = $0 }) }
     /// The timeline's zoom while you pinch it (0 day … 3 months), so the
     /// slider's handle follows your fingers; nil when not pinching.
     @State private var pinchZoom: CGFloat?
@@ -75,8 +84,10 @@ struct RepoView: View {
 
     /// The handover screen, one step past the project.
     @State private var handingOver = false
-    /// The options menu under "…" is open.
+    /// The menu on your name (documenting, Intelligence, Settings) is open.
     @State private var optionsOpen = false
+    /// Ask, at the bottom right of the project.
+    @StateObject private var ask = AskModel()
     /// Settings, one step past home.
     @State private var settingsOpen = false
     /// Automatic capture on in Settings: its captures show between yours.
@@ -86,12 +97,10 @@ struct RepoView: View {
     @State private var forward = true
 
     /// The floating sidebar is out (⌘\ hides it).
-    @AppStorage("sidebarShown") private var sidebarShown = true
-    /// While the sidebar comes or goes: the archive, already at its new
-    /// width, eases in from a little to the side, fading up. (No blur here:
-    /// a blur over the whole timeline would cost every scroll after.)
-    @State private var reflowOffset: CGFloat = 0
-    @State private var reflowFade: Double = 1
+    /// Kept as plain state so the change carries its animation (an
+    /// @AppStorage change arrives without it, and the card just jumped);
+    /// saved to the defaults after each toggle.
+    @State private var sidebarShown: Bool = UserDefaults.standard.object(forKey: "sidebarShown") as? Bool ?? true
     /// Files from Finder are over the project.
     @State private var dropping = false
     /// "Added 3 files", shortly after a drop.
@@ -126,34 +135,21 @@ struct RepoView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .clipped()
         }
-        // The archive makes room for the sidebar while it's out. It takes
-        // its new width at once (rows re-flowing on every frame of a slide
-        // jump about) and eases in from where it was instead.
-        .padding(.leading, sidebarShown ? ProjectSidebar.room : 0)
-        .animation(nil, value: sidebarShown)
-        .offset(x: reflowOffset)
-        .opacity(reflowFade)
-        // Always there, so it can slide: out past the window's left edge
-        // when hidden, its rows coming back in one after another.
-        ProjectSidebar(
-            current: store.currentProject,
-            onHome: atHome && !settingsOpen,
-            onSettings: atHome && settingsOpen,
-            shown: sidebarShown,
-            open: openProject,
-            home: goHome,
-            settings: openSettingsAnywhere,
-            collapse: toggleSidebar
-        )
-        // Opening, the card unfolds from the edge (inside ProjectSidebar),
-        // drifting in and coming into focus; closing, it folds back, drifts
-        // out and softens away. The rows follow it in, one after another.
-        .offset(x: sidebarShown ? 0 : -Theme.Space.x4)
-        .blur(radius: sidebarShown ? 0 : 8)
-        .opacity(sidebarShown ? 1 : 0)
-        .allowsHitTesting(sidebarShown)
-        .accessibilityHidden(!sidebarShown)
+        // The archive's edge moves with the card, on the same curve; Ask's
+        // panel takes the right the same way.
+        .padding(.leading, sidebarShown ? ProjectSidebar.room : ProjectSidebar.railRoom)
+        .padding(.trailing, askShown ? AskPanel.room : 0)
+        // Always there: the card narrows to a rail when collapsed and
+        // widens back, its rows coming in one after another.
+        sidebar
         .zIndex(2)
+        // Ask: a panel on the right, the sidebar's mirror.
+        if askShown {
+            AskPanel(ask: ask, entries: visibleEntries, clustering: clustering, submit: submitAsk, close: closeAsk)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                .transition(.move(edge: .trailing).combined(with: .opacity))
+                .zIndex(3)
+        }
         }
         .frame(minWidth: 600, minHeight: 380)
         .background(Brand.background)
@@ -189,21 +185,22 @@ struct RepoView: View {
             if !atHome && store.currentProject == name { return }
             openProject(name)
         }
-        .overlay(alignment: .topTrailing) {
-            if optionsOpen && inProject {
-                ZStack(alignment: .topTrailing) {
-                    // A click anywhere else closes it.
-                    Color.black.opacity(0.0001)
-                        .onTapGesture { withAnimation(Theme.Motion.exit) { optionsOpen = false } }
-                    CaptureOptionsMenu()
-                        .padding(.top, RepoHeader.height - 4)
-                        .padding(.trailing, RepoHeader.inset + RepoHeader.toolWidth + Theme.Space.x1)
-                        // Out of the tool it belongs to, and back into it.
-                        .transition(.pop(from: .topTrailing))
-                }
-                .ignoresSafeArea()
-            }
+        .overlay(alignment: .bottomLeading) { profileMenu }
+        // Ask clears when you leave the project it was asked in.
+        .onChange(of: store.currentProject) { project in
+            if askShown { closeAsk() }
+            ask.load(project: project)
         }
+        .onChange(of: atHome) { home in if home && askShown { closeAsk() } }
+        .onAppear { ask.load(project: store.currentProject) }
+        // ⌘F: Ask, from anywhere in a project.
+        .background(
+            Button("", action: openAsk)
+                .keyboardShortcut("f", modifiers: .command)
+                .opacity(0)
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+        )
         .overlay {
             if let focused, inProject {
                 FocusView(
@@ -215,6 +212,50 @@ struct RepoView: View {
                 .transition(.opacity)
                 .ignoresSafeArea()
             }
+        }
+    }
+
+    /// The sidebar, open or the rail.
+    private var sidebar: some View {
+        ProjectSidebar(
+            current: store.currentProject,
+            onHome: atHome && !settingsOpen,
+            onSettings: atHome && settingsOpen,
+            shown: sidebarShown,
+            open: openProject,
+            home: goHome,
+            settings: openSettingsAnywhere,
+            menuOpen: optionsOpen,
+            openMenu: { withAnimation(optionsOpen ? Theme.Motion.exit : Theme.Motion.enter) { optionsOpen.toggle() } },
+            collapse: toggleSidebar,
+            handoff: inProject ? toggleHandover : nil,
+            handingOver: handingOver
+        )
+    }
+
+    /// The menu on your name: out of the name it belongs to, above it in
+    /// the open sidebar, beside it on the rail.
+    @ViewBuilder private var profileMenu: some View {
+        if optionsOpen {
+            let leading: CGFloat = sidebarShown
+                ? ProjectSidebar.inset + ProjectSidebar.rowInset
+                : ProjectSidebar.railRoom + Theme.Space.x2
+            let bottom: CGFloat = sidebarShown
+                ? ProjectSidebar.inset + ProjectSidebar.rowInset + ProjectSidebar.rowHeight + Theme.Space.x1
+                : ProjectSidebar.inset + ProjectSidebar.rowInset
+            ZStack(alignment: .bottomLeading) {
+                // A click anywhere else closes it.
+                Color.black.opacity(0.0001)
+                    .onTapGesture { withAnimation(Theme.Motion.exit) { optionsOpen = false } }
+                ProfileMenu(openSettings: {
+                    withAnimation(Theme.Motion.exit) { optionsOpen = false }
+                    openSettingsAnywhere()
+                })
+                .padding(.leading, leading)
+                .padding(.bottom, bottom)
+                .transition(.pop(from: sidebarShown ? .bottom : .bottomLeading))
+            }
+            .ignoresSafeArea()
         }
     }
 
@@ -274,29 +315,48 @@ struct RepoView: View {
         }
     }
 
+    /// The card's morph, and the archive's edge with it: quick off the
+    /// mark, then a long gentle settle. Closing is a touch shorter. The
+    /// contents come in on their own stagger once the card is mostly there.
+    static let sidebarOpen = Animation.timingCurve(0.32, 0.72, 0, 1, duration: 0.5)
+    static let sidebarClose = Animation.timingCurve(0.32, 0.72, 0, 1, duration: 0.42)
+
+    // MARK: Ask
+
+    private var askShown: Bool { inProject && ask.stage != .closed }
+    /// Whether the sidebar was open before Ask narrowed it to the rail.
+    @State private var sidebarBeforeAsk = false
+
+    private func openAsk() {
+        guard inProject else { return }
+        guard ask.stage == .closed else { return }
+        sidebarBeforeAsk = sidebarShown
+        withAnimation(Self.sidebarOpen) {
+            ask.open()
+            if sidebarShown { sidebarShown = false }
+        }
+    }
+
+    private func closeAsk() {
+        withAnimation(Self.sidebarClose) {
+            ask.close()
+            if sidebarBeforeAsk && !sidebarShown { sidebarShown = true }
+        }
+        sidebarBeforeAsk = false
+    }
+
+    private func submitAsk() {
+        let project = store.currentProject
+        let maps = intelligence.maps
+        ask.undoSteer = { maps.undo(project: project) }
+        ask.submit(entries: visibleEntries, intelligence: intelligence, clustering: clustering)
+    }
+
     private func toggleSidebar() {
         let reduce = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
-        let opening = !sidebarShown
-        if reduce {
-            withAnimation(Theme.Motion.hover) { sidebarShown.toggle() }
-            return
-        }
-        // The archive jumps to its new width, starting from where its
-        // content was and a touch soft...
-        var instant = Transaction()
-        instant.disablesAnimations = true
-        withTransaction(instant) {
-            reflowOffset = opening ? -ProjectSidebar.room * 0.25 : ProjectSidebar.room * 0.25
-            reflowFade = 0.55
-        }
-        withAnimation(opening ? Theme.Motion.sidebarIn : Theme.Motion.sidebarOut) { sidebarShown.toggle() }
-        // ...then settles into place as the sidebar moves.
-        DispatchQueue.main.async {
-            withAnimation(opening ? Theme.Motion.sidebarIn : Theme.Motion.sidebarOut) {
-                reflowOffset = 0
-                reflowFade = 1
-            }
-        }
+        let motion: Animation = reduce ? Theme.Motion.hover : (sidebarShown ? Self.sidebarClose : Self.sidebarOpen)
+        withAnimation(motion) { sidebarShown.toggle() }
+        UserDefaults.standard.set(sidebarShown, forKey: "sidebarShown")
     }
 
     /// The hand-off side panel's width.
@@ -325,7 +385,7 @@ struct RepoView: View {
             if visibleEntries.isEmpty {
                 if isFiltering { noMatches } else { empty }
             } else {
-                TimeZoomView(entries: visibleEntries, level: $step, pinchZoom: $pinchZoom, interactive: focused == nil && !menuOpen,
+                TimeZoomView(entries: visibleEntries, level: stepBinding, pinchZoom: $pinchZoom, interactive: focused == nil && !menuOpen,
                              clustering: clustering, mapDepth: $mapDepth)
                     // Into the map at the timeline's scale; while there, the
                     // timeline keeps to the nearest scale, so going back is seamless.
@@ -357,6 +417,10 @@ struct RepoView: View {
             return true
         }
         .overlay { if dropping { dropTarget.transition(.opacity) } }
+        // Ask reading: a slow band of clarity passes over the archive.
+        .overlay {
+            if ask.look?.phase == .reading { ReadingSweep().transition(.opacity) }
+        }
         // Timeline or Themes: floating at the bottom centre, over the work.
         .overlay(alignment: .bottom) {
             if !visibleEntries.isEmpty {
@@ -365,6 +429,8 @@ struct RepoView: View {
                     .padding(.bottom, Theme.Space.x4)
             }
         }
+        // What Ask found, for the timeline and the map to show.
+        .environment(\.askLook, ask.look)
         .overlay(alignment: .bottom) {
             if let dropNote {
                 FloatingNote(text: dropNote)
@@ -376,9 +442,9 @@ struct RepoView: View {
 
     /// A hairline frame inside the window while files hover over it.
     private var dropTarget: some View {
-        RoundedRectangle(cornerRadius: 12, style: .continuous)
+        RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
             .strokeBorder(Color.primary.opacity(0.35), style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
-            .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.primary.opacity(0.03)))
+            .background(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous).fill(Color.primary.opacity(0.03)))
             .overlay {
                 Text("Add to \(store.currentProject)")
                     .font(Theme.Typography.ui(13, .medium))
@@ -421,16 +487,16 @@ struct RepoView: View {
     private var header: some View {
         GeometryReader { geo in
             let width = geo.size.width
-            let leading = sidebarShown ? Theme.Space.x4 : RepoHeader.titleX - 4 + RepoHeader.toolWidth + Theme.Space.x2
-            let tools = 3 * RepoHeader.toolWidth + 2 * Theme.Space.x1
-                + (searching ? RepoHeader.searchOpen - RepoHeader.searchClosed : 0)
-            // Centred in the archive, unless the tools (search open) need the room.
+            // The sidebar (open or the rail) holds the traffic lights and its toggle.
+            let leading = Theme.Space.x4
+            let tools = RepoHeader.toolWidth
+            // Centred in the archive, unless the tools need the room.
             let right = width - RepoHeader.inset - tools - Theme.Space.x6
             let slider = min(RepoHeader.sliderWidth, max(160, right - leading - Theme.Space.x6))
             let shift = min(0, right - (width + slider) / 2)
             ZStack {
                 if inProject {
-                    GranularitySlider(step: $step, steps: TimeScale.allCases.count, live: clustering ? mapDepth : pinchZoom,
+                    GranularitySlider(step: stepBinding, steps: TimeScale.allCases.count, live: clustering ? mapDepth : pinchZoom,
                                       continuous: clustering, onValue: { mapDepth = $0 })
                         .tourAnchor("slider")
                         .frame(width: slider)
@@ -438,51 +504,26 @@ struct RepoView: View {
                         .transition(.opacity)
                 }
                 HStack(spacing: 0) {
-                    if !sidebarShown {
-                        SidebarToggle(action: toggleSidebar)
-                            .transition(.opacity)
-                    }
                     Spacer(minLength: 0)
                     if inProject {
-                        HStack(spacing: Theme.Space.x1) {
-                            RepoSearch(
-                                query: $query,
-                                filters: $filters,
-                                open: $searching,
-                                menuOpen: $menuOpen,
-                                submit: submitQuery
-                            )
-                            // Where the field is, so its menu drops right under it.
-                            .background(GeometryReader { geo in
-                                Color.clear
-                                    .onAppear { searchFrame = geo.frame(in: .named("repo")) }
-                                    .onChange(of: geo.frame(in: .named("repo"))) { searchFrame = $0 }
-                            })
-                            .tourAnchor("search")
-                            // How Margin helps you document; its menu opens under it.
-                            HeaderTool(help: "Documenting", detail: "Reminder or automatic", active: optionsOpen, action: {
-                                withAnimation(optionsOpen ? Theme.Motion.exit : Theme.Motion.enter) { optionsOpen.toggle() }
-                                menuOpen = false
-                            }) {
-                                SettingsGlyph().frame(width: 16, height: 16)
-                            }
-                            // Hand the project off: to your agent, a review, a case study.
-                            HeaderTool(help: "Hand off", detail: "For your agent, a review or a case study", active: handingOver, action: toggleHandover) {
-                                HandoffMarkGlyph().frame(width: 16, height: 16)
-                            }
-                            .tourAnchor("handoff")
+                        // Ask: opens its panel on the right.
+                        HeaderTool(help: "Ask  ⌘F", detail: "Find anything, or sort the map, in your own words",
+                                   active: askShown, action: openAsk) {
+                            MagnifierCaret(progress: 0)
+                                .stroke(style: StrokeStyle(lineWidth: 1.4, lineCap: .round))
+                                .frame(width: 14, height: 14)
                         }
+                        .tourAnchor("search")
+                        .opacity(askShown ? 0 : 1)
                         .transition(.opacity)
                     }
                 }
-                // Clear of the traffic lights when the sidebar isn't holding them.
-                .padding(.leading, sidebarShown ? Theme.Space.x4 : RepoHeader.titleX - 4)
+                .padding(.leading, Theme.Space.x4)
                 .padding(.trailing, RepoHeader.inset)
             }
             .frame(width: width, height: RepoHeader.height)
             // The bar's empty space moves the window.
             .background(WindowDragArea())
-            .animation(Theme.Motion.snappy, value: searching)
         }
         .frame(height: RepoHeader.height)
     }
@@ -855,7 +896,7 @@ private final class HopMotion {
     /// the halves' corners.
     static let height: CGFloat = 28
     static let track: CGFloat = 20
-    static let radius: CGFloat = 6
+    static let radius: CGFloat = Theme.Radius.chip
     /// The labels at the ends, in sentence case, at the control size every
     /// switch uses.
     static let labels = ["Close-up", "Big picture"]
@@ -1103,7 +1144,7 @@ struct MarginSaw: View {
                         .font(Theme.Typography.ui(9, .medium))
                         .padding(.horizontal, 5)
                         .padding(.vertical, 1)
-                        .overlay(Capsule().strokeBorder(Color.secondary.opacity(0.4), lineWidth: 1))
+                        .background(RoundedRectangle(cornerRadius: Theme.Radius.chip, style: .continuous).fill(Theme.Palette.fill))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -1143,9 +1184,9 @@ private struct TagChip: View {
             .lineLimit(1)
             .padding(.horizontal, 7)
             .padding(.vertical, 2.5)
-            .background(Capsule().fill(isTopic ? Color.clear : Brand.fill))
+            .background(RoundedRectangle(cornerRadius: Theme.Radius.chip, style: .continuous).fill(isTopic ? Color.clear : Brand.fill))
             .overlay(
-                Capsule().strokeBorder(Color.secondary.opacity(isTopic ? 0.45 : 0), style: StrokeStyle(lineWidth: 1, dash: isTopic ? [2.5, 2] : []))
+                RoundedRectangle(cornerRadius: Theme.Radius.chip, style: .continuous).strokeBorder(Color.secondary.opacity(isTopic ? 0.45 : 0), style: StrokeStyle(lineWidth: 1, dash: isTopic ? [2.5, 2] : []))
             )
             .toolTip(isTopic ? "Part of \(text)?" : "Tagged by Margin", isTopic ? "Accept the tab in the repo to file it there." : nil, align: .leading)
     }
@@ -1200,19 +1241,13 @@ private struct ModeSwitch: View {
     var body: some View {
         // The same switch as everywhere else, only lifted off the page
         // because it floats.
-        let shape = RoundedRectangle(cornerRadius: Theme.Segmented.radius, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: Theme.Floating.radius, style: .continuous)
         HStack(spacing: 0) {
             segment(0, label: "Timeline", help: "Every step, in order") { TimelineGlyph() }
-            segment(1, label: "Themes", help: "The big picture, grouped by theme") { MapGlyph() }
+            segment(1, label: "Themes", help: "The big picture, grouped by theme") { ThemesGlyph() }
         }
-        .padding(Theme.Segmented.padding)
-        .background {
-            ZStack {
-                FloatingSurface(shape: shape)
-                SegmentTrack()
-            }
-        }
-        .overlay(shape.strokeBorder(Theme.Palette.hairline, lineWidth: 1))
+        .padding(Theme.Floating.padding)
+        .background(ControlSurface(shape: shape))
         .animation(Theme.Motion.hover, value: hovered)
         // Changed from elsewhere (the tour): the thumb follows.
         .onChange(of: clustering) { on in
@@ -1231,16 +1266,17 @@ private struct ModeSwitch: View {
                 clustering = index == 1
             }
         } label: {
-            HStack(spacing: 6) {
-                icon().frame(width: Theme.Segmented.icon, height: Theme.Segmented.icon)
-                Text(label).font(Theme.Typography.ui(Theme.Typography.control))
+            HStack(spacing: 7) {
+                icon().frame(width: Theme.Floating.icon, height: Theme.Floating.icon)
+                Text(label).font(Theme.Typography.ui(Theme.Floating.text))
             }
             .foregroundStyle(Theme.Segmented.label(selected, hovered: hovered == index))
-            .padding(.horizontal, Theme.Space.x3)
-            .frame(height: Theme.Segmented.segment)
+            .padding(.leading, Theme.Space.x3 + 2)
+            .padding(.trailing, Theme.Space.x4)
+            .frame(height: Theme.Floating.segment)
             .background {
                 if selected {
-                    SegmentThumb().matchedGeometryEffect(id: "chip", in: chip)
+                    SegmentThumb(radius: Theme.Floating.thumbRadius).matchedGeometryEffect(id: "chip", in: chip)
                 }
             }
             .contentShape(Rectangle())
@@ -1272,17 +1308,23 @@ private struct TimelineGlyph: View {
     }
 }
 
-/// The map's icon: three dots, loosely gathered.
-private struct MapGlyph: View {
+/// The themes' icon: three small boxes joined by lines, like groups on
+/// the map and the links between them. One colour throughout.
+private struct ThemesGlyph: View {
     var body: some View {
         Canvas { context, size in
             let u = size.width / 14
-            let dots: [(x: CGFloat, y: CGFloat, r: CGFloat)] = [
-                (4.6, 5.0, 2.3), (10.0, 4.4, 1.6), (8.2, 10.0, 2.0),
-            ]
-            for dot in dots {
-                let rect = CGRect(x: (dot.x - dot.r) * u, y: (dot.y - dot.r) * u, width: dot.r * 2 * u, height: dot.r * 2 * u)
-                context.fill(Path(ellipseIn: rect), with: .foreground)
+            let nodes: [CGPoint] = [CGPoint(x: 7.3, y: 3.6), CGPoint(x: 3.5, y: 10.4), CGPoint(x: 10.6, y: 9.0)]
+            var links = Path()
+            for end in nodes.dropFirst() {
+                links.move(to: CGPoint(x: nodes[0].x * u, y: nodes[0].y * u))
+                links.addLine(to: CGPoint(x: end.x * u, y: end.y * u))
+            }
+            context.stroke(links, with: .foreground, style: StrokeStyle(lineWidth: 1.5 * u, lineCap: .round))
+            let side: CGFloat = 4.2
+            for node in nodes {
+                let box = CGRect(x: (node.x - side / 2) * u, y: (node.y - side / 2) * u, width: side * u, height: side * u)
+                context.fill(Path(roundedRect: box, cornerRadius: 1.1 * u, style: .continuous), with: .foreground)
             }
         }
     }
@@ -1298,19 +1340,18 @@ struct FloatingNote: View {
 
     var body: some View {
         let ink = MenuInk(scheme)
-        let shape = RoundedRectangle(cornerRadius: 11, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: Theme.Floating.radius, style: .continuous)
         Text(text)
-            .font(Theme.Typography.ui(13, .medium))
+            .font(Theme.Typography.ui(Theme.Floating.text, .medium))
             .lineLimit(1)
             .fixedSize()
             .foregroundStyle(ink.text)
-            .padding(.horizontal, 15)
-        .frame(height: 38)
+            .padding(.horizontal, Theme.Space.x4 + 2)
+        .frame(height: Theme.Floating.height)
         .background(
             shape.fill(ink.surface)
                 .shadow(color: .black.opacity(scheme == .dark ? 0.5 : 0.08), radius: 1.5, y: 1)
                 .shadow(color: .black.opacity(scheme == .dark ? 0.45 : 0.16), radius: 18, y: 8)
         )
-        .overlay(shape.strokeBorder(ink.hairline, lineWidth: 1))
     }
 }

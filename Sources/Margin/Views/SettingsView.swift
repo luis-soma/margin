@@ -17,6 +17,9 @@ struct SettingsView: View {
     @State private var mcp: MCPStatus = .checking
     @State private var token = ""
     @State private var hasToken = Keychain.figmaToken != nil
+    @State private var claudeLinked = ClaudeDesktopLink.isConnected
+    @State private var autoUpdate = Updater.isAutomatic
+    @State private var claudeNote: String?
     @State private var tokenStatus: String?
     @State private var accessibility = DoubleTapShortcut.isTrusted
     @State private var screenRecording = ScreenCapture.hasPermission
@@ -90,6 +93,16 @@ struct SettingsView: View {
                                 if coding.isConnected { coding.disconnect() } else { coding.connect() }
                             }
                             .disabled(coding.port == nil)
+                        }
+                    }
+                    divider
+                    // Claude's chats (and Claude projects) document work into
+                    // Margin through margin-mcp; the skill says how.
+                    row("Claude app", claudeAppStatus) {
+                        HStack(spacing: Theme.Space.x2) {
+                            dot(claudeLinked ? .green : Theme.Palette.ink3)
+                            button("Download skill", action: downloadSkill)
+                            button(claudeLinked ? "Disconnect" : "Connect", action: toggleClaudeApp)
                         }
                     }
                     divider
@@ -176,6 +189,12 @@ struct SettingsView: View {
                     }
                 }
 
+                group("Updates") {
+                    row("Update automatically", "Margin looks for a new version when it starts and every few hours, and puts it in while you're not using it.") {
+                        toggle(Binding(get: { autoUpdate }, set: { autoUpdate = $0; Updater.isAutomatic = $0 }))
+                    }
+                }
+
                 // The team's tools, left out of the published app.
                 if !BuildInfo.isRelease {
                     group("Demo") {
@@ -183,6 +202,7 @@ struct SettingsView: View {
                             HStack(spacing: Theme.Space.x2) {
                                 if DemoData.isOn {
                                     button("Reset demo") { AppModel.shared.useDemoData(true, reset: true) }
+                                    button("Make mine") { AppModel.shared.adoptDemo() }
                                 }
                                 toggle(Binding(get: { DemoData.isOn }, set: { AppModel.shared.useDemoData($0) }))
                             }
@@ -279,8 +299,7 @@ struct SettingsView: View {
                 .foregroundStyle(Theme.Palette.ink)
                 .padding(.horizontal, Theme.Space.x3)
                 .frame(height: RepoHeader.toolHeight)
-                .background(RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous).fill(Theme.Palette.paper))
-                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous).strokeBorder(Theme.Palette.hairline, lineWidth: 1))
+                .background(RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous).fill(Theme.Palette.fill))
                 .contentShape(RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous))
         }
         .buttonStyle(PressStyle())
@@ -301,8 +320,7 @@ struct SettingsView: View {
         .foregroundStyle(Theme.Palette.ink)
         .padding(.horizontal, Theme.Space.x2 + 2)
         .frame(width: 200, height: RepoHeader.toolHeight)
-        .background(RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous).fill(Theme.Palette.paper))
-        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous).strokeBorder(Theme.Palette.hairline, lineWidth: 1))
+        .background(RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous).fill(Theme.Palette.fill))
     }
 
     /// A key: typed hidden, saved with Return or the button.
@@ -317,8 +335,41 @@ struct SettingsView: View {
     private func toggle(_ isOn: Binding<Bool>) -> some View {
         Toggle("", isOn: isOn)
             .labelsHidden()
-            .toggleStyle(.switch)
+            .toggleStyle(InkSwitch())
             .controlSize(.small)
+    }
+
+    private var claudeAppStatus: String {
+        if let claudeNote { return claudeNote }
+        return claudeLinked
+            ? "Chats in the Claude app can document a project into Margin."
+            : "Lets Claude document a project's process into Margin, from a chat or a Claude project. Add the skill to Claude too."
+    }
+
+    private func toggleClaudeApp() {
+        do {
+            if claudeLinked {
+                try ClaudeDesktopLink.disconnect()
+                claudeLinked = false
+                claudeNote = "Disconnected. Reopen Claude to finish."
+            } else {
+                try ClaudeDesktopLink.connect()
+                claudeLinked = true
+                claudeNote = "Connected. Quit Claude and open it again so it finds Margin."
+            }
+        } catch {
+            claudeNote = "Couldn't change Claude's settings: \(error.localizedDescription)"
+        }
+    }
+
+    private func downloadSkill() {
+        do {
+            let zip = try ClaudeDesktopLink.saveSkill()
+            NSWorkspace.shared.activateFileViewerSelecting([zip])
+            claudeNote = "Saved to Downloads. Add it in Claude › Settings › Capabilities › Skills."
+        } catch {
+            claudeNote = "Couldn't save the skill: \(error.localizedDescription)"
+        }
     }
 
     private func dot(_ color: Color) -> some View {

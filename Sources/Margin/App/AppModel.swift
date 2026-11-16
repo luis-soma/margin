@@ -164,7 +164,12 @@ final class AppModel: ObservableObject {
 
         let bridge = figmaBridge
         coding.extraRoutes = { bridge.handle($0) }
-        coding.deferredRoutes = { bridge.handleDeferred($0, reply: $1) }
+        // Claude documenting a project (through margin-mcp) comes in here too.
+        coding.deferredRoutes = { ClaudeImport.handle($0, reply: $1) || bridge.handleDeferred($0, reply: $1) }
+        ClaudeImport.shared.store = store
+        ClaudeImport.shared.onAdded = { [weak self] _ in self?.intelligence.scan() }
+        // Margin's helper for the Claude app follows Margin's updates.
+        if ClaudeDesktopLink.isConnected { try? ClaudeDesktopLink.refreshHelper() }
         coding.figmaBridge = bridge
         figma.bridge = bridge
         figma.onProgress = { [weak self] text, fraction in
@@ -174,6 +179,13 @@ final class AppModel: ObservableObject {
             Task { @MainActor in self?.stopRecording() }
         }
 
+        // Margin keeps itself current, swapping in a new version only while
+        // it's out of the way: not in front, nothing being captured.
+        updater.isQuiet = { [weak self] in
+            guard let self else { return false }
+            return !NSApp.isActive && !self.quick.isOpen && !self.isRecording && !self.recorder.isRecording
+        }
+        updater.startAutomatic()
         IconRefresh.runIfNeeded()
         FigmaPlugin.refreshIfInstalled()
         autoCapture.config = { [weak self] in self?.intelligence.config ?? AIConfig() }
@@ -630,28 +642,30 @@ final class AppModel: ObservableObject {
         var title: String?
 
         if isCurrentPage, ScreenCapture.hasPermission {
-            // Close the address bar (Arc's ⌘L bar floats over the page) so the
-            // picture shows the page itself.
-            Keys.escape()
-            try? await Task.sleep(nanoseconds: 300_000_000)
+            // Close the address bar first (Arc's and Dia's float over the
+            // page), and check it really closed.
+            await Self.leaveAddressBar(pid: pid)
             title = await Task.detached { SelectionReader.windowTitle(pid: pid) }.value
             let webArea = await Task.detached { SelectionReader.webAreaFrame(pid: pid) }.value
             let file = store.newImageURL(ext: "png")
-            var ok = false
-            if let webArea {
-                ok = await ScreenCapture.captureArea(webArea, to: file)
-            }
-            if ok {
+            if let webArea, await ScreenCapture.captureWebArea(pid: pid, area: webArea, to: file) {
                 entry.imageFile = file.lastPathComponent
+                MarginLog.info("Website: pictured the page as it is on screen")
             } else {
-                // No page area from the browser: the whole window, tabs and all.
-                let shot = store.newImageURL(ext: "heic")
-                if await ScreenCapture.snapshot(pid: pid, to: shot) != nil { entry.imageFile = shot.lastPathComponent }
+                MarginLog.info("Website: no picture from the screen (\(webArea == nil ? "the browser didn't say where the page is" : "blank or outside the window"))")
             }
         }
+        // Not on screen, or that didn't work: Margin loads the page itself.
         if entry.imageFile == nil, let shot = await PagePreview.shot(url, timeout: 20) {
             entry.imageFile = store.saveFile(shot.png, ext: "png")
             title = title ?? shot.title
+            MarginLog.info("Website: pictured the page by loading it")
+        }
+        // Last: the whole browser window, tabs and all, if it shows anything.
+        if entry.imageFile == nil, isCurrentPage, ScreenCapture.hasPermission {
+            let shot = store.newImageURL(ext: "heic")
+            if await ScreenCapture.snapshot(pid: pid, to: shot) != nil { entry.imageFile = shot.lastPathComponent }
+            MarginLog.info("Website: \(entry.imageFile == nil ? "no picture at all" : "pictured the whole window")")
         }
         // Browsers end window titles with their name: "Page – Google Chrome".
         if let raw = title {
@@ -664,6 +678,22 @@ final class AppModel: ObservableObject {
         entry.windowTitle = url.host
         store.add(entry)
         present(entry)
+    }
+
+    /// Presses Escape until the focus leaves the address bar (at most three
+    /// times), so the bar and its suggestions aren't over the page. Stops as
+    /// soon as it's left, so no Escape reaches the page itself.
+    private static func leaveAddressBar(pid: pid_t) async {
+        for _ in 0..<3 {
+            Keys.escape()
+            try? await Task.sleep(nanoseconds: 280_000_000)
+            let inBar = await Task.detached {
+                ["AXTextField", "AXComboBox", "AXSearchField", "AXTextArea"].contains(SelectionReader.read(pid: pid).role ?? "")
+            }.value
+            if !inBar { break }
+        }
+        // The bar's closing animation.
+        try? await Task.sleep(nanoseconds: 180_000_000)
     }
 
     private func saveClipboardImage(_ data: Data, sourceURL: URL?, app: NSRunningApplication) {
@@ -755,6 +785,29 @@ final class AppModel: ObservableObject {
     func useDemoData(_ on: Bool, reset: Bool = false) {
         DemoData.isOn = on
         if on && reset { DemoData.seed(force: true) }
+        relaunch()
+    }
+
+    /// Keeps what demo data shows as your own archive, after asking. Your
+    /// archive as it was is kept beside it. Relaunches on your captures.
+    func adoptDemo() {
+        guard DemoData.isOn else { return }
+        let alert = NSAlert()
+        alert.messageText = "Make these your captures?"
+        alert.informativeText = "Everything you see now becomes your archive, and demo data turns off. Your archive as it is now is kept as a backup in Margin's folder, and any captures only in it come along."
+        alert.addButton(withTitle: "Make Them Mine")
+        alert.addButton(withTitle: "Cancel")
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        let project = store.currentProject
+        guard DemoData.adopt() != nil else {
+            let failed = NSAlert()
+            failed.messageText = "Couldn't make these your captures"
+            failed.informativeText = "Nothing changed. The log has the details."
+            failed.runModal()
+            return
+        }
+        UserDefaults.standard.set(project, forKey: "currentProject")
+        DemoData.isOn = false
         relaunch()
     }
 

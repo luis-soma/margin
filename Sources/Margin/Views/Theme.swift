@@ -175,15 +175,54 @@ enum Theme {
         }
     }
 
+    /// Controls share one look: a light grey track, corners of 8, ink for
+    /// what's chosen. They come in two sizes, which is the hierarchy. Inline
+    /// controls (header tools, the slider, Settings, the hand-off's
+    /// choices and Send) are 28 tall with 12 pt words and stay quiet. The
+    /// two that float over captures (the Timeline / Themes switch, Ask) are
+    /// a step up, 32 tall with 13 pt words, on an opaque copy of the track
+    /// with a faint contact shadow, not a glass layer.
+    enum Floating {
+        static let segment: CGFloat = 28
+        static let padding: CGFloat = 2
+        static var height: CGFloat { segment + 2 * padding }
+        static let radius: CGFloat = Radius.control
+        static var thumbRadius: CGFloat { radius - padding }
+        static let icon: CGFloat = 14
+        static let text: CGFloat = 13
+        /// From the window's edges.
+        static let inset: CGFloat = 16
+        /// Messages (Ask's reply): a card, one corner tucked toward the field.
+        static let bubble: CGFloat = Radius.card
+    }
+
+    /// Slightly square, without strokes. The radius grows with the size,
+    /// about a quarter of a control's height, and never reaches a round end:
+    /// no pills, no round buttons. Circles are kept for people (avatars) and
+    /// dots. Nothing is outlined: surfaces separate by fill and a soft
+    /// shadow. Captures stay square, with their thin frame, so your work
+    /// reads as the material. A shape inset inside another takes the outer
+    /// radius minus the inset.
     enum Radius {
-        /// Chips and tags.
-        static let chip: CGFloat = 4
-        /// Buttons, fields, header tools.
+        /// Key caps, marks on pictures (up to 20 tall).
+        static let tiny: CGFloat = 4
+        /// Tags, chips and small buttons (20 to 26 tall).
+        static let chip: CGFloat = 6
+        /// Buttons, fields, header tools, switches (28 to 32 tall).
         static let control: CGFloat = 8
-        /// Menus, cards, the capture card, the loading pill's ends.
+        /// The capture menu and fields over other apps (36 to 40 tall).
+        static let floating: CGFloat = 10
+        /// Rows in a list: the sidebar's items, menu rows, Ask's results.
+        static let row: CGFloat = 8
+        /// Tooltips.
+        static let tip: CGFloat = 8
+        /// Cards, menus, panels, the sidebar, Ask's composer.
         static let card: CGFloat = 12
         /// Captured content (images, video, frames, code): square.
         static let media: CGFloat = 0
+
+        /// The radius for a shape inset `by` inside one of `outer`.
+        static func inside(_ outer: CGFloat, by inset: CGFloat) -> CGFloat { max(outer - inset, 2) }
     }
 
     // MARK: - Space
@@ -283,17 +322,14 @@ extension AnyTransition {
 
 // MARK: - Surfaces
 
-/// The surface behind a floating control (the capture menu, card, pill,
-/// nudge, the mode switch): solid white with the card shadow. Callers draw
-/// their own hairline on top. No Liquid Glass: over a white canvas it has
-/// nothing to refract and reads as a grey smudge.
 /// The chosen segment's thumb. `pictures` keeps it white under app icons,
 /// which an ink chip would swallow.
 struct SegmentThumb: View {
     var pictures = false
+    var radius: CGFloat = Theme.Segmented.thumbRadius
 
     var body: some View {
-        let shape = RoundedRectangle(cornerRadius: Theme.Segmented.thumbRadius, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
         if Theme.Segmented.inkThumb && !pictures {
             shape.fill(Theme.Palette.ink)
         } else {
@@ -304,17 +340,51 @@ struct SegmentThumb: View {
 
 /// The track the segments sit in.
 struct SegmentTrack: View {
+    var radius: CGFloat = Theme.Segmented.radius
+
     var body: some View {
-        RoundedRectangle(cornerRadius: Theme.Segmented.radius, style: .continuous)
+        RoundedRectangle(cornerRadius: radius, style: .continuous)
             .fill(Theme.Palette.fill)
     }
 }
 
+/// The surface behind a floating control (the sidebar, menus, the capture
+/// card, the mode switch, Ask): solid paper, a faint light along the top
+/// edge and a soft, wide shadow. `frosted` lets what's underneath blur
+/// through a little; only the sidebar and its menu use it, since over
+/// captures it reads as grey. Callers draw their own hairline on top.
 struct FloatingSurface<S: Shape>: View {
+    let shape: S
+    var frosted = false
+    /// Kept for panels over other apps (the capture card, the nudge): they
+    /// are always solid.
+    var solid = true
+
+    var body: some View {
+        ZStack {
+            if frosted { shape.fill(.ultraThinMaterial) }
+            shape.fill(Theme.Palette.paper.opacity(frosted ? 0.82 : 1))
+        }
+        .compositingGroup()
+        .cardShadow()
+    }
+}
+
+/// A control floating over captures (the Timeline / Themes switch, Ask):
+/// the same grey track as every other control, made opaque so captures
+/// don't show through, with only a contact shadow to lift it. No hairline,
+/// no glass.
+struct ControlSurface<S: Shape>: View {
     let shape: S
 
     var body: some View {
-        shape.fill(Theme.Palette.paper).cardShadow()
+        ZStack {
+            shape.fill(Theme.Palette.paper)
+            shape.fill(Theme.Palette.fill)
+        }
+        .compositingGroup()
+        .shadow(color: .black.opacity(0.07), radius: 1, x: 0, y: 1)
+        .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 2)
     }
 }
 
@@ -323,14 +393,12 @@ extension View {
     /// shadow (the shadow sits on the shape, not on the content).
     func glassSurface<S: Shape>(_ shape: S) -> some View {
         background(FloatingSurface(shape: shape))
-            .overlay(shape.stroke(Theme.Palette.hairline, lineWidth: 1))
     }
 
     /// Solid canvas with a hairline edge: the surface for anything that
     /// holds content. No shadow.
     func paperSurface<S: Shape>(_ shape: S) -> some View {
-        background(shape.fill(Theme.Palette.paper))
-            .overlay(shape.stroke(Theme.Palette.hairline, lineWidth: 1))
+        background(shape.fill(Theme.Palette.raised))
     }
 
     /// For `.background`: the surface of a floating control. See
@@ -339,16 +407,53 @@ extension View {
         FloatingSurface(shape: shape)
     }
 
-    /// `shadow.card`, neutral black and quiet: a contact shadow (0 1 2, 5%)
-    /// and a soft one (0 4 16, 6%). Floating cards, menus and panels only;
+    /// `shadow.card`, neutral black and quiet: a contact shadow (0 1 2, 4%)
+    /// and a soft, wide one (0 8 28, 7%). Floating cards, menus and panels only;
     /// captures never get a shadow.
     func cardShadow() -> some View {
-        shadow(color: .black.opacity(0.05), radius: 1, x: 0, y: 1)
-            .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 4)
+        shadow(color: .black.opacity(0.06), radius: 1, x: 0, y: 0.5)
+            .shadow(color: .black.opacity(0.07), radius: 18, x: 0, y: 6)
     }
 
     /// `shadow.thumb`: the selected segment (0 1 1, 8%).
     func thumbShadow() -> some View {
         shadow(color: .black.opacity(0.08), radius: 0.5, x: 0, y: 1)
+    }
+}
+
+/// Margin's switch: ink when on, the track's grey when off, a white knob
+/// with a faint shadow. No system blue anywhere. Sized by the control size
+/// (mini in menus, small in Settings).
+struct InkSwitch: ToggleStyle {
+    @Environment(\.controlSize) private var controlSize
+    @Environment(\.isEnabled) private var enabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        let size: CGSize
+        switch controlSize {
+        case .mini: size = CGSize(width: 26, height: 15)
+        case .small: size = CGSize(width: 30, height: 17)
+        default: size = CGSize(width: 34, height: 20)
+        }
+        let knob = size.height - 4
+        return HStack(spacing: Theme.Space.x2) {
+            configuration.label
+            ZStack(alignment: configuration.isOn ? .trailing : .leading) {
+                Capsule(style: .continuous)
+                    .fill(configuration.isOn ? Theme.Palette.ink : Theme.Palette.ink.opacity(0.12))
+                Circle()
+                    .fill(Color.white)
+                    .shadow(color: .black.opacity(0.18), radius: 1, x: 0, y: 0.5)
+                    .frame(width: knob, height: knob)
+                    .padding(2)
+            }
+            .frame(width: size.width, height: size.height)
+            .opacity(enabled ? 1 : 0.4)
+            .contentShape(Rectangle())
+            .onTapGesture { withAnimation(Theme.Motion.snappy) { configuration.isOn.toggle() } }
+            .accessibilityElement()
+            .accessibilityAddTraits(.isButton)
+            .accessibilityValue(configuration.isOn ? "On" : "Off")
+        }
     }
 }

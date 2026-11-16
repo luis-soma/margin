@@ -35,6 +35,15 @@ struct ClusterCanvas: View {
     @EnvironmentObject private var store: EntryStore
     @EnvironmentObject private var intelligence: Intelligence
     @Environment(\.focusMoment) private var focusMoment
+    /// What Ask found: those gather into one group in the middle of the view.
+    @Environment(\.askLook) private var askLook
+    /// Where Ask's answers sit while they're shown, on the map; cleared, they go home.
+    @State private var askPlaced: [UUID: CGRect] = [:]
+    /// Where the group's name sits, on the map.
+    @State private var askLabel: CGPoint?
+    /// Ask just sorted the map: each capture's place in the order the new
+    /// groups land, one theme after another.
+    @State private var steerOrder: [UUID: Double]?
 
     /// Each artifact's frame on the map now (at no pan and no zoom).
     @State private var frames: [UUID: CGRect] = [:]
@@ -155,6 +164,19 @@ struct ClusterCanvas: View {
         }
         .onChange(of: size) { _ in sync(animated: true) }
         .onChange(of: mapDepth) { slid(to: $0) }
+        .onChange(of: askLook) { placeAsk($0) }
+        .onReceive(NotificationCenter.default.publisher(for: AskModel.steer)) { note in
+            guard let request = note.object as? AskSteer else { return }
+            applySteer(request)
+        }
+        // A theme picked in Ask's panel: the map glides to it.
+        .onReceive(NotificationCenter.default.publisher(for: AskModel.focusTheme)) { note in
+            guard mapped, let name = note.object as? String,
+                  let theme = arrangement?.themes.first(where: { $0.title == name }) else { return }
+            withAnimation(Self.mapMotion) {
+                pan = panCentring(on: CGPoint(x: theme.label.x, y: theme.label.y), zoom: zoom)
+            }
+        }
     }
 
     // MARK: The map
@@ -176,14 +198,19 @@ struct ClusterCanvas: View {
                 .transition(.opacity)
             }
             ForEach(entries) { entry in
-                if let frame = frames[entry.id] {
+                if let home = frames[entry.id] {
+                    let frame = askPlaced[entry.id] ?? home
                     let moving = dragging != nil && group.contains(entry.id)
                     CanvasArtifact(entry: entry, size: frame.size, lifted: lifted, held: moving, seed: seed(entry.id),
                                    sharp: wantsSharp(frame), zoom: zoom, selected: selected.contains(entry.id),
                                    floats: entries.count <= Self.mostFloating)
                         .opacity(artifactOpacity(entry.id))
                         .offset(x: frame.minX + (moving ? dragDelta.width : 0), y: frame.minY + (moving ? dragDelta.height : 0))
-                        .zIndex(moving ? 4 : 0)
+                        // Ask: the answers travel to their group one after
+                        // another, and back home when it's cleared.
+                        .animation(askMotion(entry.id), value: askPlaced[entry.id])
+                        .animation(askLook?.motion(entry.id) ?? .easeInOut(duration: 0.3), value: askLook)
+                        .zIndex(moving ? 4 : askPlaced[entry.id] != nil ? 2 : 0)
                         .onHover { inside in
                             if inside { hovered = entry.id } else if hovered == entry.id { hovered = nil }
                         }
@@ -196,7 +223,7 @@ struct ClusterCanvas: View {
                                 focusMoment(entry)
                             }
                         }
-                    if notes > 0.01, !moving {
+                    if notes > 0.01, !moving, askLook == nil {
                         note(for: entry, under: frame)
                             .opacity(notes)
                     }
@@ -220,9 +247,28 @@ struct ClusterCanvas: View {
                 }
                 .scaleEffect(1 / max(zoom, 0.05))
                 .position(pattern.center)
-                .opacity(pattern.opacity)
+                .opacity(pattern.opacity * (askLook == nil ? 1 : 0.12))
+                .animation(.easeInOut(duration: 0.3), value: askLook == nil)
                 .allowsHitTesting(pattern.opacity > 0.5)
                 .zIndex(3)
+            }
+            // Ask's group: its name over the answers.
+            if let point = askLabel, let look = askLook, look.phase == .found {
+                VStack(spacing: 2) {
+                    Text(look.title)
+                        .font(Archive.font(PatternLabel.titleSize))
+                        .foregroundStyle(Archive.ink)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: PatternLabel.wrapWidth)
+                    Text(look.ids.count == 1 ? "1 capture" : "\(look.ids.count) captures")
+                        .font(Archive.mono(Archive.Size.meta))
+                        .foregroundStyle(Archive.faint)
+                }
+                .fixedSize()
+                .scaleEffect(1 / max(zoom, 0.05))
+                .position(point)
+                .zIndex(6)
+                .transition(.opacity.animation(.easeOut(duration: 0.3).delay(0.15)))
             }
             // A headline you're adding.
             if case let .headline(at, _)? = editing {
@@ -236,9 +282,64 @@ struct ClusterCanvas: View {
         .frame(width: size.width, height: size.height, alignment: .topLeading)
     }
 
+    /// Ask's answers gather in the middle of what you're looking at, in rows,
+    /// the same height on screen, under the group's name. Placed once when
+    /// they're found, on the map, so they stay put as you pan and zoom.
+    private func placeAsk(_ look: AskLook?) {
+        guard let look, look.phase == .found else {
+            askPlaced = [:]
+            askLabel = nil
+            return
+        }
+        let z: CGFloat = max(zoom, 0.05)
+        let ids: [UUID] = look.ids.filter { frames[$0] != nil }
+        guard !ids.isEmpty else { askPlaced = [:]; askLabel = nil; return }
+        let height: CGFloat = ids.count > 24 ? 56 : ids.count > 10 ? 72 : 96
+        let gap: CGFloat = 12
+        let widest: CGFloat = size.width * 0.72
+        var rows: [[(UUID, CGSize)]] = [[]]
+        var rowWidth: CGFloat = 0
+        for id in ids {
+            guard let f = frames[id] else { continue }
+            let w: CGFloat = min(height * f.width / max(f.height, 1), height * 2.2)
+            if rowWidth > 0, rowWidth + gap + w > widest {
+                rows.append([])
+                rowWidth = 0
+            }
+            rows[rows.count - 1].append((id, CGSize(width: w, height: height)))
+            rowWidth += (rowWidth > 0 ? gap : 0) + w
+        }
+        let labelRoom: CGFloat = 56
+        let block: CGFloat = CGFloat(rows.count) * height + CGFloat(rows.count - 1) * gap
+        var y: CGFloat = max(labelRoom + 16, (size.height - block + labelRoom) / 2)
+        let labelY: CGFloat = y - labelRoom / 2
+        var placed: [UUID: CGRect] = [:]
+        for row in rows {
+            let w: CGFloat = row.map(\.1.width).reduce(0, +) + CGFloat(max(row.count - 1, 0)) * gap
+            var x: CGFloat = (size.width - w) / 2
+            for (id, item) in row {
+                placed[id] = CGRect(x: (x - pan.width) / z, y: (y - pan.height) / z,
+                                    width: item.width / z, height: item.height / z)
+                x += item.width + gap
+            }
+            y += height + gap
+        }
+        askPlaced = placed
+        askLabel = CGPoint(x: (size.width / 2 - pan.width) / z, y: (labelY - pan.height) / z)
+    }
+
+    /// Going to the group: one after another, on the map's spring. Going home: together.
+    private func askMotion(_ id: UUID) -> Animation {
+        if let index = askLook?.rank[id] {
+            return Self.mapMotion.delay(0.06 + Double(min(index, 24)) * 0.045)
+        }
+        return Self.stepMotion
+    }
+
     /// Suggestions being looked at light those; a hovered capture quiets
     /// everything it isn't close to.
     private func artifactOpacity(_ id: UUID) -> Double {
+        if let askLook { return askLook.opacity(id) }
         if !highlighted.isEmpty { return highlighted.contains(id) ? 1 : 0.3 }
         guard mapped, dragging == nil, let hovered, hovered != id else { return 1 }
         let near = map?.neighbors[hovered.uuidString] ?? []
@@ -683,6 +784,84 @@ struct ClusterCanvas: View {
         }
     }
 
+    /// Ask, in the Themes view: the project in the groups the agent found.
+    /// Laid out in the background like Margin's own sorting, then kept as
+    /// the map (Undo brings back the one before). The view opens out to the
+    /// whole map so you watch every group form.
+    private func applySteer(_ request: AskSteer) {
+        guard active, mapped, editing == nil else { request.done(false); return }
+        let here = Set(entries.map(\.id.uuidString))
+        var patterns: [ProjectMap.Cluster] = [], themes: [ProjectMap.Cluster] = []
+        var titles: [String: String] = [:]
+        var order: [UUID: Double] = [:]
+        var placed = Set<String>()
+        typealias Group = (name: String, patterns: [(name: String, ids: [String])])
+        var groups: [Group] = []
+        for theme in request.themes {
+            var inner: [(name: String, ids: [String])] = []
+            for pattern in theme.patterns {
+                let ids: [String] = pattern.ids.map(\.uuidString).filter { here.contains($0) }
+                inner.append((name: pattern.name, ids: ids))
+            }
+            groups.append((name: theme.name, patterns: inner))
+        }
+        // Anything the agent didn't place keeps a group of its own.
+        let named = Set(groups.flatMap { $0.patterns.flatMap(\.ids) })
+        let rest = entries.map(\.id.uuidString).filter { !named.contains($0) }
+        if !rest.isEmpty { groups.append((name: "Everything else", patterns: [(name: "Not part of this sorting", ids: rest)])) }
+        for (t, theme) in groups.enumerated() {
+            let themeKey = "ask-\(request.token)-\(t)"
+            var children: [Int] = [], members: [String] = []
+            for (p, pattern) in theme.patterns.enumerated() {
+                let ids = pattern.ids.filter { placed.insert($0).inserted }
+                guard !ids.isEmpty else { continue }
+                let key = "\(themeKey)-\(p)"
+                titles[key] = pattern.name
+                children.append(patterns.count)
+                patterns.append(ProjectMap.Cluster(key: key, members: ids, parent: themes.count))
+                members += ids
+                for id in ids {
+                    if let uuid = UUID(uuidString: id) { order[uuid] = Double(themes.count) * 0.09 + Double(p) * 0.03 }
+                }
+            }
+            guard !members.isEmpty else { continue }
+            titles[themeKey] = theme.name
+            themes.append(ProjectMap.Cluster(key: themeKey, members: members, parent: nil, children: children))
+        }
+        guard !themes.isEmpty else { request.done(false); return }
+        let affinity = Array(repeating: Array(repeating: 0.0, count: themes.count), count: themes.count)
+        let steered = ProjectMap(tiers: [patterns, themes], neighbors: map?.neighbors ?? [:],
+                                 neighborSimilarity: map?.neighborSimilarity ?? [:],
+                                 themeAffinity: affinity, signature: "ask-\(request.token)")
+        var sizes: [String: MapSize] = [:]
+        for entry in entries {
+            let s = maps.mapSize(for: entry)
+            sizes[entry.id.uuidString] = MapSize(width: Double(s.width), height: Double(s.height))
+        }
+        var themeLabels: [String: MapSize] = [:], patternLabels: [String: MapSize] = [:]
+        for cluster in themes { themeLabels[cluster.key] = PatternLabel.size(title: titles[cluster.key] ?? "", count: cluster.members.count) }
+        for cluster in patterns { patternLabels[cluster.key] = PatternLabel.size(title: titles[cluster.key] ?? "", count: cluster.members.count) }
+        let input = TreeLayout.Input(map: steered, sizes: sizes, themeLabels: themeLabels, patternLabels: patternLabels,
+                                     window: MapSize(width: Double(size.width), height: Double(size.height)),
+                                     closeSide: Double(Archive.Timeline.boxes[0].width), side: Double(ProjectMaps.side),
+                                     noteHeight: ProjectMaps.noteHeight)
+        layoutToken += 1
+        let token = layoutToken
+        let project = self.project
+        Task {
+            let result = await Task.detached(priority: .userInitiated) { TreeLayout.layout(input) }.value
+            guard token == layoutToken, active, mapped else { request.done(false); return }
+            finishEditing()
+            selected = []
+            steerOrder = order
+            depth = 3
+            mapDepth = 3
+            maps.steer(project: project, map: steered, layout: result, titles: titles, replacing: request.replacing)
+            // Lift the quiet once the groups are on their way.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { request.done(true) }
+        }
+    }
+
     /// Reads the arrangement into frames and names, and fits the window.
     private func sync(animated: Bool) {
         guard let a = arrangement else { return }
@@ -729,7 +908,21 @@ struct ClusterCanvas: View {
 
         guard mapped else { return }
         let goal = framesAt(depth)
-        if animated {
+        if animated, let order = steerOrder {
+            // Sorted by Ask: the view opens out to the whole map, and the
+            // groups land one after another.
+            steerOrder = nil
+            withAnimation(Self.mapMotion) {
+                zoom = zoomAt(depth)
+                pan = panCentring(on: mapCentre, zoom: zoom)
+            }
+            let waves = Dictionary(grouping: goal.keys) { order[$0] ?? 0 }
+            for (delay, ids) in waves {
+                withAnimation(Self.mapMotion.delay(delay)) {
+                    for id in ids { frames[id] = goal[id] }
+                }
+            }
+        } else if animated {
             withAnimation(Self.stepMotion) {
                 frames = goal
                 if depth >= 2.99 {
@@ -1286,7 +1479,7 @@ private struct SuggestionPreview: View {
 
     var body: some View {
         let ink = MenuInk(scheme)
-        let shape = RoundedRectangle(cornerRadius: 11, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
         // At most four side by side; more wrap onto a second row.
         let shown = Array(entries.prefix(Self.most))
         let rows = stride(from: 0, to: shown.count, by: Self.perRow).map { Array(shown[$0..<min($0 + Self.perRow, shown.count)]) }
@@ -1310,7 +1503,6 @@ private struct SuggestionPreview: View {
                 .shadow(color: .black.opacity(scheme == .dark ? 0.45 : 0.08), radius: 1.5, y: 1)
                 .shadow(color: .black.opacity(scheme == .dark ? 0.4 : 0.12), radius: 14, y: 6)
         )
-        .overlay(shape.strokeBorder(ink.hairline, lineWidth: 1))
     }
 
     @ViewBuilder

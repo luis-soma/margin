@@ -169,8 +169,8 @@ private struct ImagePreviewView: View {
             Image(systemName: symbol)
                 .font(.system(size: 11, weight: .semibold))
                 .frame(width: 26, height: 26)
-                .background(Circle().fill(Color.white.opacity(0.12)))
-                .contentShape(Circle())
+                .background(RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous).fill(Color.white.opacity(0.12)))
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }
@@ -219,8 +219,8 @@ private struct NoteField: View {
             .onSubmit { preview.submit() }
             .padding(.horizontal, 14)
             .frame(height: 40)
-            .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Color.white.opacity(focused ? 0.14 : 0.1)))
-            .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Color.white.opacity(focused ? 0.28 : 0.14), lineWidth: 1))
+            .background(RoundedRectangle(cornerRadius: Theme.Radius.floating, style: .continuous).fill(Color.white.opacity(focused ? 0.14 : 0.1)))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.floating, style: .continuous).strokeBorder(Color.white.opacity(focused ? 0.28 : 0.14), lineWidth: 1))
             .onTapGesture {}
             .onAppear {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { focused = true }
@@ -238,6 +238,6 @@ private struct PreviewKey: View {
             .font(Theme.Typography.mono(9, .medium))
             .padding(.horizontal, 5)
             .frame(height: 17)
-            .overlay(RoundedRectangle(cornerRadius: 4, style: .continuous).strokeBorder(Color.white.opacity(0.35), lineWidth: 1))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.tiny, style: .continuous).strokeBorder(Color.white.opacity(0.35), lineWidth: 1))
     }
 }

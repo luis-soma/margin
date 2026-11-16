@@ -100,7 +100,7 @@ struct ComposerView: View {
             TextEditor(text: text)
                 .font(.body)
                 .frame(minHeight: 56)
-                .overlay(RoundedRectangle(cornerRadius: 6).stroke(.quaternary))
+                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.chip, style: .continuous).stroke(.quaternary))
         }
     }
 

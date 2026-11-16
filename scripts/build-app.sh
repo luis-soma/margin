@@ -49,6 +49,8 @@ APP="build/Margin.app"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN_DIR/Margin" "$APP/Contents/MacOS/Margin"
+# The helper the Claude app starts to document a project into Margin.
+if [[ -f "$BIN_DIR/MarginMCP" ]]; then cp "$BIN_DIR/MarginMCP" "$APP/Contents/MacOS/margin-mcp"; fi
 cp Resources/Info.plist "$APP/Contents/Info.plist"
 
 # App icon from the 1024px PNG.
@@ -143,6 +145,12 @@ if [[ -d Resources/Covers ]]; then
   cp -R Resources/Covers "$APP/Contents/Resources/Covers"
 fi
 
+# The film studio's backdrops (team builds only; see FilmStudio).
+if [[ "$RELEASE" != 1 && -d Resources/Film ]]; then
+  rm -rf "$APP/Contents/Resources/Film"
+  cp -R Resources/Film "$APP/Contents/Resources/Film"
+fi
+
 # Remember where the repo lives and which commit this is, so Margin can
 # update itself from its menu and tell when it's already up to date.
 # (Not in a release: it would point at this Mac's folders.)
@@ -184,7 +192,19 @@ if [[ -z "$IDENTITY" && "${MARGIN_STABLE_SIGNING:-1}" == 1 ]]; then
     echo "Couldn't set up the Margin Dev certificate (see above)."
   fi
 fi
-if [[ -n "$IDENTITY" ]] && codesign --force --sign "$IDENTITY" "${SIGN_ARGS[@]}" "$APP"; then
+# The Claude helper is signed first, as code inside the app has to be. If
+# the app then won't sign with it, it's left out rather than the app being
+# signed ad hoc (which would make macOS forget Margin's permissions).
+HELPER="$APP/Contents/MacOS/margin-mcp"
+if [[ -f "$HELPER" ]]; then
+  if [[ -n "$IDENTITY" ]]; then
+    codesign --force --sign "$IDENTITY" "${SIGN_ARGS[@]}" "$HELPER" 2>/dev/null || codesign --force --sign - "$HELPER" || true
+  else
+    codesign --force --sign - "$HELPER" || true
+  fi
+fi
+sign_app() { codesign --force --sign "$IDENTITY" "${SIGN_ARGS[@]}" "$APP"; }
+if [[ -n "$IDENTITY" ]] && { sign_app || { [[ -f "$HELPER" ]] && rm -f "$HELPER" && echo "Left out the Claude helper: the app wouldn't sign with it." && sign_app; }; }; then
   if [[ "$(cat "$LAST_IDENTITY" 2>/dev/null)" != "$IDENTITY" ]]; then
     # A new certificate (or the first stable build): what was allowed for
     # the old signature no longer applies, and a stale entry would show as

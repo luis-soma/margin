@@ -439,7 +439,18 @@ final class EntryStore: ObservableObject {
         }
     }
 
+    /// Team builds: the film studio's copy, which never writes entries.json.
+    var isReadOnly = false
+
+    /// Team builds: in the film studio's copy only, a capture counts as made
+    /// at `date`, as one you just made would. Never saved.
+    func restage(_ id: UUID, at date: Date) {
+        guard isReadOnly, let index = entries.firstIndex(where: { $0.id == id }) else { return }
+        entries[index].createdAt = date
+    }
+
     private func save() {
+        guard !isReadOnly else { return }
         write(entries, to: entriesURL)
         diskStamp = DiskStamp(entriesURL)
     }

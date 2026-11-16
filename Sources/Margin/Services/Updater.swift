@@ -89,6 +89,14 @@ final class Updater: ObservableObject {
 
     func update() {
         guard !state.isBusy else { return }
+        automatic = false
+        // Already built or downloaded in the background: put it in now.
+        if let ready {
+            installTimer?.invalidate()
+            state = .installing
+            installAndRelaunch(newApp: ready)
+            return
+        }
         guard let repo else {
             state = .failed("Margin doesn't know where its code is. Build it once with scripts/build-app.sh.")
             return
@@ -125,6 +133,11 @@ final class Updater: ObservableObject {
         let upstream = lines[lines.count - 1]
 
         if local == upstream, upstream == installedCommit {
+            if automatic {
+                automatic = false
+                state = .idle
+                return
+            }
             state = .upToDate
             try? await Task.sleep(nanoseconds: 4_000_000_000)
             if state == .upToDate { state = .idle }
@@ -145,13 +158,19 @@ final class Updater: ObservableObject {
             return fail("The build failed\(last.map { ": \($0)" } ?? ""). See the update log.", build)
         }
 
-        state = .installing
-        installAndRelaunch(newApp: repo.appendingPathComponent("build/Margin.app"))
+        let built = repo.appendingPathComponent("build/Margin.app")
+        if automatic {
+            state = .idle
+            installWhenQuiet(built)
+        } else {
+            state = .installing
+            installAndRelaunch(newApp: built)
+        }
     }
 
     /// Hands over to a helper that replaces this app once it has quit, then
     /// opens the new one. Margin quits right after.
-    private func installAndRelaunch(newApp: URL) {
+    private func installAndRelaunch(newApp: URL, background: Bool = false) {
         let running = Bundle.main.bundleURL.standardizedFileURL
         let destination = running.pathExtension == "app" ? running : URL(fileURLWithPath: "/Applications/Margin.app")
         let pid = ProcessInfo.processInfo.processIdentifier
@@ -167,13 +186,13 @@ final class Updater: ObservableObject {
           rm -rf "$2"
         fi
         /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$3" >/dev/null 2>&1
-        /usr/bin/open "$3"
+        if [ "$4" = "background" ]; then /usr/bin/open -g "$3" --args --background; else /usr/bin/open "$3"; fi
         """
         do {
             try script.write(to: helper, atomically: true, encoding: .utf8)
             let process = Process()
             process.executableURL = URL(fileURLWithPath: "/bin/sh")
-            let quoted = [helper.path, String(pid), newApp.standardizedFileURL.path, destination.path]
+            let quoted = [helper.path, String(pid), newApp.standardizedFileURL.path, destination.path, background ? "background" : "front"]
                 .map { "'" + $0.replacingOccurrences(of: "'", with: "'\\''") + "'" }
             process.arguments = ["-c", "nohup /bin/sh \(quoted.joined(separator: " ")) >> '\(logURL.path)' 2>&1 &"]
             try process.run()
@@ -182,13 +201,20 @@ final class Updater: ObservableObject {
             state = .failed("Couldn't install the update: \(error.localizedDescription)")
             return
         }
-        MarginLog.info("Update built; relaunching")
+        MarginLog.info("Update \(background ? "installed quietly" : "built"); relaunching")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { NSApp.terminate(nil) }
     }
 
     private func fail(_ message: String, _ output: Shell.Output) {
-        MarginLog.info("Update failed: \(message)\n\(output.stderr.suffix(2000))")
-        state = .failed(message)
+        MarginLog.info("Update failed\(automatic ? " (automatic)" : ""): \(message)\n\(output.stderr.suffix(2000))")
+        // An update you didn't ask for doesn't show its failure; the next
+        // check tries again.
+        if automatic {
+            automatic = false
+            state = .idle
+        } else {
+            state = .failed(message)
+        }
     }
 
     /// Runs a command in a login shell (so git and swift are found), logging its output.
@@ -206,6 +232,112 @@ final class Updater: ObservableObject {
             }
             return output
         }.value
+    }
+
+    // MARK: Automatic updates
+
+    /// Margin keeps itself current: on launch and every few hours it looks
+    /// for a newer version. A copy built from the repo pulls and builds it;
+    /// a downloaded copy fetches the newest release from GitHub. Either way
+    /// it's put in place at a quiet moment (Margin not in front, nothing
+    /// being captured or recorded) and Margin reopens in the menu bar.
+    static let automaticKey = "updateAutomatically"
+    static var isAutomatic: Bool {
+        get { UserDefaults.standard.object(forKey: automaticKey) as? Bool ?? true }
+        set { UserDefaults.standard.set(newValue, forKey: automaticKey) }
+    }
+    /// The public repository releases come from.
+    static let releases = URL(string: "https://api.github.com/repos/luis-soma/margin/releases/latest")!
+
+    /// Whether now is a good moment to swap the app; set by AppModel.
+    var isQuiet: () -> Bool = { !NSApp.isActive }
+    private var automatic = false
+    private var ready: URL?
+    private var checkTimer: Timer?
+    private var installTimer: Timer?
+
+    func startAutomatic() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 30) { [weak self] in self?.checkAutomatically() }
+        checkTimer = Timer.scheduledTimer(withTimeInterval: 4 * 3600, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.checkAutomatically() }
+        }
+    }
+
+    func checkAutomatically() {
+        guard Self.isAutomatic, !state.isBusy, ready == nil else { return }
+        automatic = true
+        if let repo {
+            state = .checking
+            Task { await run(repo) }
+        } else {
+            Task { await fetchRelease() }
+        }
+    }
+
+    /// A downloaded copy: the newest release's disk image, if it's newer
+    /// than this one, opened and its app copied out, ready to swap in.
+    private func fetchRelease() async {
+        defer { automatic = false }
+        let current = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0"
+        var request = URLRequest(url: Self.releases, timeoutInterval: 30)
+        request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
+        guard let (data, _) = try? await URLSession.shared.data(for: request),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let tag = json["tag_name"] as? String else { return }
+        let version = tag.hasPrefix("v") ? String(tag.dropFirst()) : tag
+        guard Self.isNewer(version, than: current),
+              let assets = json["assets"] as? [[String: Any]],
+              let address = assets.first(where: { ($0["name"] as? String) == "Margin.dmg" })?["browser_download_url"] as? String,
+              let url = URL(string: address) else { return }
+        MarginLog.info("Update: Margin \(version) is out (this is \(current)); downloading")
+        guard let (file, _) = try? await URLSession.shared.download(from: url) else {
+            return MarginLog.info("Update: the download didn't finish")
+        }
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("margin-update-\(version)", isDirectory: true)
+        let app = await Task.detached { () -> URL? in
+            let fm = FileManager.default
+            try? fm.removeItem(at: folder)
+            try? fm.createDirectory(at: folder, withIntermediateDirectories: true)
+            let dmg = folder.appendingPathComponent("Margin.dmg")
+            let mount = folder.appendingPathComponent("mount")
+            try? fm.moveItem(at: file, to: dmg)
+            guard Shell.run("/usr/bin/hdiutil", ["attach", "-nobrowse", "-quiet", "-mountpoint", mount.path, dmg.path], timeout: 120).ok else { return nil }
+            defer { Shell.run("/usr/bin/hdiutil", ["detach", "-quiet", mount.path], timeout: 60) }
+            let copy = folder.appendingPathComponent("Margin.app")
+            guard Shell.run("/usr/bin/ditto", [mount.appendingPathComponent("Margin.app").path, copy.path], timeout: 300).ok else { return nil }
+            return copy
+        }.value
+        guard let app, let bundle = Bundle(url: app), bundle.bundleIdentifier == Bundle.main.bundleIdentifier else {
+            return MarginLog.info("Update: the disk image didn't hold Margin")
+        }
+        installWhenQuiet(app)
+    }
+
+    /// Swaps the new version in at the first quiet moment, checking every
+    /// half minute.
+    private func installWhenQuiet(_ app: URL) {
+        ready = app
+        MarginLog.info("Update ready; it goes in when Margin isn't in use")
+        installTimer?.invalidate()
+        installTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { [weak self] timer in
+            MainActor.assumeIsolated {
+                guard let self, let ready = self.ready, self.isQuiet(), !self.state.isBusy else { return }
+                timer.invalidate()
+                self.state = .installing
+                self.installAndRelaunch(newApp: ready, background: true)
+            }
+        }
+    }
+
+    /// "0.5.0" is newer than "0.4.10"? Compares number by number.
+    static func isNewer(_ candidate: String, than current: String) -> Bool {
+        let a = candidate.split(separator: ".").map { Int($0) ?? 0 }
+        let b = current.split(separator: ".").map { Int($0) ?? 0 }
+        for i in 0..<max(a.count, b.count) {
+            let x = i < a.count ? a[i] : 0, y = i < b.count ? b[i] : 0
+            if x != y { return x > y }
+        }
+        return false
     }
 
     func showLog() {

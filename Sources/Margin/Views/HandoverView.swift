@@ -1043,7 +1043,6 @@ private struct HandoffHelp: View {
         .padding(Theme.Space.x4)
         .frame(width: 300)
         .background(FloatingSurface(shape: shape))
-        .overlay(shape.strokeBorder(Theme.Palette.hairline, lineWidth: 1))
     }
 
     private func step(_ number: Int, _ text: String) -> some View {
@@ -1145,13 +1144,9 @@ private struct AgentMenu: View {
         .padding(5)
         .frame(width: 232)
         .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
+            RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
                 .fill(Brand.background)
                 .shadow(color: .black.opacity(0.12), radius: 16, y: 6)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
         )
     }
 }
@@ -1177,7 +1172,7 @@ private struct AgentRow: View {
             }
             .padding(.horizontal, 10)
             .frame(height: 34)
-            .background(RoundedRectangle(cornerRadius: 6, style: .continuous).fill(Color.primary.opacity(hovering ? 0.06 : 0)))
+            .background(RoundedRectangle(cornerRadius: Theme.Radius.row, style: .continuous).fill(Color.primary.opacity(hovering ? 0.06 : 0)))
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

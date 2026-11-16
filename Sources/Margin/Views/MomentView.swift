@@ -220,9 +220,9 @@ struct MomentView: View {
                                 .font(Theme.Typography.ui(11, .medium))
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 4)
-                                .background(Capsule().fill(entry.verdict == option.id ? Color.primary.opacity(0.85) : Brand.fill))
+                                .background(RoundedRectangle(cornerRadius: Theme.Radius.chip, style: .continuous).fill(entry.verdict == option.id ? Color.primary.opacity(0.85) : Brand.fill))
                                 .foregroundStyle(entry.verdict == option.id ? Brand.background : Color.primary)
-                                .contentShape(Capsule())
+                                .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
                     }

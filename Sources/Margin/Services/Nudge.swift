@@ -249,8 +249,7 @@ private struct NudgePill: View {
             .clipShape(shape)
         }
         // The shadow belongs to the surface only, never to the words on it.
-        .background(FloatingSurface(shape: shape))
-        .overlay(shape.strokeBorder(ink.hairline, lineWidth: 1))
+        .background(FloatingSurface(shape: shape, solid: true))
         .contentShape(shape)
         .offset(y: (shown ? 0 : -46) + min(0, drag))
         .opacity(shown ? 1 : 0)

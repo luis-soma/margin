@@ -84,7 +84,7 @@ private struct AutoCaptureTile: View {
 
     var body: some View {
         let ink = MenuInk(scheme)
-        let shape = RoundedRectangle(cornerRadius: 11, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: Theme.Radius.floating, style: .continuous)
         Mark(size: 14, dot: 1)
             .frame(width: 36, height: 36)
             .background(
@@ -92,7 +92,6 @@ private struct AutoCaptureTile: View {
                     .shadow(color: .black.opacity(scheme == .dark ? 0.5 : 0.08), radius: 1.5, y: 1)
                     .shadow(color: .black.opacity(scheme == .dark ? 0.45 : 0.16), radius: 14, y: 6)
             )
-            .overlay(shape.strokeBorder(ink.hairline, lineWidth: 1))
             .overlay {
                 // Draws on, then its tail follows the head round: once.
                 TimelineView(.animation) { timeline in

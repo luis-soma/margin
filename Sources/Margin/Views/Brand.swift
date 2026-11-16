@@ -274,7 +274,7 @@ struct ThinkingPill: View {
             .padding(.horizontal, size * 0.8)
             .padding(.vertical, size * 0.32)
             .progressFill(fraction)
-            .background(Capsule().fill(Brand.fill))
+            .background(RoundedRectangle(cornerRadius: Theme.Radius.chip, style: .continuous).fill(Brand.fill))
             .shimmer()
             .accessibilityLabel(text)
             .accessibilityValue(fraction.map { "\(Int($0 * 100)) percent" } ?? "")

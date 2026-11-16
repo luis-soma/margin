@@ -374,7 +374,7 @@ private struct SetupStep: View {
                 item("Your own AI keys", "For notes on captures and summaries. Off until you turn it on.") {
                     Toggle("", isOn: $intelligence.isEnabled)
                         .labelsHidden()
-                        .toggleStyle(.switch)
+                        .toggleStyle(InkSwitch())
                         .controlSize(.small)
                         .disabled(!intelligence.config.hasGemini && gemini.trimmed.isEmpty)
                 }
@@ -408,7 +408,6 @@ private struct SetupStep: View {
         .padding(Theme.Space.x6)
         .frame(width: 440)
         .background(FloatingSurface(shape: shape))
-        .overlay(shape.strokeBorder(Theme.Palette.hairline, lineWidth: 1))
     }
 
     /// Keys typed but not yet saved go in on the way out.
@@ -453,7 +452,7 @@ private struct SetupStep: View {
                 .foregroundStyle(Theme.Palette.ink)
                 .padding(.horizontal, Theme.Space.x3)
                 .frame(height: RepoHeader.toolHeight)
-                .background(RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous).strokeBorder(Theme.Palette.hairline, lineWidth: 1))
+                .background(RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous).fill(Theme.Palette.fill))
                 .contentShape(Rectangle())
         }
         .buttonStyle(PressStyle())
@@ -669,12 +668,11 @@ private struct TourCard: View {
         }
         .padding(14)
         .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
                 .fill(ink.surface)
                 .shadow(color: .black.opacity(0.08), radius: 1.5, y: 1)
                 .shadow(color: .black.opacity(0.2), radius: 22, y: 10)
         )
-        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(ink.hairline, lineWidth: 1))
     }
 }
 
@@ -696,7 +694,7 @@ private struct CaptureMenuDemo: View {
             .foregroundStyle(ink.surface)
             .padding(.horizontal, 11)
             .frame(height: chip)
-            .background(RoundedRectangle(cornerRadius: 7, style: .continuous).fill(ink.text))
+            .background(RoundedRectangle(cornerRadius: Theme.Radius.chip, style: .continuous).fill(ink.text))
             HStack(spacing: 6) {
                 Image(systemName: "video")
                 Text("Record")
@@ -714,11 +712,10 @@ private struct CaptureMenuDemo: View {
         .padding(.horizontal, 5)
         .frame(width: size.width, height: size.height)
         .background(
-            RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
+            RoundedRectangle(cornerRadius: Theme.Radius.floating, style: .continuous)
                 .fill(ink.surface)
                 .shadow(color: .black.opacity(0.16), radius: 14, y: 6)
         )
-        .overlay(RoundedRectangle(cornerRadius: 11, style: .continuous).strokeBorder(ink.hairline, lineWidth: 1))
         .scaleEffect(shown ? 1 : 0.92, anchor: .top)
         .offset(y: shown ? 0 : -30)
         .opacity(shown ? 1 : 0)
@@ -833,7 +830,7 @@ private struct KeyCap: View {
                         .fill(Brand.background)
                         .shadow(color: .black.opacity(0.12), radius: 0, y: down ? 0.5 : 2)
                 )
-                .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).strokeBorder(Color.primary.opacity(0.12), lineWidth: 1))
+                
                 .offset(y: down ? 1.5 : 0)
         }
     }
@@ -873,7 +870,6 @@ private struct TourButton: View {
             .background(Color.primary.opacity(hovering ? 0.04 : 0))
             .background(ink.surface)
             .clipShape(shape)
-            .overlay(shape.strokeBorder(ink.hairline, lineWidth: 1))
             .contentShape(shape)
         }
         .buttonStyle(.plain)

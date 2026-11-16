@@ -164,7 +164,7 @@ private struct LiveSwitch: View {
 
     var body: some View {
         let ink = MenuInk(scheme)
-        let shape = RoundedRectangle(cornerRadius: 9, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: Theme.Segmented.radius, style: .continuous)
         HStack(spacing: 1) {
             segment(0, label: "Live", symbol: "play")
             segment(1, label: "Screenshot", symbol: "photo")
@@ -175,7 +175,6 @@ private struct LiveSwitch: View {
                 .shadow(color: .black.opacity(scheme == .dark ? 0.4 : 0.06), radius: 1, y: 0.5)
                 .shadow(color: .black.opacity(scheme == .dark ? 0.35 : 0.07), radius: 8, y: 3)
         )
-        .overlay(shape.strokeBorder(ink.hairline, lineWidth: 1))
         .animation(Brand.motion, value: live)
         .animation(Brand.quick, value: hovered)
         .animation(.easeOut(duration: 0.1), value: tip)
@@ -183,7 +182,7 @@ private struct LiveSwitch: View {
 
     private func segment(_ index: Int, label: String, symbol: String) -> some View {
         let selected = (index == 0) == live
-        let chipShape = RoundedRectangle(cornerRadius: Brand.smallRadius, style: .continuous)
+        let chipShape = RoundedRectangle(cornerRadius: Theme.Segmented.thumbRadius, style: .continuous)
         return Button {
             guard !selected else { return }
             live = index == 0

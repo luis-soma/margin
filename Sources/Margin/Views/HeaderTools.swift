@@ -11,6 +11,9 @@ struct HeaderTool<Label: View>: View {
     /// A line under the name in the tooltip: what it does.
     var detail: String? = nil
     var active = false
+    /// Inside a card (the sidebar, Ask's panel): no fill, only the icon
+    /// darkens on hover, so nothing crowds the card's edge.
+    var plain = false
     /// Which side of the tool the tooltip lines up with.
     var tipAlign: HorizontalAlignment = .trailing
     let action: () -> Void
@@ -24,7 +27,7 @@ struct HeaderTool<Label: View>: View {
                 .frame(width: RepoHeader.toolWidth, height: RepoHeader.toolHeight)
                 .background(
                     RoundedRectangle(cornerRadius: RepoHeader.toolRadius, style: .continuous)
-                        .fill(active ? Theme.Palette.fillSelected : hovering ? Theme.Palette.fillHover : .clear)
+                        .fill(plain ? .clear : active ? Theme.Palette.fill : hovering ? Theme.Palette.fillHover : .clear)
                 )
                 .contentShape(RoundedRectangle(cornerRadius: RepoHeader.toolRadius, style: .continuous))
         }
@@ -35,9 +38,10 @@ struct HeaderTool<Label: View>: View {
     }
 }
 
-/// Where a tooltip hangs: under the control, or over it (for controls at
-/// the bottom of the window).
-enum TipEdge { case below, above }
+/// Where a tooltip hangs: under the control, over it (for controls at the
+/// bottom of the window), or beside it to the right (the sidebar rail,
+/// where it's a pill with just the name).
+enum TipEdge { case below, above, trailing }
 
 private struct HoverTip: ViewModifier {
     let title: String
@@ -45,6 +49,7 @@ private struct HoverTip: ViewModifier {
     let edge: TipEdge
     let align: HorizontalAlignment
     let enabled: Bool
+    let delay: Double
     @State private var shown = false
     @State private var work: DispatchWorkItem?
 
@@ -53,24 +58,45 @@ private struct HoverTip: ViewModifier {
             .onHover { inside in inside && enabled ? showSoon() : hide() }
             .simultaneousGesture(TapGesture().onEnded { hide() })
             .onChange(of: enabled) { if !$0 { hide() } }
-            .overlay(alignment: Alignment(horizontal: align, vertical: edge == .below ? .bottom : .top)) {
+            .overlay(alignment: anchor) {
                 if shown {
-                    ToolTip(title: title, detail: detail)
-                        .fixedSize()
-                        .frame(height: 0, alignment: edge == .below ? .top : .bottom)
-                        .offset(y: edge == .below ? Theme.Space.x2 : -Theme.Space.x2)
+                    tip
                         .allowsHitTesting(false)
-                        .transition(.pop(from: edge == .below ? .top : .bottom))
                         .zIndex(10)
                 }
             }
+    }
+
+    private var anchor: Alignment {
+        switch edge {
+        case .below: return Alignment(horizontal: align, vertical: .bottom)
+        case .above: return Alignment(horizontal: align, vertical: .top)
+        case .trailing: return .trailing
+        }
+    }
+
+    @ViewBuilder private var tip: some View {
+        switch edge {
+        case .trailing:
+            ToolTip(title: title, detail: detail)
+                .fixedSize()
+                .frame(width: 0, alignment: .leading)
+                .offset(x: Theme.Space.x3)
+                .transition(.pop(from: .leading))
+        case .below, .above:
+            ToolTip(title: title, detail: detail)
+                .fixedSize()
+                .frame(height: 0, alignment: edge == .below ? .top : .bottom)
+                .offset(y: edge == .below ? Theme.Space.x2 : -Theme.Space.x2)
+                .transition(.pop(from: edge == .below ? .top : .bottom))
+        }
     }
 
     private func showSoon() {
         work?.cancel()
         let next = DispatchWorkItem { withAnimation(Theme.Motion.enter) { shown = true } }
         work = next
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: next)
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: next)
     }
 
     private func hide() {
@@ -82,10 +108,11 @@ private struct HoverTip: ViewModifier {
 
 extension View {
     /// Margin's tooltip, the same ink card on every control: its name, and
-    /// what it does in a line. Shows after resting on it for half a second.
+    /// what it does in a line. Shows after resting on it for half a second
+    /// (the rail's names, which are the only label there, come up sooner).
     func toolTip(_ title: String, _ detail: String? = nil, edge: TipEdge = .below,
-                 align: HorizontalAlignment = .trailing, enabled: Bool = true) -> some View {
-        modifier(HoverTip(title: title, detail: detail, edge: edge, align: align, enabled: enabled))
+                 align: HorizontalAlignment = .trailing, enabled: Bool = true, delay: Double = 0.5) -> some View {
+        modifier(HoverTip(title: title, detail: detail, edge: edge, align: align, enabled: enabled, delay: delay))
     }
 }
 
@@ -113,7 +140,7 @@ struct ToolTip: View {
         }
         .padding(.horizontal, Theme.Space.x2 + 2)
         .padding(.vertical, Theme.Space.x1 + 2)
-        .background(Theme.Palette.ink, in: RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous))
+        .background(Theme.Palette.ink, in: RoundedRectangle(cornerRadius: Theme.Radius.tip, style: .continuous))
     }
 }
 
@@ -225,7 +252,6 @@ struct CaptureOptionsMenu: View {
         .padding(Theme.Space.x3)
         .frame(width: 260)
         .background(FloatingSurface(shape: shape))
-        .overlay(shape.strokeBorder(Theme.Palette.hairline, lineWidth: 1))
     }
 }
 
@@ -303,7 +329,7 @@ private struct OptionRow: View {
             .padding(.horizontal, 10)
             .frame(height: 28)
             .background(
-                RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous)
+                RoundedRectangle(cornerRadius: Theme.Radius.row, style: .continuous)
                     .fill(Color.primary.opacity(hovering ? 0.06 : 0))
             )
             .contentShape(Rectangle())

@@ -23,6 +23,15 @@ enum SelectionReader {
         var isInField: Bool {
             ["AXTextField", "AXComboBox", "AXSearchField"].contains(role ?? "")
         }
+
+        /// Looks like a browser's address bar: a single-line field, or a
+        /// text box (some command bars) whose whole text is selected.
+        var isAddressLike: Bool {
+            if isInField { return true }
+            guard role == "AXTextArea", let text = text?.trimmingCharacters(in: .whitespacesAndNewlines), !text.isEmpty,
+                  let value = value?.trimmingCharacters(in: .whitespacesAndNewlines) else { return false }
+            return text == value
+        }
     }
 
     static func read(pid: pid_t) -> Result {

@@ -236,15 +236,11 @@ private struct NewProjectButton: View {
         .padding(.horizontal, 11)
         .frame(height: 34)
         // Words only ever inside the button, even while it grows or shrinks.
-        .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous))
         .background(
-            RoundedRectangle(cornerRadius: 7, style: .continuous)
+            RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous)
                 .fill(Brand.background)
                 .shadow(color: .black.opacity(hovering || naming ? 0.1 : 0.05), radius: hovering || naming ? 10 : 4, y: 2)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 7, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
         )
         .contentShape(Rectangle())
         .onTapGesture { if !naming { open() } }
@@ -378,13 +374,9 @@ private struct CoverMenu: View {
                 .padding(5)
                 .frame(width: 214)
                 .background(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
                         .fill(Brand.background)
                         .shadow(color: .black.opacity(0.12), radius: 16, y: 6)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
                 )
                 .transition(.pop(from: .topTrailing))
             }
@@ -407,7 +399,7 @@ private struct MoreButton: View {
                 .foregroundStyle(Archive.ink.opacity(hovering || open ? 0.9 : 0.65))
                 .frame(width: 26, height: 22)
                 .background(
-                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    RoundedRectangle(cornerRadius: Theme.Radius.row, style: .continuous)
                         .fill(Brand.background.opacity(hovering || open ? 1 : 0.9))
                         .shadow(color: .black.opacity(0.1), radius: 4, y: 1)
                 )
@@ -446,7 +438,7 @@ private struct MenuRow: View {
             .padding(.horizontal, 10)
             .frame(height: 30)
             .background(
-                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                RoundedRectangle(cornerRadius: Theme.Radius.row, style: .continuous)
                     .fill(Color.primary.opacity(hovering ? 0.06 : 0))
             )
             .contentShape(Rectangle())

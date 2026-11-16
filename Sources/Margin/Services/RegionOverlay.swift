@@ -513,7 +513,7 @@ private struct OverlayPill: View {
         let open = state.phase == .open
         let shown = state.phase != .hidden
         let ink = MenuInk(scheme)
-        let shape = RoundedRectangle(cornerRadius: 11, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: Theme.Radius.floating, style: .continuous)
         VStack(spacing: 8) {
             // The tip close to the choices, and as much room after it as the
             // first choice has before it.
@@ -544,8 +544,7 @@ private struct OverlayPill: View {
             // Nothing draws outside the menu, even mid-animation.
             .clipShape(shape)
             // The shadow belongs to the surface only, never to the words on it.
-            .background(FloatingSurface(shape: shape).opacity(bare ? 0 : 1))
-            .overlay(shape.strokeBorder(ink.hairline, lineWidth: 1).opacity(bare ? 0 : 1))
+            .background(FloatingSurface(shape: shape, solid: true).opacity(bare ? 0 : 1))
             // Drops in from under the menu bar, sharpening as it lands.
             .scaleEffect(shown ? 1 : 0.9, anchor: .top)
             .blur(radius: shown ? 0 : 4)
@@ -557,8 +556,7 @@ private struct OverlayPill: View {
                     .foregroundStyle(ink.text)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
-                    .background(FloatingSurface(shape: RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous)))
-                    .overlay(RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous).strokeBorder(ink.hairline, lineWidth: 1))
+                    .background(FloatingSurface(shape: RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous), solid: true))
                     .leaving(4, state.partsHidden)
                     .transition(.arrive(4))
             }
@@ -609,7 +607,7 @@ private struct OverlayPill: View {
                 .foregroundStyle(ink.muted)
                 .padding(.horizontal, 5)
                 .frame(height: 17)
-                .overlay(RoundedRectangle(cornerRadius: 4, style: .continuous).strokeBorder(ink.hairline, lineWidth: 1))
+                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.tiny, style: .continuous).strokeBorder(ink.hairline, lineWidth: 1))
         }
     }
 }

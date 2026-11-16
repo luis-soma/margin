@@ -1,5 +1,7 @@
 import AppKit
 import CoreGraphics
+import ImageIO
+import UniformTypeIdentifiers
 import MarginKit
 
 /// The result of capturing an app's front window.
@@ -79,8 +81,39 @@ enum ScreenCapture {
         return WindowShot(title: window.title, fingerprint: fingerprint)
     }
 
+    /// The page area of a browser window, from that window alone: the
+    /// address bar's suggestions, a floating command bar or Margin's own
+    /// card are other windows, so they're never in the picture. False if
+    /// there's no window, the area is outside it or the picture is blank.
+    static func captureWebArea(pid: pid_t, area: CGRect, to url: URL) async -> Bool {
+        guard let window = frontWindowInfo(of: pid) else { return false }
+        let temp = FileManager.default.temporaryDirectory.appendingPathComponent("margin-\(UUID().uuidString).png")
+        defer { try? FileManager.default.removeItem(at: temp) }
+        // -x no sound, -o no shadow, -l this window only
+        guard await run(["-x", "-o", "-l\(window.id)", temp.path]), let image = ImageTools.load(temp),
+              window.bounds.width > 0 else { return false }
+        let scale = CGFloat(image.width) / window.bounds.width
+        let crop = CGRect(x: (area.minX - window.bounds.minX) * scale, y: (area.minY - window.bounds.minY) * scale,
+                          width: area.width * scale, height: area.height * scale)
+            .integral
+            .intersection(CGRect(x: 0, y: 0, width: image.width, height: image.height))
+        guard crop.width > 100, crop.height > 100, let page = image.cropping(to: crop) else { return false }
+        if PictureCheck.isBlank(page) {
+            MarginLog.info("Website: the page area came out blank")
+            return false
+        }
+        guard let destination = CGImageDestinationCreateWithURL(url as CFURL, UTType.png.identifier as CFString, 1, nil) else { return false }
+        CGImageDestinationAddImage(destination, page, nil)
+        return CGImageDestinationFinalize(destination)
+    }
+
     /// The frontmost normal window of an app, skipping tiny utility windows.
     static func frontWindow(of pid: pid_t) -> (id: CGWindowID, title: String?)? {
+        frontWindowInfo(of: pid).map { ($0.id, $0.title) }
+    }
+
+    /// The same, with where it is on screen (Core Graphics points).
+    static func frontWindowInfo(of pid: pid_t) -> (id: CGWindowID, title: String?, bounds: CGRect)? {
         let options: CGWindowListOption = [.optionOnScreenOnly, .excludeDesktopElements]
         guard let list = CGWindowListCopyWindowInfo(options, kCGNullWindowID) as? [[String: Any]] else { return nil }
         // The list is ordered front to back.
@@ -88,13 +121,11 @@ enum ScreenCapture {
             guard let owner = (info[kCGWindowOwnerPID as String] as? NSNumber)?.int32Value, owner == pid,
                   let layer = (info[kCGWindowLayer as String] as? NSNumber)?.intValue, layer == 0,
                   let number = (info[kCGWindowNumber as String] as? NSNumber)?.uint32Value else { continue }
-            if let boundsDict = info[kCGWindowBounds as String] as? NSDictionary,
-               let bounds = CGRect(dictionaryRepresentation: boundsDict as CFDictionary),
-               bounds.width < 200 || bounds.height < 150 {
-                continue
-            }
+            guard let boundsDict = info[kCGWindowBounds as String] as? NSDictionary,
+                  let bounds = CGRect(dictionaryRepresentation: boundsDict as CFDictionary),
+                  bounds.width >= 200, bounds.height >= 150 else { continue }
             let title = info[kCGWindowName as String] as? String
-            return (CGWindowID(number), title)
+            return (CGWindowID(number), title, bounds)
         }
         return nil
     }

@@ -305,7 +305,7 @@ private struct FilterToken: View {
             }
             .padding(.horizontal, 6)
             .frame(height: 14)
-            .background(Capsule().fill(Color.primary.opacity(hovering ? 0.18 : 0.13)))
+            .background(RoundedRectangle(cornerRadius: Theme.Radius.tiny, style: .continuous).fill(Color.primary.opacity(hovering ? 0.18 : 0.13)))
         }
         .buttonStyle(.plain)
         .onHover { hovering = $0 }
@@ -365,13 +365,9 @@ struct FilterMenu: View {
         .padding(4)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
+            RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
                 .fill(Brand.background)
                 .shadow(color: .black.opacity(0.1), radius: 14, y: 6)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
         )
     }
 }
@@ -402,7 +398,7 @@ private struct FilterRow: View {
             .padding(.horizontal, 8)
             .frame(height: 26)
             .background(
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                RoundedRectangle(cornerRadius: Theme.Radius.row, style: .continuous)
                     .fill(Color.primary.opacity(hovering ? 0.06 : 0))
             )
             .contentShape(Rectangle())
@@ -436,9 +432,8 @@ private struct MenuChip: View {
             .padding(.horizontal, 9)
             .padding(.vertical, 3.5)
             .foregroundStyle(style == .tab ? Color.primary : Color.secondary)
-            .background(Capsule().fill(style == .tab ? Color.primary.opacity(hovering ? 0.13 : 0.08) : Color.primary.opacity(hovering ? 0.07 : 0)))
-            .overlay(Capsule().strokeBorder(Color.primary.opacity(style == .tag ? 0.14 : 0), lineWidth: 1))
-            .contentShape(Capsule())
+            .background(RoundedRectangle(cornerRadius: Theme.Radius.chip, style: .continuous).fill(style == .tab ? Color.primary.opacity(hovering ? 0.13 : 0.08) : Color.primary.opacity(hovering ? 0.07 : 0)))
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .onHover { hovering = $0 }
@@ -473,8 +468,8 @@ struct SuggestedChip: View {
         .padding(.leading, 9)
         .padding(.trailing, 7)
         .padding(.vertical, 3.5)
-        .background(Capsule().fill(isOn ? Brand.fill : Color.clear))
-        .overlay(Capsule().strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [3, 3])).foregroundStyle(Color.secondary.opacity(0.5)))
+        .background(RoundedRectangle(cornerRadius: Theme.Radius.chip, style: .continuous).fill(isOn ? Brand.fill : Color.clear))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.chip, style: .continuous).strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [3, 3])).foregroundStyle(Color.secondary.opacity(0.5)))
         .foregroundStyle(.secondary)
         .toolTip("Suggested", "Margin found this in your captures", align: .leading)
     }
