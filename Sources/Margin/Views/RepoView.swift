@@ -867,15 +867,15 @@ private struct GranularitySlider: View {
         let mid = HopMotion.height / 2
         let h = HopMotion.track - 3 * frame.speed
         let half = RoundedRectangle(cornerRadius: HopMotion.radius, style: .continuous)
-        // The halves are the sidebar's surface: frosted white with its soft
-        // shadow, a shade deeper under the pointer and in your hand.
-        let shade = Theme.Palette.ink.opacity(frame.dragging ? 0.04 : hovering ? 0.025 : 0)
+        // The halves: a light grey, a shade deeper under the pointer and in
+        // your hand.
+        let shade = Theme.Palette.ink.opacity(frame.dragging ? 0.06 : hovering ? 0.048 : 0.035)
         return ZStack(alignment: .topLeading) {
-            SliderHalf(shape: half, shade: shade)
+            half.fill(shade)
                 .frame(width: frame.leftWidth, height: h)
                 .opacity(frame.leftWidth < 2 ? 0 : 1)
                 .offset(y: mid - h / 2)
-            SliderHalf(shape: half, shade: shade)
+            half.fill(shade)
                 .frame(width: frame.rightWidth, height: h)
                 .opacity(frame.rightWidth < 2 ? 0 : 1)
                 .offset(x: frame.rightX, y: mid - h / 2)
@@ -924,24 +924,6 @@ private struct GranularitySlider: View {
             .blur(radius: soft)
             .offset(x: x, y: top)
             .allowsHitTesting(false)
-    }
-}
-
-/// One half of the slider: white, lifted off the page by a shadow close
-/// enough to read on white (the sidebar's, tightened for something this
-/// small).
-private struct SliderHalf<S: Shape>: View {
-    let shape: S
-    let shade: Color
-
-    var body: some View {
-        ZStack {
-            shape.fill(Theme.Palette.paper)
-            shape.fill(shade)
-        }
-        .compositingGroup()
-        .shadow(color: .black.opacity(0.10), radius: 1, x: 0, y: 0.5)
-        .shadow(color: .black.opacity(0.08), radius: 6, x: 0, y: 2)
     }
 }
 
