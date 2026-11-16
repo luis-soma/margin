@@ -527,7 +527,9 @@ struct RepoView: View {
             let tools = RepoHeader.toolWidth
             // Centred in the archive, unless the tools need the room.
             let right = width - RepoHeader.inset - tools - Theme.Space.x6
-            let slider = min(RepoHeader.sliderWidth, max(160, right - leading - Theme.Space.x6))
+            // Grows with the window: about four tenths of it, 320 to 720.
+            let wanted = min(max(width * 0.42, 320), 720)
+            let slider = min(wanted, max(160, right - leading - Theme.Space.x6))
             let shift = min(0, right - (width + slider) / 2)
             ZStack {
                 if inProject {
@@ -869,13 +871,11 @@ private struct GranularitySlider: View {
         // shadow, a shade deeper under the pointer and in your hand.
         let shade = Theme.Palette.ink.opacity(frame.dragging ? 0.04 : hovering ? 0.025 : 0)
         return ZStack(alignment: .topLeading) {
-            FloatingSurface(shape: half, frosted: true)
-                .overlay(half.fill(shade))
+            SliderHalf(shape: half, shade: shade)
                 .frame(width: frame.leftWidth, height: h)
                 .opacity(frame.leftWidth < 2 ? 0 : 1)
                 .offset(y: mid - h / 2)
-            FloatingSurface(shape: half, frosted: true)
-                .overlay(half.fill(shade))
+            SliderHalf(shape: half, shade: shade)
                 .frame(width: frame.rightWidth, height: h)
                 .opacity(frame.rightWidth < 2 ? 0 : 1)
                 .offset(x: frame.rightX, y: mid - h / 2)
@@ -927,6 +927,24 @@ private struct GranularitySlider: View {
     }
 }
 
+/// One half of the slider: white, lifted off the page by a shadow close
+/// enough to read on white (the sidebar's, tightened for something this
+/// small).
+private struct SliderHalf<S: Shape>: View {
+    let shape: S
+    let shade: Color
+
+    var body: some View {
+        ZStack {
+            shape.fill(Theme.Palette.paper)
+            shape.fill(shade)
+        }
+        .compositingGroup()
+        .shadow(color: .black.opacity(0.10), radius: 1, x: 0, y: 0.5)
+        .shadow(color: .black.opacity(0.08), radius: 6, x: 0, y: 2)
+    }
+}
+
 /// The slider's motion: a spring that follows the pointer while dragging and
 /// settles on a stop when released, stops that pull the handle in, and labels
 /// that hop over the handle. Plain state, advanced once per frame.
@@ -934,8 +952,8 @@ private final class HopMotion {
     /// The row it sits in (the tools' height), the track's own height and
     /// the halves' corners.
     static let height: CGFloat = 28
-    static let track: CGFloat = 26
-    static let radius: CGFloat = Theme.Radius.control
+    static let track: CGFloat = 22
+    static let radius: CGFloat = Theme.Radius.chip + 1
     /// The labels at the ends, in sentence case, at the control size every
     /// switch uses.
     static let labels = ["Close-up", "Big picture"]
@@ -1281,7 +1299,7 @@ private struct ModeSwitch: View {
         // The same switch as everywhere else, only lifted off the page
         // because it floats.
         // The sidebar's surface: the same frosted card and shadow, the
-        // chosen side a light fill like a chosen row.
+        // chosen side in ink.
         let shape = RoundedRectangle(cornerRadius: Theme.Radius.floating, style: .continuous)
         HStack(spacing: 0) {
             segment(0, label: "Timeline", help: "Every step, in order") { TimelineGlyph() }
@@ -1311,14 +1329,14 @@ private struct ModeSwitch: View {
                 icon().frame(width: Theme.Floating.icon, height: Theme.Floating.icon)
                 Text(label).font(Theme.Typography.ui(Theme.Floating.text, selected ? .medium : .regular))
             }
-            .foregroundStyle(selected || hovered == index ? Theme.Palette.ink : Theme.Palette.ink2)
+            .foregroundStyle(selected ? Theme.Palette.paper : hovered == index ? Theme.Palette.ink : Theme.Palette.ink2)
             .padding(.leading, Theme.Space.x3 + 2)
             .padding(.trailing, Theme.Space.x4)
             .frame(height: Theme.Floating.segment)
             .background {
                 if selected {
                     RoundedRectangle(cornerRadius: Theme.Radius.floating - Theme.Floating.padding, style: .continuous)
-                        .fill(Theme.Palette.fillSelected)
+                        .fill(Theme.Palette.ink)
                         .matchedGeometryEffect(id: "chip", in: chip)
                 } else if hovered == index {
                     RoundedRectangle(cornerRadius: Theme.Radius.floating - Theme.Floating.padding, style: .continuous)
