@@ -40,6 +40,9 @@ struct ProjectSidebar: View {
     @AppStorage("projectOrder") private var orderList = ""
     /// The project being dragged to a new place.
     @State private var dragging: String?
+    /// The project whose right-click menu is open, and where its rows are.
+    @State private var menuFor: String?
+    @State private var rowFrames: [String: CGRect] = [:]
     /// The name showing beside the rail, if any.
     @State private var tip: RailTip?
     @ObservedObject private var icons = ProjectIcons.shared
@@ -177,7 +180,29 @@ struct ProjectSidebar: View {
                     .id(tip.name)
             }
         }
-        .onChange(of: shown) { _ in tip = nil }
+        .onChange(of: shown) { _ in tip = nil; menuFor = nil }
+        .onPreferenceChange(RowFramesKey.self) { frames in
+            MainActor.assumeIsolated { rowFrames = frames }
+        }
+        // The right-click menu: beside its row, outside the card. A click
+        // anywhere else, or Esc, closes it.
+        .overlay(alignment: .topLeading) {
+            if let name = menuFor, let frame = rowFrames[name] {
+                ZStack(alignment: .topLeading) {
+                    Color.black.opacity(0.0001)
+                        .frame(width: 8000, height: 8000)
+                        .offset(x: -4000, y: -4000)
+                        .onTapGesture { withAnimation(Theme.Motion.exit) { menuFor = nil } }
+                    rowMenu(name)
+                        .offset(x: (shown ? Self.width : Self.railWidth) + Theme.Space.x2, y: max(0, frame.minY - Theme.Space.x1 - 2))
+                        .transition(.pop(from: .topLeading))
+                    Button("") { withAnimation(Theme.Motion.exit) { menuFor = nil } }
+                        .keyboardShortcut(.cancelAction)
+                        .opacity(0)
+                        .frame(width: 0, height: 0)
+                }
+            }
+        }
         .padding(Self.inset)
     }
 
@@ -240,15 +265,31 @@ struct ProjectSidebar: View {
             return NSItemProvider(object: name as NSString)
         }
         .onDrop(of: [.text], delegate: ProjectDrop(target: name, dragging: $dragging, move: move))
-        .contextMenu {
+        // Right-click: Margin's own menu, beside the row.
+        .onRightClick {
+            tip = nil
+            withAnimation(Theme.Motion.enter) { menuFor = name }
+        }
+        .background(GeometryReader { geo in
+            Color.clear.preference(key: RowFramesKey.self, value: [name: geo.frame(in: .named(RailTip.space))])
+        })
+    }
+
+    /// The right-click menu of a project: its page, pin, its icon.
+    private func rowMenu(_ name: String) -> some View {
+        let isPinned = list(pinnedList).contains(name)
+        func run(_ action: @escaping () -> Void) -> () -> Void {
+            { withAnimation(Theme.Motion.exit) { menuFor = nil }; action() }
+        }
+        return MarginMenu(width: 248) {
             if let projectSettings {
-                Button("Project settings…") { projectSettings(name) }
-                Divider()
+                MarginMenuItem(title: "Project settings", symbol: "slider.horizontal.3", shortcut: "⌘I", action: run { projectSettings(name) })
+                MarginMenuRule()
             }
-            Button(isPinned ? "Unpin" : "Pin") { togglePin(name) }
-            Button("Choose icon…") { icons.choose(for: name, store: store) }
+            MarginMenuItem(title: isPinned ? "Unpin" : "Pin", symbol: isPinned ? "pin.slash" : "pin", action: run { togglePin(name) })
+            MarginMenuItem(title: "Choose icon…", symbol: "photo", action: run { icons.choose(for: name, store: store) })
             if icons.hasOwn(name, store: store) {
-                Button("Use a picture from the project") { icons.automatic(for: name, store: store) }
+                MarginMenuItem(title: "Use a picture from the project", symbol: "arrow.uturn.backward", action: run { icons.automatic(for: name, store: store) })
             }
         }
     }
@@ -268,6 +309,14 @@ struct ProjectSidebar: View {
         var list = pinnedList.split(separator: "\n").map(String.init)
         if let index = list.firstIndex(of: name) { list.remove(at: index) } else { list.append(name) }
         withAnimation(Theme.Motion.snappy) { pinnedList = list.joined(separator: "\n") }
+    }
+}
+
+/// Where each project's row is in the card, for its right-click menu.
+private struct RowFramesKey: PreferenceKey {
+    static let defaultValue: [String: CGRect] = [:]
+    static func reduce(value: inout [String: CGRect], nextValue: () -> [String: CGRect]) {
+        value.merge(nextValue()) { $1 }
     }
 }
 
