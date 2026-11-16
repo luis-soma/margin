@@ -552,7 +552,8 @@ struct AskPanel: View {
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
         VStack(alignment: .leading, spacing: 0) {
-            top
+            // Above the composer, so the close button's tooltip isn't under it.
+            top.zIndex(1)
             composer
                 .padding(.horizontal, Self.pad - 4)
             ScrollView {
