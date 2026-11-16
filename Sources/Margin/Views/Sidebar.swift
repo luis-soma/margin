@@ -29,6 +29,8 @@ struct ProjectSidebar: View {
     var menuOpen = false
     let openMenu: () -> Void
     let collapse: () -> Void
+    /// A project's page: from the dots on its row, or its right-click menu.
+    var projectSettings: ((String) -> Void)? = nil
     /// In a project: Hand off, a tool at the foot of the sidebar.
     var handoff: (() -> Void)? = nil
     var handingOver = false
@@ -227,6 +229,8 @@ struct ProjectSidebar: View {
                     index: index, tip: $tip, action: { open(name) }) {
             ProjectIcon(project: name)
         }
+        // On hover, open: the dots to the project's page.
+        .modifier(RowMore(open: shown && dragging == nil, action: projectSettings.map { go in { go(name) } }))
         // Drag a project up or down to put it where you want it.
         .opacity(dragging == name ? 0.5 : 1)
         .onDrag {
@@ -237,6 +241,10 @@ struct ProjectSidebar: View {
         }
         .onDrop(of: [.text], delegate: ProjectDrop(target: name, dragging: $dragging, move: move))
         .contextMenu {
+            if let projectSettings {
+                Button("Project settings…") { projectSettings(name) }
+                Divider()
+            }
             Button(isPinned ? "Unpin" : "Pin") { togglePin(name) }
             Button("Choose icon…") { icons.choose(for: name, store: store) }
             if icons.hasOwn(name, store: store) {
@@ -260,6 +268,39 @@ struct ProjectSidebar: View {
         var list = pinnedList.split(separator: "\n").map(String.init)
         if let index = list.firstIndex(of: name) { list.remove(at: index) } else { list.append(name) }
         withAnimation(Theme.Motion.snappy) { pinnedList = list.joined(separator: "\n") }
+    }
+}
+
+/// The dots at the end of a project's row, shown while the pointer is on
+/// it: they open the project's page. Not on the rail, where the
+/// right-click menu has it.
+private struct RowMore: ViewModifier {
+    let open: Bool
+    let action: (() -> Void)?
+    @State private var hovering = false
+    @State private var onDots = false
+
+    func body(content: Content) -> some View {
+        content
+            .overlay(alignment: .trailing) {
+                if open, hovering, let action {
+                    Button(action: action) {
+                        Image(systemName: "ellipsis")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(onDots ? Theme.Palette.ink : Theme.Palette.ink2)
+                            .frame(width: 24, height: 24)
+                            .background(RoundedRectangle(cornerRadius: Theme.Radius.chip, style: .continuous)
+                                .fill(onDots ? Theme.Palette.fill : .clear))
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(PressStyle())
+                    .onHover { onDots = $0 }
+                    .help("Project settings (⌘I)")
+                    .padding(.trailing, 6)
+                    .transition(.opacity)
+                }
+            }
+            .onHover { inside in withAnimation(Theme.Motion.hover) { hovering = inside } }
     }
 }
 
@@ -727,6 +768,17 @@ final class ProjectIcons: ObservableObject {
         images[project] = nil
         working.remove(project)
         load(project, store: store)
+    }
+
+    /// The icon follows the project to its new name.
+    func rename(_ old: String, to new: String, store: EntryStore) {
+        let from = Self.url(for: old, in: store), to = Self.url(for: new, in: store)
+        if FileManager.default.fileExists(atPath: from.path) {
+            try? FileManager.default.removeItem(at: to)
+            try? FileManager.default.moveItem(at: from, to: to)
+        }
+        images[new] = images.removeValue(forKey: old)
+        working.remove(old)
     }
 
     func hasOwn(_ project: String, store: EntryStore) -> Bool {

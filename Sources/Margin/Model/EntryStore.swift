@@ -104,6 +104,16 @@ final class EntryStore: ObservableObject {
         save()
     }
 
+    /// Moves every capture of `old` to `new`, and follows it if it's open.
+    func renameProject(_ old: String, to new: String) {
+        reloadIfChanged()
+        for index in entries.indices where entries[index].project == old {
+            entries[index].project = new
+        }
+        if currentProject == old { currentProject = new }
+        save()
+    }
+
     func update(_ entry: Entry) {
         reloadIfChanged()
         // Gone: deleted in another copy of Margin; it stays deleted.

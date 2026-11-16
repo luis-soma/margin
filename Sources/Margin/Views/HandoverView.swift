@@ -48,7 +48,7 @@ final class HandoverModel: ObservableObject {
     func pack(entries: [Entry], store: EntryStore, summary: ChapterSummary?, config: AIConfig) {
         guard !started else { return }
         started = true
-        let plan = HandoverExporter.plan(project: project, entries: entries, store: store, summary: summary)
+        let plan = HandoverExporter.plan(project: project, entries: entries, store: store, summary: summary, about: ProjectNotes.shared.about(project))
         total = plan.copies.count
         let model = self, project = project, folder = folder
         Task.detached(priority: .userInitiated) {
@@ -73,7 +73,7 @@ final class HandoverModel: ObservableObject {
     /// Writes the hand-off's texts again (HANDOFF.md with your description,
     /// say), leaving the captures already copied alone.
     func rewriteTexts(entries: [Entry], store: EntryStore, summary: ChapterSummary?) {
-        let plan = HandoverExporter.plan(project: project, entries: entries, store: store, summary: summary)
+        let plan = HandoverExporter.plan(project: project, entries: entries, store: store, summary: summary, about: ProjectNotes.shared.about(project))
         for text in plan.texts {
             try? text.contents.write(to: plan.folder.appendingPathComponent(text.name), atomically: true, encoding: .utf8)
         }

@@ -167,6 +167,7 @@ final class AppModel: ObservableObject {
         // Claude documenting a project (through margin-mcp) comes in here too.
         coding.deferredRoutes = { ClaudeImport.handle($0, reply: $1) || bridge.handleDeferred($0, reply: $1) }
         ClaudeImport.shared.store = store
+        ProjectNotes.shared.load(store)
         ClaudeImport.shared.onAdded = { [weak self] _ in self?.intelligence.scan() }
         // Margin's helper for the Claude app follows Margin's updates.
         if ClaudeDesktopLink.isConnected { try? ClaudeDesktopLink.refreshHelper() }

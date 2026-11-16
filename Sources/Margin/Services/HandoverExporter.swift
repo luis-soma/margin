@@ -30,7 +30,7 @@ enum HandoverExporter {
 
     /// Builds the files' contents and the list of captures to copy. Cheap; on the main actor.
     @MainActor
-    static func plan(project: String, entries: [Entry], store: EntryStore, summary: ChapterSummary?) -> Plan {
+    static func plan(project: String, entries: [Entry], store: EntryStore, summary: ChapterSummary?, about: String = "") -> Plan {
         let folder = folder(for: project)
         let captures = folder.appendingPathComponent("captures", isDirectory: true)
         let chronological = entries.sorted { $0.createdAt < $1.createdAt }
@@ -58,7 +58,7 @@ enum HandoverExporter {
         return Plan(
             folder: folder,
             texts: [
-                ("CLAUDE.md", guide(project: project, entries: chronological, files: copies.count)),
+                ("CLAUDE.md", guide(project: project, entries: chronological, files: copies.count, about: about)),
                 ("HANDOFF.md", story(project: project, entries: chronological, summary: summary,
                                       process: ProcessMemory.handoffSection(for: project))),
                 ("moments.json", json + "\n"),
@@ -184,7 +184,15 @@ enum HandoverExporter {
 
     // MARK: Files
 
-    private static func guide(project: String, entries: [Entry], files: Int) -> String {
+    private static func guide(project: String, entries: [Entry], files: Int, about: String = "") -> String {
+        // What the designer wrote about the project, as they wrote it.
+        let aboutSection = about.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "" : """
+
+        ## About the project, in the designer's words
+
+        \(about.trimmingCharacters(in: .whitespacesAndNewlines))
+
+        """
         let span = entries.first.map { first in
             "\(first.createdAt.formatted(date: .abbreviated, time: .omitted)) to \((entries.last ?? first).createdAt.formatted(date: .abbreviated, time: .omitted))"
         } ?? "no dates yet"
@@ -192,7 +200,7 @@ enum HandoverExporter {
         # \(project): design handoff from Margin
 
         This folder is the design record of **\(project)**, captured with Margin while it was designed (\(span), \(entries.count) moments, \(files) files). It is context, not a finished case study. Read it before building anything from it.
-
+        \(aboutSection)
         ## What's here
 
         - `HANDOFF.md`: the story. A short overview, the decisions, then every moment in order, day by day, with links to its files.

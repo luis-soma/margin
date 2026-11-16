@@ -114,6 +114,21 @@ enum ProjectCovers {
 
     private static func chosenKey(_ project: String) -> String { "coverChosen." + project }
 
+    /// The cover follows the project to its new name.
+    static func rename(_ old: String, to new: String, in store: EntryStore) {
+        let from = url(for: old, in: store), to = url(for: new, in: store)
+        if FileManager.default.fileExists(atPath: from.path) {
+            try? FileManager.default.removeItem(at: to)
+            try? FileManager.default.moveItem(at: from, to: to)
+        }
+        if UserDefaults.standard.bool(forKey: chosenKey(old)) {
+            UserDefaults.standard.set(true, forKey: chosenKey(new))
+            UserDefaults.standard.removeObject(forKey: chosenKey(old))
+        }
+        cache[from.path] = nil
+        store.objectWillChange.send()
+    }
+
     static func pngData(_ image: NSImage, maxWidth: CGFloat) -> Data? {
         guard let cg = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return nil }
         let scale = min(1, maxWidth / CGFloat(cg.width))

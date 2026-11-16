@@ -362,6 +362,10 @@ private struct CoverMenu: View {
             MoreButton(open: open) { withAnimation(Brand.quick) { open.toggle() } }
             if open {
                 VStack(alignment: .leading, spacing: 0) {
+                    MenuRow(title: "Project settings…", symbol: "slider.horizontal.3") {
+                        withAnimation(Brand.quick) { open = false }
+                        NotificationCenter.default.post(name: ProjectPage.show, object: project)
+                    }
                     MenuRow(title: "Choose thumbnail…", symbol: "photo") {
                         withAnimation(Brand.quick) { open = false }
                         ProjectCovers.choose(for: project, in: store)

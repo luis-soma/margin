@@ -129,8 +129,15 @@ public struct CaptureAsk {
         "required": ["ids", "reply", "label"],
     ]
 
-    static func prompt(question: String, items: [Item]) -> String {
-        var out = ["Captures:"]
+    static func prompt(question: String, items: [Item], context: String? = nil) -> String {
+        var out: [String] = []
+        // What the designer wrote about the project: background, not captures.
+        if let context, !context.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            out.append("About this project, in the designer's words:")
+            out.append(context)
+            out.append("")
+        }
+        out.append("Captures:")
         for item in items { out.append("[\(item.id)] \(item.line)") }
         out.append("")
         out.append("The designer asks: \(question)")
@@ -138,8 +145,8 @@ public struct CaptureAsk {
     }
 
     /// The captures that answer `question`, with a reply and a group name.
-    public func ask(_ question: String, items: [Item], onRetry: ((String) -> Void)? = nil) async throws -> Answer {
-        let data = try await generate(system: Self.system, prompt: Self.prompt(question: question, items: items),
+    public func ask(_ question: String, items: [Item], context: String? = nil, onRetry: ((String) -> Void)? = nil) async throws -> Answer {
+        let data = try await generate(system: Self.system, prompt: Self.prompt(question: question, items: items, context: context),
                                       schema: Self.schema, timeout: 40, onRetry: onRetry)
         struct Raw: Decodable {
             var ids: [String]
@@ -209,8 +216,8 @@ public struct CaptureAsk {
 
     /// The whole project regrouped around `request`. Unknown ids are dropped,
     /// each id is kept once (its first place), empty groups go.
-    public func steer(_ request: String, items: [Item], onRetry: ((String) -> Void)? = nil) async throws -> Steering {
-        let data = try await generate(system: Self.steerSystem, prompt: Self.prompt(question: request, items: items),
+    public func steer(_ request: String, items: [Item], context: String? = nil, onRetry: ((String) -> Void)? = nil) async throws -> Steering {
+        let data = try await generate(system: Self.steerSystem, prompt: Self.prompt(question: request, items: items, context: context),
                                       schema: Self.steerSchema, timeout: 90, onRetry: onRetry)
         struct Raw: Decodable {
             struct Pattern: Decodable { var name: String; var ids: [String] }

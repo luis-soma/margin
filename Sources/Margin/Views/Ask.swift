@@ -387,7 +387,8 @@ final class AskModel: ObservableObject {
         let (items, byKey) = Self.items(entries)
         let steering: CaptureAsk.Steering
         do {
-            steering = try await CaptureAsk(config: config).steer(question, items: items) { [weak self] in self?.retrying($0) }
+            let context = entries.first.map { ProjectNotes.shared.about($0.project) }
+            steering = try await CaptureAsk(config: config).steer(question, items: items, context: context) { [weak self] in self?.retrying($0) }
         } catch {
             guard !Task.isCancelled else { return }
             setPlan([plan.first ?? Step(doing: "Reading", done: "Read"), Step(doing: "Matching words", done: "Matched"),
@@ -476,7 +477,8 @@ final class AskModel: ObservableObject {
                                    onRetry: @escaping (String) -> Void)
         async throws -> (ids: [UUID], reply: String, label: String, keywords: Bool) {
         let (items, byKey) = items(entries)
-        let answer = try await CaptureAsk(config: config).ask(question, items: items, onRetry: onRetry)
+        let context = entries.first.map { ProjectNotes.shared.about($0.project) }
+        let answer = try await CaptureAsk(config: config).ask(question, items: items, context: context, onRetry: onRetry)
         let ids = answer.ids.compactMap { byKey[$0] }
         return (ids, answer.reply.isEmpty ? "Here's what fits." : answer.reply, answer.label, false)
     }

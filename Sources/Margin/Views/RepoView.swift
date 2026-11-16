@@ -90,6 +90,9 @@ struct RepoView: View {
     @StateObject private var ask = AskModel()
     /// Settings, one step past home.
     @State private var settingsOpen = false
+    /// A project's own page (name, icon, cover, what Margin knows), one
+    /// level up like Settings.
+    @State private var projectPage: String?
     /// Automatic capture on in Settings: its captures show between yours.
     /// Off: they stay out of the archive. (AutoCapture's own setting.)
     @AppStorage("autoCaptureEnabled") private var showAuto = true
@@ -121,6 +124,10 @@ struct RepoView: View {
             ZStack(alignment: .topLeading) {
                 if atHome && settingsOpen {
                     SettingsView(embedded: true)
+                        .transition(push)
+                } else if atHome, let page = projectPage {
+                    ProjectPage(project: page, open: openProject, renamed: { projectPage = $0 })
+                        .id(page)
                         .transition(push)
                 } else if atHome {
                     HomeView(open: openProject, settings: openSettings)
@@ -180,6 +187,10 @@ struct RepoView: View {
             }
             RunLoop.main.add(timer, forMode: .common)
         }
+        .onReceive(NotificationCenter.default.publisher(for: ProjectPage.show)) { note in
+            guard let name = note.object as? String else { return }
+            openProjectPage(name)
+        }
         .onReceive(NotificationCenter.default.publisher(for: OnboardingTour.showProject)) { note in
             guard let name = note.object as? String else { return }
             if !atHome && store.currentProject == name { return }
@@ -193,13 +204,17 @@ struct RepoView: View {
         }
         .onChange(of: atHome) { home in if home && askShown { closeAsk() } }
         .onAppear { ask.load(project: store.currentProject) }
-        // ⌘F: Ask, from anywhere in a project.
+        // ⌘F: Ask, from anywhere in a project. ⌘I: the project's page.
         .background(
-            Button("", action: openAsk)
-                .keyboardShortcut("f", modifiers: .command)
-                .opacity(0)
-                .allowsHitTesting(false)
-                .accessibilityHidden(true)
+            ZStack {
+                Button("", action: openAsk)
+                    .keyboardShortcut("f", modifiers: .command)
+                Button("") { if inProject { openProjectPage(store.currentProject) } }
+                    .keyboardShortcut("i", modifiers: .command)
+            }
+            .opacity(0)
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
         )
         .overlay {
             if let focused, inProject {
@@ -218,8 +233,8 @@ struct RepoView: View {
     /// The sidebar, open or the rail.
     private var sidebar: some View {
         ProjectSidebar(
-            current: store.currentProject,
-            onHome: atHome && !settingsOpen,
+            current: projectPage ?? store.currentProject,
+            onHome: atHome && !settingsOpen && projectPage == nil,
             onSettings: atHome && settingsOpen,
             shown: sidebarShown,
             open: openProject,
@@ -228,6 +243,7 @@ struct RepoView: View {
             menuOpen: optionsOpen,
             openMenu: { withAnimation(optionsOpen ? Theme.Motion.exit : Theme.Motion.enter) { optionsOpen.toggle() } },
             collapse: toggleSidebar,
+            projectSettings: openProjectPage,
             handoff: inProject ? toggleHandover : nil,
             handingOver: handingOver
         )
@@ -286,6 +302,20 @@ struct RepoView: View {
         step(forward: true) {
             store.currentProject = name
             atHome = false
+            projectPage = nil
+        }
+    }
+
+    /// A project's page, from the sidebar, All projects or ⌘I.
+    private func openProjectPage(_ name: String) {
+        guard !(atHome && projectPage == name) else { return }
+        step(forward: true) {
+            if handingOver { AppModel.shared.closeHandoffWindow() }
+            handingOver = false
+            optionsOpen = false
+            settingsOpen = false
+            atHome = true
+            projectPage = name
         }
     }
 
@@ -296,11 +326,15 @@ struct RepoView: View {
             handingOver = false
             optionsOpen = false
             settingsOpen = false
+            projectPage = nil
         }
     }
 
     private func openSettings() {
-        step(forward: true) { settingsOpen = true }
+        step(forward: true) {
+            settingsOpen = true
+            projectPage = nil
+        }
     }
 
     /// Settings from the sidebar, from wherever you are.
@@ -312,6 +346,7 @@ struct RepoView: View {
             optionsOpen = false
             atHome = true
             settingsOpen = true
+            projectPage = nil
         }
     }
 

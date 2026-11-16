@@ -76,7 +76,8 @@ final class ClaudeImport {
             ["title": entry.displayTitle, "kind": entry.kind.rawValue, "when": iso.string(from: entry.createdAt),
              "link": entry.link, "body": String(entry.body.prefix(160))]
         }
-        return ["name": name, "captures": entries.count, "recent": listed]
+        // What the designer wrote about the project, so Claude starts from it.
+        return ["name": name, "captures": entries.count, "about": ProjectNotes.shared.about(name), "recent": listed]
     }
 
     // MARK: Adding
