@@ -97,7 +97,7 @@ h1 { margin: 0; font: 500 clamp(32px, 4.2vw, 56px)/1.02 var(--display); letter-s
 <header>
   <div class="brand">
     <a href="/"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M13 7H8v18h5" fill="none" stroke="currentColor" stroke-width="2.6"/><circle cx="19.5" cy="16" r="3" fill="currentColor"/></svg>Margin</a>
-    <span class="pill">v0.4.0</span>
+    <span class="pill" id="version">v0.5.0</span>
   </div>
   <a class="nav" href="https://github.com/luis-soma/margin">GitHub</a>
 </header>
@@ -117,6 +117,15 @@ h1 { margin: 0; font: 500 clamp(32px, 4.2vw, 56px)/1.02 var(--display); letter-s
 <footer class="team">By <a href="https://ednaho.com">Edna Ho</a>, <a href="https://sarah-mei.com">Sarah Kwakkelaar</a> and <a href="https://luissoma.com">Luis Somasundaram</a></footer>
 
 <script>
+// The version on the chip is the newest release's, so it never goes stale.
+fetch("https://api.github.com/repos/luis-soma/margin/releases/latest")
+  .then(r => r.ok ? r.json() : null)
+  .then(release => {
+    const tag = release && release.tag_name;
+    if (tag) document.getElementById("version").textContent = "v" + tag.replace(/^v/, "").split(".").slice(0, 3).join(".");
+  })
+  .catch(() => {});
+
   const copy = document.getElementById('copy');
   copy.addEventListener('click', async () => {
     try { await navigator.clipboard.writeText(copy.dataset.prompt); } catch (e) { return; }
