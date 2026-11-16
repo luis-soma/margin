@@ -1,7 +1,10 @@
 name: Release
 
 # Builds Margin.dmg on a Mac and attaches it to a GitHub release.
-# Run it from the Actions tab (Run workflow) or push a tag like v0.4.1.
+# Runs on every push to main that changes the app (a release numbered
+# <version in Info.plist>.<commit count>, so installed copies see it as newer
+# and update themselves), from the Actions tab (Run workflow), or for a tag
+# like v0.6.0.
 # The link https://github.com/luis-soma/margin/releases/latest/download/Margin.dmg
 # always points at the newest one.
 
@@ -9,13 +12,25 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Release tag
-        default: v0.4.0
+        description: Release tag (empty for <version>.<commit count>)
+        default: ""
   push:
     tags: ["v*"]
+    branches: [main]
+    paths:
+      - "Sources/**"
+      - "Resources/**"
+      - "Package.swift"
+      - "scripts/build-app.sh"
+      - "scripts/package-release.sh"
 
 permissions:
   contents: write
+
+# One release at a time, in order.
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
   dmg:
@@ -23,6 +38,25 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Version
+        id: version
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          if [[ -n "$INPUT_TAG" ]]; then
+            TAG="$INPUT_TAG"
+          elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            TAG="$GITHUB_REF_NAME"
+          else
+            BASE="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' Resources/Info.plist)"
+            TAG="v$BASE.$(git rev-list --count HEAD)"
+          fi
+          # The app says the same version as its release.
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${TAG#v}" Resources/Info.plist
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Releasing $TAG"
       - name: Toolchain
         run: |
           sw_vers
@@ -43,7 +77,7 @@ jobs:
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ inputs.tag || github.ref_name }}
+          TAG: ${{ steps.version.outputs.tag }}
         run: |
           VERSION="${TAG#v}"
           if ! gh release view "$TAG" >/dev/null 2>&1; then
