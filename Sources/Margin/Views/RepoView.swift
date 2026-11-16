@@ -533,9 +533,6 @@ struct RepoView: View {
                 if inProject {
                     GranularitySlider(step: stepBinding, steps: TimeScale.allCases.count, live: clustering ? mapDepth : pinchZoom,
                                       continuous: clustering, onValue: { mapDepth = $0 })
-                        // On the sidebar's frosted card, like the switch below.
-                        .padding(.horizontal, Theme.Space.x1)
-                        .background(FloatingSurface(shape: RoundedRectangle(cornerRadius: Theme.Radius.floating, style: .continuous), frosted: true))
                         .tourAnchor("slider")
                         .frame(width: slider)
                         .offset(x: shift)
@@ -868,13 +865,17 @@ private struct GranularitySlider: View {
         let mid = HopMotion.height / 2
         let h = HopMotion.track - 3 * frame.speed
         let half = RoundedRectangle(cornerRadius: HopMotion.radius, style: .continuous)
-        let shade = Theme.Palette.ink.opacity(frame.dragging ? 0.08 : hovering ? 0.065 : 0.05)
+        // The halves are the sidebar's surface: frosted white with its soft
+        // shadow, a shade deeper under the pointer and in your hand.
+        let shade = Theme.Palette.ink.opacity(frame.dragging ? 0.04 : hovering ? 0.025 : 0)
         return ZStack(alignment: .topLeading) {
-            half.fill(shade)
+            FloatingSurface(shape: half, frosted: true)
+                .overlay(half.fill(shade))
                 .frame(width: frame.leftWidth, height: h)
                 .opacity(frame.leftWidth < 2 ? 0 : 1)
                 .offset(y: mid - h / 2)
-            half.fill(shade)
+            FloatingSurface(shape: half, frosted: true)
+                .overlay(half.fill(shade))
                 .frame(width: frame.rightWidth, height: h)
                 .opacity(frame.rightWidth < 2 ? 0 : 1)
                 .offset(x: frame.rightX, y: mid - h / 2)
@@ -933,8 +934,8 @@ private final class HopMotion {
     /// The row it sits in (the tools' height), the track's own height and
     /// the halves' corners.
     static let height: CGFloat = 28
-    static let track: CGFloat = 20
-    static let radius: CGFloat = Theme.Radius.chip
+    static let track: CGFloat = 26
+    static let radius: CGFloat = Theme.Radius.control
     /// The labels at the ends, in sentence case, at the control size every
     /// switch uses.
     static let labels = ["Close-up", "Big picture"]
