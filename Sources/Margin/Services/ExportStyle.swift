@@ -36,7 +36,7 @@ struct ExportStyle: Codable, Equatable {
     init() {}
 
     enum Backdrop: String, Codable, CaseIterable, Identifiable {
-        // Soft light with a little grain, like a photo out of focus.
+        // Soft light, like a photo out of focus.
         case paper, fog, dawn, silver, dusk, smoke, cobalt, aurora
         // Plain.
         case white, mist, ink
@@ -82,7 +82,7 @@ struct ExportStyle: Codable, Equatable {
     }
 
     /// A textured backdrop: a top-to-bottom wash, soft light laid over it,
-    /// blurred, then a fine grain.
+    /// blurred, then the faintest dither so it stays smooth.
     struct Texture {
         struct Light {
             /// 0 to 1 from the top left.
@@ -101,7 +101,7 @@ struct ExportStyle: Codable, Equatable {
         var top: Int
         var bottom: Int
         var lights: [Light]
-        var grain: CGFloat = 0.09
+        var grain: CGFloat = 0.008
 
         static func of(_ backdrop: Backdrop) -> Texture? {
             switch backdrop {
@@ -109,7 +109,7 @@ struct ExportStyle: Codable, Equatable {
                 return Texture(top: 0xF7F6F3, bottom: 0xE8E6E1, lights: [
                     Light(x: 0.72, y: 0.22, radius: 0.55, color: 0xFFFFFF, alpha: 0.8, stretch: (1.6, 0.9), angle: -15),
                     Light(x: 0.2, y: 0.9, radius: 0.45, color: 0xDCD8D0, alpha: 0.6),
-                ], grain: 0.12)
+                ])
             case .fog:
                 return Texture(top: 0xEEF1F3, bottom: 0x0B1420, lights: [
                     Light(x: 0.5, y: 0.5, radius: 0.55, color: 0x8FA7B7, alpha: 0.85, stretch: (2.6, 0.55)),
@@ -134,19 +134,19 @@ struct ExportStyle: Codable, Equatable {
                 return Texture(top: 0x0B0B0B, bottom: 0x1B1B1B, lights: [
                     Light(x: 0.6, y: 0.38, radius: 0.45, color: 0xD9D9D9, alpha: 0.8, stretch: (2.3, 0.32), angle: -35),
                     Light(x: 0.24, y: 0.82, radius: 0.32, color: 0xF1EEE6, alpha: 0.55, stretch: (1.7, 0.55), angle: 22),
-                ], grain: 0.11)
+                ])
             case .cobalt:
                 return Texture(top: 0x2F60CC, bottom: 0x0A1120, lights: [
                     Light(x: 0.26, y: 0.3, radius: 0.42, color: 0x79A2EC, alpha: 0.7, stretch: (2.1, 0.6), angle: 18),
                     Light(x: 0.82, y: 0.88, radius: 0.5, color: 0x04070D, alpha: 0.9, stretch: (1.8, 0.9), angle: 25),
-                ], grain: 0.11)
+                ])
             case .aurora:
                 return Texture(top: 0x4A4038, bottom: 0x0E1420, lights: [
                     Light(x: 0.35, y: 0.32, radius: 0.36, color: 0x8C7B67, alpha: 0.7),
                     Light(x: 0.74, y: 0.45, radius: 0.28, color: 0x5A8FE0, alpha: 0.7, stretch: (0.6, 2.0), angle: 10),
                     Light(x: 0.4, y: 0.84, radius: 0.32, color: 0xE8904A, alpha: 0.5, stretch: (2.0, 0.5), angle: 8),
                     Light(x: 0.58, y: 0.66, radius: 0.24, color: 0xE9E3D7, alpha: 0.4),
-                ], grain: 0.11)
+                ])
             default:
                 return nil
             }
@@ -429,19 +429,21 @@ enum ExportRenderer {
         // Soft all over, as if out of focus.
         image = image.clampedToExtent().applyingGaussianBlur(sigma: 0.06 * longest).cropped(to: bounds)
 
-        // A fine grain, the same on every frame.
-        let k = texture.grain
-        let grain = CIFilter.randomGenerator().outputImage?
+        // The faintest dither, a step or two of 255: no visible grain, but
+        // the soft gradients don't band, not even in a GIF or an MP4.
+        let amount = texture.grain
+        let shifted = image.applyingFilter("CIColorMatrix", parameters: [
+            "inputBiasVector": CIVector(x: -amount / 2, y: -amount / 2, z: -amount / 2, w: 0),
+        ])
+        if let noise = CIFilter.randomGenerator().outputImage?
             .applyingFilter("CIColorMatrix", parameters: [
-                "inputRVector": CIVector(x: k, y: 0, z: 0, w: 0),
-                "inputGVector": CIVector(x: k, y: 0, z: 0, w: 0),
-                "inputBVector": CIVector(x: k, y: 0, z: 0, w: 0),
+                "inputRVector": CIVector(x: amount, y: 0, z: 0, w: 0),
+                "inputGVector": CIVector(x: amount, y: 0, z: 0, w: 0),
+                "inputBVector": CIVector(x: amount, y: 0, z: 0, w: 0),
                 "inputAVector": CIVector(x: 0, y: 0, z: 0, w: 0),
-                "inputBiasVector": CIVector(x: 0.5 - k / 2, y: 0.5 - k / 2, z: 0.5 - k / 2, w: 1),
-            ])
-            .cropped(to: bounds)
-        if let grain {
-            image = grain.applyingFilter("CISoftLightBlendMode", parameters: [kCIInputBackgroundImageKey: image]).cropped(to: bounds)
+                "inputBiasVector": CIVector(x: 0, y: 0, z: 0, w: 0),
+            ]) {
+            image = noise.applyingFilter("CIAdditionCompositing", parameters: [kCIInputBackgroundImageKey: shifted]).cropped(to: bounds)
         }
         return image
     }

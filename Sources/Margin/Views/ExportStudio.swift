@@ -121,7 +121,7 @@ struct ExportStudio: View {
 
     private var stage: some View {
         GeometryReader { geo in
-            let timeline: CGFloat = isVideo && !cropping ? 60 : 0
+            let timeline: CGFloat = 60
             let room = CGSize(width: max(80, geo.size.width - 2 * F.leading),
                               height: max(80, geo.size.height - 2 * F.verticalMargin * 0.75 - timeline))
             ZStack {
@@ -132,6 +132,7 @@ struct ExportStudio: View {
                         .interpolation(.high)
                         .frame(width: size.width, height: size.height)
                         .overlay(CropOverlay(crop: $crop))
+                        .offset(y: -timeline / 2)
                         .transition(.opacity)
                 } else if isVideo, player.renderSize != .zero {
                     let size = fitted(player.renderSize, in: room)
@@ -154,6 +155,7 @@ struct ExportStudio: View {
                     // shows where it ends.
                     .overlay(Rectangle().strokeBorder(Archive.rule, lineWidth: 1))
                     .animation(Theme.Motion.settle, value: size)
+                    .offset(y: -timeline / 2)
                     .transition(.opacity)
                 } else if failed {
                     Text("This capture can't be opened here.")
@@ -165,17 +167,20 @@ struct ExportStudio: View {
             }
             .frame(width: geo.size.width, height: geo.size.height)
             .animation(Theme.Motion.settle, value: cropping)
-            .overlay(alignment: .topLeading) { stageTools.padding(.top, F.navTop).padding(.leading, F.navTop) }
             .overlay(alignment: .bottom) {
-                if isVideo, !cropping, player.duration > 0 {
-                    Scrubber(time: player.time, playing: player.playing, duration: player.duration,
-                             clicks: plan?.clicks.map(\.t) ?? [],
-                             seek: { player.seek($0) }, togglePlay: { player.toggle() })
-                        .frame(maxWidth: 520)
-                        .padding(.horizontal, F.leading)
-                        .padding(.bottom, Theme.Space.x6)
-                        .transition(.opacity)
+                // Under the preview: the timeline for a recording, and Crop.
+                HStack(spacing: Theme.Space.x2) {
+                    if isVideo, !cropping, player.duration > 0 {
+                        Scrubber(time: player.time, playing: player.playing, duration: player.duration,
+                                 clicks: plan?.clicks.map(\.t) ?? [],
+                                 seek: { player.seek($0) }, togglePlay: { player.toggle() })
+                            .transition(.opacity)
+                    }
+                    stageTools
                 }
+                .frame(maxWidth: isVideo && !cropping ? 600 : nil)
+                .padding(.horizontal, F.leading)
+                .padding(.bottom, Theme.Space.x6)
             }
         }
     }
@@ -215,21 +220,23 @@ struct ExportStudio: View {
         .padding(.bottom, F.trailing)
     }
 
+    /// The settings in Settings' own form: a title, then each group's
+    /// rows on a raised card, hairlines between them.
     private var settings: some View {
-        VStack(alignment: .leading, spacing: 26) {
+        VStack(alignment: .leading, spacing: Theme.Space.x6) {
             Text("Edit")
-                .font(Theme.Typography.ui(17, .semibold))
-                .foregroundStyle(Archive.ink)
-                .padding(.bottom, -6)
+                .font(Theme.Typography.ui(Theme.Typography.title, .medium))
+                .foregroundStyle(Theme.Palette.ink)
             group("Background") {
                 Swatches(style: $style, options: ExportStyle.Backdrop.available(video: isVideo), capture: small)
+                    .padding(.vertical, Theme.Space.x3)
             }
             group("Frame") {
-                VStack(spacing: 14) {
-                    StyleSlider(title: "Padding", value: $style.padding)
-                    StyleSlider(title: "Corners", value: $style.radius)
-                    StyleSlider(title: "Shadow", value: $style.shadow)
-                }
+                sliderRow("Padding", $style.padding)
+                divider
+                sliderRow("Corners", $style.radius)
+                divider
+                sliderRow("Shadow", $style.shadow)
             }
             group("Size") {
                 VStack(alignment: .leading, spacing: Theme.Space.x2) {
@@ -239,56 +246,89 @@ struct ExportStudio: View {
                             .transition(.opacity.combined(with: .offset(y: -4)))
                     }
                 }
+                .padding(.vertical, Theme.Space.x3)
                 .animation(Theme.Motion.snappy, value: style.ratio == .custom)
             }
             if isVideo, track != nil {
                 group("Motion") { motion }
             }
-            Button("Reset to default") { withAnimation(Theme.Motion.settle) { style = ExportStyle() } }
-                .buttonStyle(.plain)
-                .font(Archive.sans(F.valueSize))
-                .foregroundStyle(Archive.faint)
-                .pointingHand()
-                .opacity(style == ExportStyle() ? 0 : 1)
-                .disabled(style == ExportStyle())
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    private var motion: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            StyleToggle(title: "Zoom on clicks", isOn: $style.zoom)
-            if style.zoom {
-                StyleSlider(title: "Zoom", value: $style.zoomAmount)
+            if style != ExportStyle() {
+                Button("Reset to default") { withAnimation(Theme.Motion.settle) { style = ExportStyle() } }
+                    .buttonStyle(.plain)
+                    .font(Theme.Typography.ui(Theme.Typography.caption))
+                    .foregroundStyle(Theme.Palette.ink3)
+                    .pointingHand()
                     .transition(.opacity)
             }
-            if studioURL != nil {
-                StyleToggle(title: "Smooth cursor", isOn: $style.smoothCursor)
-                if style.smoothCursor {
-                    StyleSlider(title: "Cursor size", value: $style.cursorSize)
-                        .transition(.opacity)
-                }
-            }
-            StyleToggle(title: "Show clicks", isOn: $style.showClicks)
-            if plan?.hasClicks == false {
-                Text("No clicks in this recording, so nothing to zoom to.")
-                    .font(Archive.sans(F.valueSize))
-                    .foregroundStyle(Archive.faint)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.top, Theme.Space.x1)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .animation(Theme.Motion.snappy, value: style == ExportStyle())
+    }
+
+    @ViewBuilder
+    private var motion: some View {
+        toggleRow("Zoom on clicks", plan?.hasClicks == false ? "No clicks in this recording" : nil, $style.zoom)
+        if style.zoom {
+            sliderRow("Zoom", $style.zoomAmount)
+                .padding(.top, -Theme.Space.x2)
+                .transition(.opacity)
+        }
+        if studioURL != nil {
+            divider
+            toggleRow("Smooth cursor", nil, $style.smoothCursor)
+            if style.smoothCursor {
+                sliderRow("Size", $style.cursorSize)
+                    .padding(.top, -Theme.Space.x2)
+                    .transition(.opacity)
             }
         }
-        .animation(Theme.Motion.snappy, value: style.zoom)
-        .animation(Theme.Motion.snappy, value: style.smoothCursor)
+        divider
+        toggleRow("Show clicks", nil, $style.showClicks)
     }
 
     private func group<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: Theme.Space.x2) {
             Text(title)
-                .font(Theme.Typography.ui(Theme.Typography.caption, .medium))
-                .foregroundStyle(Archive.faint)
-            content()
+                .font(Theme.Typography.ui(Theme.Typography.body, .medium))
+                .foregroundStyle(Theme.Palette.ink)
+            VStack(alignment: .leading, spacing: 0) { content() }
+                .padding(.horizontal, Theme.Space.x3)
+                .background(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous).fill(Theme.Palette.raised))
+                .animation(Theme.Motion.snappy, value: style.zoom)
+                .animation(Theme.Motion.snappy, value: style.smoothCursor)
         }
+    }
+
+    private func sliderRow(_ title: String, _ value: Binding<Double>) -> some View {
+        StyleSlider(title: title, value: value)
+            .padding(.vertical, Theme.Space.x3)
+    }
+
+    /// A setting that's on or off, as in Settings: its name, a line if it
+    /// needs one, Margin's switch on the right.
+    private func toggleRow(_ title: String, _ detail: String?, _ isOn: Binding<Bool>) -> some View {
+        HStack(alignment: .center, spacing: Theme.Space.x3) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(Theme.Typography.ui(Theme.Typography.body))
+                    .foregroundStyle(Theme.Palette.ink)
+                if let detail {
+                    Text(detail)
+                        .font(Theme.Typography.ui(Theme.Typography.caption))
+                        .foregroundStyle(Theme.Palette.ink3)
+                }
+            }
+            Spacer(minLength: Theme.Space.x2)
+            Toggle("", isOn: isOn)
+                .labelsHidden()
+                .toggleStyle(InkSwitch())
+                .controlSize(.small)
+        }
+        .padding(.vertical, Theme.Space.x3)
+    }
+
+    private var divider: some View {
+        Rectangle().fill(Theme.Palette.hairline).frame(height: 1)
     }
 
     private var footer: some View {
@@ -811,9 +851,9 @@ private struct FormatSwitch: View {
                     withAnimation(Theme.Motion.snappy) { selection = format }
                 } label: {
                     Text(format == .mp4 ? "MP4" : "GIF")
-                        .font(Theme.Typography.ui(Theme.Typography.caption, selection == format ? .medium : .regular))
+                        .font(Theme.Typography.ui(Theme.Typography.control))
                         .foregroundStyle(S.label(selection == format, hovered: false))
-                        .frame(width: 42, height: 22)
+                        .frame(width: 46, height: S.segment)
                         .background {
                             if selection == format { SegmentThumb().matchedGeometryEffect(id: "thumb", in: thumb) }
                         }
@@ -822,7 +862,7 @@ private struct FormatSwitch: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding(2)
+        .padding(S.padding)
         .background(SegmentTrack())
     }
 }
@@ -1014,11 +1054,13 @@ private struct AddSwatch: View {
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: 7, style: .continuous)
         Button(action: action) {
-            Image(systemName: "plus")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(hovering || highlighted ? Theme.Palette.ink : Theme.Palette.ink3)
-                .frame(maxWidth: .infinity)
+            Color.clear
                 .aspectRatio(4 / 3, contentMode: .fit)
+                .overlay(
+                    Image(systemName: "plus")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(hovering || highlighted ? Theme.Palette.ink : Theme.Palette.ink3)
+                )
                 .background(shape.fill(hovering || highlighted ? Theme.Palette.fill : Color.clear))
                 .overlay(shape.strokeBorder(Theme.Palette.ink.opacity(0.14), style: StrokeStyle(lineWidth: 1, dash: [3, 3])))
                 .padding(3)
@@ -1163,58 +1205,89 @@ private struct Swatch: View {
     }
 }
 
-/// A setting you drag: its name and amount above a thin track with a
-/// round knob.
+/// A setting you drag, in the timeline slider's form: two light halves of
+/// a track either side of a slim ink handle, the name in one, the amount
+/// at the far end. When the name runs out of room it moves past the handle.
 private struct StyleSlider: View {
     let title: String
     @Binding var value: Double
     @State private var hovering = false
     @State private var dragging = false
 
-    var body: some View {
-        VStack(spacing: 7) {
-            HStack {
-                Text(title)
-                    .foregroundStyle(Theme.Palette.ink2)
-                Spacer()
-                Text("\(Int((value * 100).rounded()))")
-                    .monospacedDigit()
-                    .foregroundStyle(dragging || hovering ? Theme.Palette.ink : Theme.Palette.ink3)
-            }
-            .font(Theme.Typography.ui(Theme.Typography.control))
+    private static let height: CGFloat = 28
+    private static let track: CGFloat = 22
+    private static let gap: CGFloat = 5
+    private static let pad: CGFloat = 10
+    private static let inset: CGFloat = 8
 
-            GeometryReader { geo in
-                let knob: CGFloat = dragging ? 15 : 13
-                let width = geo.size.width
-                let x = CGFloat(value) * (width - 13) + 6.5
-                ZStack(alignment: .leading) {
-                    Capsule()
-                        .fill(Theme.Palette.ink.opacity(0.09))
-                        .frame(height: 4)
-                    Capsule()
-                        .fill(Theme.Palette.ink.opacity(hovering || dragging ? 0.9 : 0.75))
-                        .frame(width: max(4, x), height: 4)
-                    Circle()
-                        .fill(Color.white)
-                        .frame(width: knob, height: knob)
-                        .shadow(color: .black.opacity(0.18), radius: 1.5, y: 0.5)
-                        .overlay(Circle().strokeBorder(Color.black.opacity(0.08), lineWidth: 0.5))
-                        .offset(x: x - knob / 2)
-                }
-                .frame(height: 16)
-                .frame(maxHeight: .infinity)
-                .contentShape(Rectangle())
-                .gesture(
-                    DragGesture(minimumDistance: 0)
-                        .onChanged { drag in
-                            withAnimation(.interactiveSpring(response: 0.18, dampingFraction: 0.9)) { dragging = true }
-                            value = Double(min(max((drag.location.x - 6.5) / max(width - 13, 1), 0), 1))
-                        }
-                        .onEnded { _ in withAnimation(Theme.Motion.snappy) { dragging = false } }
-                )
+    private var font: NSFont { Theme.Typography.nsUI(Theme.Typography.control) }
+    private func width(of text: String) -> CGFloat {
+        ceil((text as NSString).size(withAttributes: [.font: font]).width)
+    }
+
+    var body: some View {
+        GeometryReader { geo in
+            let total = geo.size.width
+            let number = "\(Int((value * 100).rounded()))"
+            let nameWidth = width(of: title)
+            let numberWidth = width(of: number)
+            let handleX = Self.inset + CGFloat(value) * (total - 2 * Self.inset)
+            let leftWidth = max(handleX - Self.gap, 0)
+            let rightX = handleX + Self.gap
+            let rightWidth = max(total - rightX, 0)
+            // The name sits in the left half while it fits, else past the handle.
+            let nameLeft = leftWidth >= nameWidth + 2 * Self.pad
+            let nameX = nameLeft ? Self.pad : rightX + Self.pad
+            // The amount sits at the far right, or before the handle near the end.
+            let numberRight = rightWidth >= numberWidth + 2 * Self.pad + (nameLeft ? 0 : nameWidth + Self.pad)
+            let numberX = numberRight ? total - Self.pad - numberWidth : handleX - Self.gap - Self.pad - numberWidth
+            let half = RoundedRectangle(cornerRadius: Theme.Radius.chip + 1, style: .continuous)
+            let shade = Theme.Palette.ink.opacity(dragging ? 0.075 : hovering ? 0.06 : 0.045)
+            let top = (Self.height - Self.track) / 2
+            let handleHeight = Self.track + (dragging ? 10 : 6)
+            let handleWidth: CGFloat = dragging ? 3 : 2
+
+            ZStack(alignment: .topLeading) {
+                half.fill(shade)
+                    .frame(width: leftWidth, height: Self.track)
+                    .opacity(leftWidth < 2 ? 0 : 1)
+                    .offset(y: top)
+                half.fill(shade)
+                    .frame(width: rightWidth, height: Self.track)
+                    .opacity(rightWidth < 2 ? 0 : 1)
+                    .offset(x: rightX, y: top)
+                Capsule()
+                    .fill(Theme.Palette.ink)
+                    .frame(width: handleWidth, height: handleHeight)
+                    .offset(x: handleX - handleWidth / 2, y: (Self.height - handleHeight) / 2)
+                Text(title)
+                    .font(Theme.Typography.ui(Theme.Typography.control))
+                    .foregroundStyle(Theme.Palette.ink.opacity(0.8))
+                    .fixedSize()
+                    .frame(height: 16)
+                    .offset(x: nameX, y: Self.height / 2 - 8)
+                    .animation(Theme.Motion.snappy, value: nameLeft)
+                Text(number)
+                    .font(Theme.Typography.ui(Theme.Typography.control))
+                    .monospacedDigit()
+                    .foregroundStyle(Theme.Palette.ink.opacity(dragging ? 0.6 : 0.36))
+                    .fixedSize()
+                    .frame(height: 16)
+                    .offset(x: numberX, y: Self.height / 2 - 8)
+                    .animation(Theme.Motion.snappy, value: numberRight)
             }
-            .frame(height: 16)
+            .frame(width: total, height: Self.height, alignment: .topLeading)
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { drag in
+                        if !dragging { withAnimation(Theme.Motion.snappy) { dragging = true } }
+                        value = Double(min(max((drag.location.x - Self.inset) / max(total - 2 * Self.inset, 1), 0), 1))
+                    }
+                    .onEnded { _ in withAnimation(Theme.Motion.snappy) { dragging = false } }
+            )
         }
+        .frame(height: Self.height)
         .onHover { inside in withAnimation(Theme.Motion.hover) { hovering = inside } }
         .accessibilityElement()
         .accessibilityLabel(title)
@@ -1226,40 +1299,6 @@ private struct StyleSlider: View {
             @unknown default: break
             }
         }
-    }
-}
-
-/// A setting that's on or off: its name, a small switch at the end.
-private struct StyleToggle: View {
-    let title: String
-    @Binding var isOn: Bool
-
-    var body: some View {
-        Button {
-            withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) { isOn.toggle() }
-        } label: {
-            HStack {
-                Text(title)
-                    .font(Theme.Typography.ui(Theme.Typography.control))
-                    .foregroundStyle(Theme.Palette.ink2)
-                Spacer()
-                ZStack(alignment: isOn ? .trailing : .leading) {
-                    Capsule()
-                        .fill(isOn ? Theme.Palette.ink : Theme.Palette.ink.opacity(0.13))
-                        .frame(width: 28, height: 17)
-                    Circle()
-                        .fill(Color.white)
-                        .frame(width: 13, height: 13)
-                        .shadow(color: .black.opacity(0.18), radius: 1, y: 0.5)
-                        .padding(2)
-                }
-            }
-            .frame(height: 24)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(title)
-        .accessibilityValue(isOn ? "On" : "Off")
     }
 }
 
@@ -1277,7 +1316,7 @@ private struct RatioSwitch: View {
                     withAnimation(Theme.Motion.snappy) { selection = ratio }
                 } label: {
                     Text(ratio.name)
-                        .font(Theme.Typography.ui(Theme.Typography.control, selection == ratio ? .medium : .regular))
+                        .font(Theme.Typography.ui(Theme.Typography.control))
                         .monospacedDigit()
                         .foregroundStyle(S.label(selection == ratio, hovered: hovered == ratio))
                         .frame(maxWidth: .infinity)
@@ -1311,7 +1350,7 @@ private struct StudioButton: View {
         let shape = RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous)
         Button(action: action) {
             Text(title)
-                .font(Theme.Typography.ui(Theme.Typography.body, .medium))
+                .font(Theme.Typography.ui(Theme.Typography.body, primary ? .medium : .regular))
                 .monospacedDigit()
                 .foregroundStyle(primary ? Theme.Palette.paper : Theme.Palette.ink)
                 .frame(maxWidth: primary ? .infinity : nil)
