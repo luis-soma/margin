@@ -7,7 +7,7 @@ import CoreImage.CIFilterBuiltins
 /// corners, a shadow and the frame's shape. One look for screenshots and
 /// recordings, kept between exports.
 struct ExportStyle: Codable, Equatable {
-    var backdrop: Backdrop = .mist
+    var backdrop: Backdrop = .paper
     /// With `.picture`: one of your own backgrounds (see `ExportBackgrounds`).
     var picture: String?
     /// 0 to 1: the room around the capture.
@@ -36,46 +36,120 @@ struct ExportStyle: Codable, Equatable {
     init() {}
 
     enum Backdrop: String, Codable, CaseIterable, Identifiable {
-        case none, white, mist, graphite, ink, sand, sky, sage, rose, dusk, blur, picture
+        // Soft light with a little grain, like a photo out of focus.
+        case paper, fog, dawn, silver, dusk, smoke, cobalt, aurora
+        // Plain.
+        case white, mist, ink
+        case blur, none, picture
 
         var id: String { rawValue }
 
         var name: String {
             switch self {
-            case .none: return "None"
+            case .paper: return "Paper"
+            case .fog: return "Fog"
+            case .dawn: return "Dawn"
+            case .silver: return "Silver"
+            case .dusk: return "Dusk"
+            case .smoke: return "Smoke"
+            case .cobalt: return "Cobalt"
+            case .aurora: return "Aurora"
             case .white: return "White"
             case .mist: return "Mist"
-            case .graphite: return "Graphite"
             case .ink: return "Ink"
-            case .sand: return "Sand"
-            case .sky: return "Sky"
-            case .sage: return "Sage"
-            case .rose: return "Rose"
-            case .dusk: return "Dusk"
             case .blur: return "From the capture"
+            case .none: return "None"
             case .picture: return "Your picture"
             }
         }
 
-        /// Top left to bottom right; the same twice for a solid.
+        /// The plain ones: top left to bottom right.
         var colors: (Int, Int)? {
             switch self {
             case .white: return (0xFFFFFF, 0xFFFFFF)
-            case .mist: return (0xF4F4F2, 0xE2E2DF)
-            case .graphite: return (0x5C5C5C, 0x262626)
-            case .ink: return (0x141414, 0x141414)
-            case .sand: return (0xF2EADF, 0xD8C6AD)
-            case .sky: return (0xE2ECF7, 0xA8C2E4)
-            case .sage: return (0xE6EDE2, 0xB3C6AB)
-            case .rose: return (0xF6E5E2, 0xDDB2AC)
-            case .dusk: return (0x40455F, 0x181A28)
-            case .none, .blur, .picture: return nil
+            case .mist: return (0xF4F4F2, 0xE4E4E1)
+            case .ink: return (0x161616, 0x0E0E0E)
+            default: return nil
             }
         }
 
-        /// The built-in ones. A recording has no see-through: no "None" for it.
+        var textured: Bool { Texture.of(self) != nil }
+
+        /// The built-in ones, in order. A recording has no see-through.
         static func available(video: Bool) -> [Backdrop] {
             allCases.filter { $0 != .picture && !(video && $0 == .none) }
+        }
+    }
+
+    /// A textured backdrop: a top-to-bottom wash, soft light laid over it,
+    /// blurred, then a fine grain.
+    struct Texture {
+        struct Light {
+            /// 0 to 1 from the top left.
+            var x: CGFloat
+            var y: CGFloat
+            /// Of the longer side.
+            var radius: CGFloat
+            var color: Int
+            var alpha: CGFloat
+            /// Width and height of the light, stretched.
+            var stretch: (CGFloat, CGFloat) = (1, 1)
+            /// Degrees.
+            var angle: CGFloat = 0
+        }
+
+        var top: Int
+        var bottom: Int
+        var lights: [Light]
+        var grain: CGFloat = 0.09
+
+        static func of(_ backdrop: Backdrop) -> Texture? {
+            switch backdrop {
+            case .paper:
+                return Texture(top: 0xF7F6F3, bottom: 0xE8E6E1, lights: [
+                    Light(x: 0.72, y: 0.22, radius: 0.55, color: 0xFFFFFF, alpha: 0.8, stretch: (1.6, 0.9), angle: -15),
+                    Light(x: 0.2, y: 0.9, radius: 0.45, color: 0xDCD8D0, alpha: 0.6),
+                ], grain: 0.12)
+            case .fog:
+                return Texture(top: 0xEEF1F3, bottom: 0x0B1420, lights: [
+                    Light(x: 0.5, y: 0.5, radius: 0.55, color: 0x8FA7B7, alpha: 0.85, stretch: (2.6, 0.55)),
+                    Light(x: 0.5, y: 0.08, radius: 0.5, color: 0xF6F8F9, alpha: 0.7, stretch: (2.2, 0.6)),
+                ])
+            case .dawn:
+                return Texture(top: 0xF4ECE4, bottom: 0xB6C1D1, lights: [
+                    Light(x: 0.28, y: 0.72, radius: 0.45, color: 0xE9CBB6, alpha: 0.65, stretch: (1.8, 0.8), angle: 12),
+                    Light(x: 0.78, y: 0.25, radius: 0.4, color: 0xFFFFFF, alpha: 0.6),
+                ])
+            case .silver:
+                return Texture(top: 0x2C2E30, bottom: 0x141516, lights: [
+                    Light(x: 0.42, y: 0.62, radius: 0.48, color: 0xE4E6E8, alpha: 0.75, stretch: (1.7, 0.85), angle: -28),
+                    Light(x: 0.85, y: 0.15, radius: 0.35, color: 0x55595D, alpha: 0.6),
+                ])
+            case .dusk:
+                return Texture(top: 0xC8CFDA, bottom: 0x1C2638, lights: [
+                    Light(x: 0.3, y: 0.32, radius: 0.38, color: 0xF3F5F8, alpha: 0.65, stretch: (1.9, 0.6), angle: -8),
+                    Light(x: 0.72, y: 0.7, radius: 0.42, color: 0x0D1524, alpha: 0.75, stretch: (1.6, 0.8)),
+                ])
+            case .smoke:
+                return Texture(top: 0x0B0B0B, bottom: 0x1B1B1B, lights: [
+                    Light(x: 0.6, y: 0.38, radius: 0.45, color: 0xD9D9D9, alpha: 0.8, stretch: (2.3, 0.32), angle: -35),
+                    Light(x: 0.24, y: 0.82, radius: 0.32, color: 0xF1EEE6, alpha: 0.55, stretch: (1.7, 0.55), angle: 22),
+                ], grain: 0.11)
+            case .cobalt:
+                return Texture(top: 0x2F60CC, bottom: 0x0A1120, lights: [
+                    Light(x: 0.26, y: 0.3, radius: 0.42, color: 0x79A2EC, alpha: 0.7, stretch: (2.1, 0.6), angle: 18),
+                    Light(x: 0.82, y: 0.88, radius: 0.5, color: 0x04070D, alpha: 0.9, stretch: (1.8, 0.9), angle: 25),
+                ], grain: 0.11)
+            case .aurora:
+                return Texture(top: 0x4A4038, bottom: 0x0E1420, lights: [
+                    Light(x: 0.35, y: 0.32, radius: 0.36, color: 0x8C7B67, alpha: 0.7),
+                    Light(x: 0.74, y: 0.45, radius: 0.28, color: 0x5A8FE0, alpha: 0.7, stretch: (0.6, 2.0), angle: 10),
+                    Light(x: 0.4, y: 0.84, radius: 0.32, color: 0xE8904A, alpha: 0.5, stretch: (2.0, 0.5), angle: 8),
+                    Light(x: 0.58, y: 0.66, radius: 0.24, color: 0xE9E3D7, alpha: 0.4),
+                ], grain: 0.11)
+            default:
+                return nil
+            }
         }
     }
 
@@ -288,6 +362,9 @@ enum ExportRenderer {
             }
             return covering(bounds, with: picture, zoom: 1).clampedToExtent().cropped(to: bounds)
         default:
+            if let texture = ExportStyle.Texture.of(style.backdrop) {
+                return textured(style.backdrop, texture, size: bounds.size)
+            }
             guard let pair = style.backdrop.colors else { return CIImage(color: .white).cropped(to: bounds) }
             let (from, to) = pair
             if from == to { return CIImage(color: ciColor(from)).cropped(to: bounds) }
@@ -298,6 +375,81 @@ enum ExportRenderer {
             gradient.color1 = ciColor(to)
             return (gradient.outputImage ?? CIImage(color: ciColor(from))).cropped(to: bounds)
         }
+    }
+
+    // Textured backdrops are drawn once per size and kept: a recording asks
+    // for the same one every frame.
+    private static var textures: [String: CIImage] = [:]
+    private static let texturesLock = NSLock()
+
+    private static func textured(_ backdrop: ExportStyle.Backdrop, _ texture: ExportStyle.Texture, size: CGSize) -> CIImage {
+        let key = "\(backdrop.rawValue)|\(Int(size.width))x\(Int(size.height))"
+        texturesLock.lock()
+        if let cached = textures[key] {
+            texturesLock.unlock()
+            return cached
+        }
+        texturesLock.unlock()
+        let drawn = drawTexture(texture, size: size)
+        let image = cgImage(drawn).map { CIImage(cgImage: $0) } ?? drawn
+        texturesLock.lock()
+        if textures.count > 24 { textures.removeAll() }
+        textures[key] = image
+        texturesLock.unlock()
+        return image
+    }
+
+    /// A texture at `size`, origin zero.
+    static func drawTexture(_ texture: ExportStyle.Texture, size: CGSize) -> CIImage {
+        let bounds = CGRect(origin: .zero, size: size)
+        let longest = max(size.width, size.height)
+        let wash = CIFilter.linearGradient()
+        wash.point0 = CGPoint(x: 0, y: size.height)
+        wash.point1 = CGPoint(x: 0, y: 0)
+        wash.color0 = ciColor(texture.top)
+        wash.color1 = ciColor(texture.bottom)
+        var image = (wash.outputImage ?? CIImage(color: ciColor(texture.top))).cropped(to: bounds)
+
+        for light in texture.lights {
+            let radius = light.radius * longest
+            let glow = CIFilter.radialGradient()
+            glow.center = .zero
+            glow.radius0 = 0
+            glow.radius1 = Float(radius)
+            let color = ciColor(light.color)
+            glow.color0 = CIColor(red: color.red, green: color.green, blue: color.blue, alpha: light.alpha)
+            glow.color1 = CIColor(red: color.red, green: color.green, blue: color.blue, alpha: 0)
+            let shaped = (glow.outputImage ?? CIImage.empty())
+                .cropped(to: CGRect(x: -radius, y: -radius, width: radius * 2, height: radius * 2))
+                .transformed(by: CGAffineTransform(scaleX: light.stretch.0, y: light.stretch.1)
+                    .concatenating(CGAffineTransform(rotationAngle: light.angle * .pi / 180))
+                    .concatenating(CGAffineTransform(translationX: light.x * size.width, y: (1 - light.y) * size.height)))
+            image = shaped.composited(over: image)
+        }
+        // Soft all over, as if out of focus.
+        image = image.clampedToExtent().applyingGaussianBlur(sigma: 0.06 * longest).cropped(to: bounds)
+
+        // A fine grain, the same on every frame.
+        let k = texture.grain
+        let grain = CIFilter.randomGenerator().outputImage?
+            .applyingFilter("CIColorMatrix", parameters: [
+                "inputRVector": CIVector(x: k, y: 0, z: 0, w: 0),
+                "inputGVector": CIVector(x: k, y: 0, z: 0, w: 0),
+                "inputBVector": CIVector(x: k, y: 0, z: 0, w: 0),
+                "inputAVector": CIVector(x: 0, y: 0, z: 0, w: 0),
+                "inputBiasVector": CIVector(x: 0.5 - k / 2, y: 0.5 - k / 2, z: 0.5 - k / 2, w: 1),
+            ])
+            .cropped(to: bounds)
+        if let grain {
+            image = grain.applyingFilter("CISoftLightBlendMode", parameters: [kCIInputBackgroundImageKey: image]).cropped(to: bounds)
+        }
+        return image
+    }
+
+    /// A small picture of a backdrop, for its swatch.
+    static func swatch(_ backdrop: ExportStyle.Backdrop, size: CGSize) -> CGImage? {
+        guard let texture = ExportStyle.Texture.of(backdrop) else { return nil }
+        return cgImage(drawTexture(texture, size: size))
     }
 
     /// `image` scaled to cover `bounds` (times `zoom`), centred on it.

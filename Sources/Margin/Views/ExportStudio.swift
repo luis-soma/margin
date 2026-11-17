@@ -216,15 +216,16 @@ struct ExportStudio: View {
     }
 
     private var settings: some View {
-        VStack(alignment: .leading, spacing: Theme.Space.x6) {
+        VStack(alignment: .leading, spacing: 26) {
             Text("Edit")
-                .font(Archive.headline(F.titleSize))
+                .font(Theme.Typography.ui(17, .semibold))
                 .foregroundStyle(Archive.ink)
+                .padding(.bottom, -6)
             group("Background") {
                 Swatches(style: $style, options: ExportStyle.Backdrop.available(video: isVideo), capture: small)
             }
             group("Frame") {
-                VStack(spacing: Theme.Space.x1 + 2) {
+                VStack(spacing: 14) {
                     StyleSlider(title: "Padding", value: $style.padding)
                     StyleSlider(title: "Corners", value: $style.radius)
                     StyleSlider(title: "Shadow", value: $style.shadow)
@@ -255,7 +256,7 @@ struct ExportStudio: View {
     }
 
     private var motion: some View {
-        VStack(alignment: .leading, spacing: Theme.Space.x1 + 2) {
+        VStack(alignment: .leading, spacing: 12) {
             StyleToggle(title: "Zoom on clicks", isOn: $style.zoom)
             if style.zoom {
                 StyleSlider(title: "Zoom", value: $style.zoomAmount)
@@ -282,9 +283,9 @@ struct ExportStudio: View {
     }
 
     private func group<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: Theme.Space.x2) {
+        VStack(alignment: .leading, spacing: 10) {
             Text(title)
-                .font(Archive.font(F.labelSize))
+                .font(Theme.Typography.ui(Theme.Typography.caption, .medium))
                 .foregroundStyle(Archive.faint)
             content()
         }
@@ -911,7 +912,7 @@ private struct Swatches: View {
     @State private var pictureThumbs: [String: NSImage] = [:]
     @State private var dropping = false
 
-    private let columns = Array(repeating: GridItem(.fixed(32), spacing: 8), count: 6)
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 4)
 
     var body: some View {
         LazyVGrid(columns: columns, alignment: .leading, spacing: 8) {
@@ -987,7 +988,7 @@ private struct Swatches: View {
         guard pictureThumbs[name] == nil else { return }
         let url = ExportBackgrounds.url(name)
         Task.detached(priority: .utility) {
-            let small = ExportRenderer.picture(at: url).map { ExportRenderer.downsized($0, longest: 96) }
+            let small = ExportRenderer.picture(at: url).map { ExportRenderer.downsized($0, longest: 160) }
             let image = small.flatMap(ExportRenderer.cgImage)
             await MainActor.run {
                 if let image { pictureThumbs[name] = NSImage(cgImage: image, size: NSSize(width: image.width, height: image.height)) }
@@ -997,30 +998,33 @@ private struct Swatches: View {
 
     private func makeThumbnail() {
         guard thumbnail == nil, let capture else { return }
-        let small = ExportRenderer.downsized(capture, longest: 96)
+        let small = ExportRenderer.downsized(capture, longest: 160)
         if let image = ExportRenderer.cgImage(small) {
             thumbnail = NSImage(cgImage: image, size: NSSize(width: image.width, height: image.height))
         }
     }
 }
 
-/// The square that adds a picture: a plus on the grey track.
+/// The tile that adds a picture: a plus, dashed edge.
 private struct AddSwatch: View {
     var highlighted = false
     let action: () -> Void
     @State private var hovering = false
 
     var body: some View {
-        let shape = RoundedRectangle(cornerRadius: Theme.Radius.chip, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: 7, style: .continuous)
         Button(action: action) {
             Image(systemName: "plus")
                 .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(hovering || highlighted ? Theme.Palette.ink : Theme.Palette.ink2)
-                .frame(width: 32, height: 32)
-                .background(shape.fill(hovering || highlighted ? Theme.Palette.fillSelected : Theme.Palette.fill))
+                .foregroundStyle(hovering || highlighted ? Theme.Palette.ink : Theme.Palette.ink3)
+                .frame(maxWidth: .infinity)
+                .aspectRatio(4 / 3, contentMode: .fit)
+                .background(shape.fill(hovering || highlighted ? Theme.Palette.fill : Color.clear))
+                .overlay(shape.strokeBorder(Theme.Palette.ink.opacity(0.14), style: StrokeStyle(lineWidth: 1, dash: [3, 3])))
+                .padding(3)
                 .contentShape(shape)
         }
-        .buttonStyle(PressStyle(scale: 0.94))
+        .buttonStyle(PressStyle(scale: 0.96))
         .onHover { inside in withAnimation(Theme.Motion.hover) { hovering = inside } }
         .toolTip("Add a background", "A picture of your own, or drop one here", align: .center)
         .accessibilityLabel("Add a background")
@@ -1101,24 +1105,25 @@ private struct Swatch: View {
     let action: () -> Void
     @State private var hovering = false
 
+    // Each texture's tile, drawn by the renderer itself, once.
+    private static var tiles: [ExportStyle.Backdrop: NSImage] = [:]
+
     var body: some View {
-        let shape = RoundedRectangle(cornerRadius: Theme.Radius.chip, style: .continuous)
+        let inner = RoundedRectangle(cornerRadius: 5, style: .continuous)
+        let outer = RoundedRectangle(cornerRadius: 8, style: .continuous)
         Button(action: action) {
-            fill
-                .frame(width: 32, height: 32)
-                .clipShape(shape)
-                .overlay(shape.strokeBorder(Theme.Palette.hairline, lineWidth: 1))
-                .padding(2)
-                .overlay(
-                    RoundedRectangle(cornerRadius: Theme.Radius.chip + 2, style: .continuous)
-                        .strokeBorder(Theme.Palette.ink, lineWidth: 1.5)
-                        .opacity(selected ? 1 : 0)
-                )
-                .padding(-2)
-                .scaleEffect(hovering && !selected ? 1.04 : 1)
-                .contentShape(shape)
+            Color.clear
+                .aspectRatio(4 / 3, contentMode: .fit)
+                .overlay(fill)
+                .clipShape(inner)
+                .overlay(inner.strokeBorder(Color.black.opacity(0.07), lineWidth: 0.5))
+                .scaleEffect(hovering && !selected ? 1.03 : 1)
+                // The ring sits in the tile's own margin: nothing spills out.
+                .padding(3)
+                .overlay(outer.strokeBorder(Theme.Palette.ink, lineWidth: 1.5).opacity(selected ? 1 : 0))
+                .contentShape(outer)
         }
-        .buttonStyle(PressStyle(scale: 0.94))
+        .buttonStyle(PressStyle(scale: 0.96))
         .onHover { inside in withAnimation(Theme.Motion.hover) { hovering = inside } }
         .toolTip(option.name, align: .center)
         .accessibilityLabel(option.name)
@@ -1128,36 +1133,38 @@ private struct Swatch: View {
     private var fill: some View {
         switch option {
         case .none:
-            Checkerboard(square: 6)
-        case .blur:
+            Checkerboard(square: 5)
+        case .blur, .picture:
             if let image {
                 Image(nsImage: image)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
-                    .blur(radius: 4)
-                    .scaleEffect(1.3)
-            } else {
-                Theme.Palette.fill
-            }
-        case .picture:
-            if let image {
-                Image(nsImage: image)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
+                    .blur(radius: option == .blur ? 5 : 0)
+                    .scaleEffect(option == .blur ? 1.25 : 1)
             } else {
                 Theme.Palette.fill
             }
         default:
-            if let pair = option.colors {
+            if let tile = Self.tile(option) {
+                Image(nsImage: tile).resizable().aspectRatio(contentMode: .fill)
+            } else if let pair = option.colors {
                 LinearGradient(colors: [Color(nsColor: ExportRenderer.color(pair.0)), Color(nsColor: ExportRenderer.color(pair.1))],
                                startPoint: .topLeading, endPoint: .bottomTrailing)
             }
         }
     }
+
+    private static func tile(_ option: ExportStyle.Backdrop) -> NSImage? {
+        if let cached = tiles[option] { return cached }
+        guard let image = ExportRenderer.swatch(option, size: CGSize(width: 160, height: 120)) else { return nil }
+        let tile = NSImage(cgImage: image, size: NSSize(width: 80, height: 60))
+        tiles[option] = tile
+        return tile
+    }
 }
 
-/// A row you drag across: the name on the left, the amount on the right,
-/// the part up to the handle a shade deeper, the handle a thin ink line.
+/// A setting you drag: its name and amount above a thin track with a
+/// round knob.
 private struct StyleSlider: View {
     let title: String
     @Binding var value: Double
@@ -1165,45 +1172,50 @@ private struct StyleSlider: View {
     @State private var dragging = false
 
     var body: some View {
-        let shape = RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous)
-        GeometryReader { geo in
-            let width = geo.size.width
-            let x = CGFloat(value) * width
-            ZStack(alignment: .leading) {
-                shape.fill(Theme.Palette.fill)
-                Rectangle()
-                    .fill(Theme.Palette.ink.opacity(dragging ? 0.08 : hovering ? 0.065 : 0.05))
-                    .frame(width: max(0, x))
-                Rectangle()
-                    .fill(Theme.Palette.ink)
-                    .frame(width: 2, height: 14)
-                    .offset(x: min(max(x - 1, 6), width - 8))
-                    .opacity(value > 0.005 ? 1 : 0.35)
-                HStack {
-                    Text(title)
-                        .foregroundStyle(Theme.Palette.ink)
-                    Spacer()
-                    Text("\(Int((value * 100).rounded()))")
-                        .monospacedDigit()
-                        .foregroundStyle(Theme.Palette.ink3)
-                }
-                .font(Theme.Typography.ui(Theme.Typography.control))
-                .padding(.horizontal, Theme.Space.x3)
-                .allowsHitTesting(false)
+        VStack(spacing: 7) {
+            HStack {
+                Text(title)
+                    .foregroundStyle(Theme.Palette.ink2)
+                Spacer()
+                Text("\(Int((value * 100).rounded()))")
+                    .monospacedDigit()
+                    .foregroundStyle(dragging || hovering ? Theme.Palette.ink : Theme.Palette.ink3)
             }
-            .clipShape(shape)
-            .contentShape(shape)
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { drag in
-                        dragging = true
-                        value = Double(min(max(drag.location.x / max(width, 1), 0), 1))
-                    }
-                    .onEnded { _ in dragging = false }
-            )
-            .onHover { inside in withAnimation(Theme.Motion.hover) { hovering = inside } }
+            .font(Theme.Typography.ui(Theme.Typography.control))
+
+            GeometryReader { geo in
+                let knob: CGFloat = dragging ? 15 : 13
+                let width = geo.size.width
+                let x = CGFloat(value) * (width - 13) + 6.5
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Theme.Palette.ink.opacity(0.09))
+                        .frame(height: 4)
+                    Capsule()
+                        .fill(Theme.Palette.ink.opacity(hovering || dragging ? 0.9 : 0.75))
+                        .frame(width: max(4, x), height: 4)
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: knob, height: knob)
+                        .shadow(color: .black.opacity(0.18), radius: 1.5, y: 0.5)
+                        .overlay(Circle().strokeBorder(Color.black.opacity(0.08), lineWidth: 0.5))
+                        .offset(x: x - knob / 2)
+                }
+                .frame(height: 16)
+                .frame(maxHeight: .infinity)
+                .contentShape(Rectangle())
+                .gesture(
+                    DragGesture(minimumDistance: 0)
+                        .onChanged { drag in
+                            withAnimation(.interactiveSpring(response: 0.18, dampingFraction: 0.9)) { dragging = true }
+                            value = Double(min(max((drag.location.x - 6.5) / max(width - 13, 1), 0), 1))
+                        }
+                        .onEnded { _ in withAnimation(Theme.Motion.snappy) { dragging = false } }
+                )
+            }
+            .frame(height: 16)
         }
-        .frame(height: 28)
+        .onHover { inside in withAnimation(Theme.Motion.hover) { hovering = inside } }
         .accessibilityElement()
         .accessibilityLabel(title)
         .accessibilityValue("\(Int(value * 100)) percent")
@@ -1217,42 +1229,35 @@ private struct StyleSlider: View {
     }
 }
 
-/// A row that's on or off: the name on the grey track, a small switch at
-/// the end, ink when on.
+/// A setting that's on or off: its name, a small switch at the end.
 private struct StyleToggle: View {
     let title: String
     @Binding var isOn: Bool
-    @State private var hovering = false
 
     var body: some View {
-        let shape = RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous)
         Button {
-            withAnimation(Theme.Motion.snappy) { isOn.toggle() }
+            withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) { isOn.toggle() }
         } label: {
             HStack {
                 Text(title)
-                    .foregroundStyle(Theme.Palette.ink)
+                    .font(Theme.Typography.ui(Theme.Typography.control))
+                    .foregroundStyle(Theme.Palette.ink2)
                 Spacer()
                 ZStack(alignment: isOn ? .trailing : .leading) {
                     Capsule()
-                        .fill(isOn ? Theme.Palette.ink : Theme.Palette.ink.opacity(0.14))
-                        .frame(width: 26, height: 16)
+                        .fill(isOn ? Theme.Palette.ink : Theme.Palette.ink.opacity(0.13))
+                        .frame(width: 28, height: 17)
                     Circle()
-                        .fill(Theme.Palette.paper)
-                        .frame(width: 12, height: 12)
+                        .fill(Color.white)
+                        .frame(width: 13, height: 13)
+                        .shadow(color: .black.opacity(0.18), radius: 1, y: 0.5)
                         .padding(2)
-                        .shadow(color: .black.opacity(0.12), radius: 1, y: 0.5)
                 }
             }
-            .font(Theme.Typography.ui(Theme.Typography.control))
-            .padding(.leading, Theme.Space.x3)
-            .padding(.trailing, Theme.Space.x2)
-            .frame(height: 28)
-            .background(shape.fill(hovering ? Theme.Palette.fillHover : Theme.Palette.fill))
-            .contentShape(shape)
+            .frame(height: 24)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .onHover { inside in withAnimation(Theme.Motion.hover) { hovering = inside } }
         .accessibilityLabel(title)
         .accessibilityValue(isOn ? "On" : "Off")
     }
