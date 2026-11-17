@@ -1,5 +1,6 @@
 import AppKit
 import CoreImage
+import MarginKit
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -26,8 +27,32 @@ struct ExportStudio: View {
     /// Only the newest preview lands.
     @State private var renderID = 0
 
+    // Recordings: where the cursor went, and the moment shown.
+    @State private var track: CursorTrack?
+    @State private var duration: Double = 0
+    @State private var scrub: Double = 0.4
+    @State private var playing = false
+    @State private var playTask: Task<Void, Never>?
+    @State private var grabber: FrameGrabber?
+    /// Whose frame `small` is: the recording or its cursorless copy.
+    @State private var frameSource: URL?
+
     private var isVideo: Bool { ["mp4", "mov", "m4v"].contains(source.pathExtension.lowercased()) }
     private var F: Archive.Focus.Type { Archive.Focus.self }
+
+    /// The cursorless copy, when the recording has one.
+    private var studioURL: URL? {
+        guard isVideo, track?.starts["studio"] != nil else { return nil }
+        let url = CursorTrack.studioVideo(for: source)
+        return FileManager.default.fileExists(atPath: url.path) ? url : nil
+    }
+    /// A smooth cursor is drawn on the cursorless copy.
+    private var drawsCursor: Bool { style.smoothCursor && studioURL != nil }
+    private var videoSource: URL { drawsCursor ? (studioURL ?? source) : source }
+    private var plan: MotionPlan? {
+        guard let track else { return nil }
+        return MotionPlan(track: track, file: drawsCursor ? "studio" : "main", duration: duration)
+    }
 
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: F.radius, style: .continuous)
@@ -69,15 +94,24 @@ struct ExportStudio: View {
         .task { await load() }
         .onChange(of: style) { new in
             ExportStyle.saved = new
-            rerender()
+            if isVideo, frameSource != nil, frameSource != videoSource {
+                Task { await showFrame() }
+            } else {
+                rerender()
+            }
         }
+        .onChange(of: scrub) { _ in
+            if !playing { Task { await showFrame() } }
+        }
+        .onDisappear { playTask?.cancel() }
     }
 
     // MARK: The preview
 
     private var stage: some View {
         GeometryReader { geo in
-            let room = CGSize(width: max(80, geo.size.width - 2 * F.leading), height: max(80, geo.size.height - 2 * F.verticalMargin * 0.75))
+            let timeline: CGFloat = isVideo ? 56 : 0
+            let room = CGSize(width: max(80, geo.size.width - 2 * F.leading), height: max(80, geo.size.height - 2 * F.verticalMargin * 0.75 - timeline))
             ZStack {
                 if let preview {
                     let size = fitted(CGSize(width: preview.width, height: preview.height), in: room)
@@ -92,6 +126,7 @@ struct ExportStudio: View {
                     // shows where it ends.
                     .overlay(Rectangle().strokeBorder(Archive.rule, lineWidth: 1))
                     .animation(Theme.Motion.settle, value: size)
+                    .offset(y: -timeline / 2)
                 } else if failed {
                     Text("This capture can't be opened here.")
                         .font(Archive.sans(F.valueSize))
@@ -101,6 +136,16 @@ struct ExportStudio: View {
                 }
             }
             .frame(width: geo.size.width, height: geo.size.height)
+            .overlay(alignment: .bottom) {
+                if isVideo, duration > 0 {
+                    Scrubber(time: $scrub, playing: playing, duration: duration,
+                             clicks: track == nil ? [] : (plan?.clicks.map(\.t) ?? []),
+                             togglePlay: togglePlay)
+                        .frame(maxWidth: 520)
+                        .padding(.horizontal, F.leading)
+                        .padding(.bottom, Theme.Space.x6)
+                }
+            }
         }
     }
 
@@ -112,6 +157,18 @@ struct ExportStudio: View {
     // MARK: The controls
 
     private var controls: some View {
+        VStack(alignment: .leading, spacing: Theme.Space.x4) {
+            ScrollView(.vertical, showsIndicators: false) {
+                settings
+                    .padding(.top, F.verticalMargin * 0.75)
+                    .padding(.bottom, Theme.Space.x2)
+            }
+            footer
+        }
+        .padding(.bottom, F.trailing)
+    }
+
+    private var settings: some View {
         VStack(alignment: .leading, spacing: F.blockGap) {
             VStack(alignment: .leading, spacing: F.titleGap) {
                 Text("Export")
@@ -144,11 +201,40 @@ struct ExportStudio: View {
                 }
                 .animation(Theme.Motion.snappy, value: style.ratio == .custom)
             }
-            Spacer(minLength: Theme.Space.x4)
-            footer
+            if isVideo, track != nil {
+                group("Motion") { motion }
+            }
         }
-        .padding(.top, F.verticalMargin * 0.75)
-        .padding(.bottom, F.trailing)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// Zoom on clicks, the drawn cursor and click ripples: for recordings
+    /// made with their cursor path.
+    private var motion: some View {
+        VStack(alignment: .leading, spacing: Theme.Space.x1 + 2) {
+            StyleToggle(title: "Zoom on clicks", isOn: $style.zoom)
+            if style.zoom {
+                StyleSlider(title: "Zoom", value: $style.zoomAmount)
+                    .transition(.opacity)
+            }
+            if studioURL != nil {
+                StyleToggle(title: "Smooth cursor", isOn: $style.smoothCursor)
+                if style.smoothCursor {
+                    StyleSlider(title: "Cursor size", value: $style.cursorSize)
+                        .transition(.opacity)
+                }
+            }
+            StyleToggle(title: "Show clicks", isOn: $style.showClicks)
+            if plan?.hasClicks == false {
+                Text("No clicks in this recording, so nothing to zoom to.")
+                    .font(Archive.sans(F.valueSize))
+                    .foregroundStyle(Archive.faint)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, Theme.Space.x1)
+            }
+        }
+        .animation(Theme.Motion.snappy, value: style.zoom)
+        .animation(Theme.Motion.snappy, value: style.smoothCursor)
     }
 
     private func group<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
@@ -208,8 +294,16 @@ struct ExportStudio: View {
 
     private func load() async {
         let url = source
-        let video = isVideo
-        let content: CIImage? = video ? await ExportRenderer.poster(of: url) : await Task.detached { ExportRenderer.picture(at: url) }.value
+        if isVideo {
+            track = CursorTrack.load(for: url)
+            duration = (await VideoTools.duration(of: url)) ?? 0
+            fullSize = await FrameGrabber.naturalSize(of: url)
+            scrub = plan?.firstMoment.map { min($0, max(duration - 0.05, 0)) } ?? min(0.4, duration / 2)
+            await showFrame()
+            if small == nil { failed = true }
+            return
+        }
+        let content: CIImage? = await Task.detached { ExportRenderer.picture(at: url) }.value
         guard let content else {
             failed = true
             return
@@ -219,15 +313,68 @@ struct ExportStudio: View {
         rerender()
     }
 
+    /// The recording's frame at `scrub`, from the right copy, then restyled.
+    private func showFrame() async {
+        let url = videoSource
+        if grabber?.url != url { grabber = FrameGrabber(url: url) }
+        let moment = scrub
+        guard let frame = await grabber?.frame(at: moment) else { return }
+        // Dragging asks for many frames; only the latest one shows.
+        guard moment == scrub || playing else { return }
+        small = frame.transformed(by: CGAffineTransform(translationX: -frame.extent.minX, y: -frame.extent.minY))
+        frameSource = url
+        await renderPreview()
+    }
+
     private func rerender() {
+        Task { await renderPreview() }
+    }
+
+    private func renderPreview() async {
         guard let small else { return }
         renderID += 1
         let id = renderID
         let style = style
-        Task.detached(priority: .userInitiated) {
-            let image = ExportRenderer.cgImage(ExportRenderer.render(small, style: style))
-            await MainActor.run {
-                if id == renderID, let image { preview = image }
+        let moment = scrub
+        let motion: (plan: MotionPlan, drawCursor: Bool)? = isVideo ? plan.map { ($0, drawsCursor) } : nil
+        if let plan = motion?.plan {
+            // The cursor is drawn once, here, at the size this frame needs.
+            if drawsCursor {
+                let scale = small.extent.width / max(plan.area.width, 1)
+                _ = ExportRenderer.arrow(height: 24 * scale * CGFloat(0.7 + 1.3 * style.cursorSize))
+            }
+        }
+        let image = await Task.detached(priority: .userInitiated) { () -> CGImage? in
+            var content = small
+            if let motion {
+                content = ExportRenderer.moving(content, at: moment, plan: motion.plan, style: style, drawCursor: motion.drawCursor)
+            }
+            return ExportRenderer.cgImage(ExportRenderer.render(content, style: style))
+        }.value
+        if id == renderID, let image { preview = image }
+    }
+
+    private func togglePlay() {
+        if playing {
+            playing = false
+            playTask?.cancel()
+            return
+        }
+        playing = true
+        if scrub >= duration - 0.05 { scrub = 0 }
+        playTask = Task { @MainActor in
+            var last = Date()
+            while !Task.isCancelled, playing {
+                let now = Date()
+                let next = scrub + max(now.timeIntervalSince(last), 1.0 / 30)
+                last = now
+                if next >= duration {
+                    scrub = duration
+                    playing = false
+                    break
+                }
+                scrub = next
+                await showFrame()
             }
         }
     }
@@ -255,14 +402,20 @@ struct ExportStudio: View {
     private func save() {
         guard let folder = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first else { return }
         let destination = Self.freeName(in: folder, base: FocusView.fileName(for: entry, extension: ""), ext: isVideo ? "mp4" : "png")
-        let url = source
+        let url = isVideo ? videoSource : source
         let style = style
         busy = true
         if isVideo {
             progress = 0
+            playing = false
+            playTask?.cancel()
+            let motion = plan.map { (plan: $0, drawCursor: drawsCursor) }
+            if let motion, motion.drawCursor, let width = fullSize?.width {
+                _ = ExportRenderer.arrow(height: 24 * width / max(motion.plan.area.width, 1) * CGFloat(0.7 + 1.3 * style.cursorSize))
+            }
             Task {
                 do {
-                    try await ExportRenderer.exportVideo(from: url, style: style, to: destination) { value in progress = value }
+                    try await ExportRenderer.exportVideo(from: url, style: style, motion: motion, to: destination) { value in progress = value }
                     finishSave(destination, ok: true)
                 } catch {
                     finishSave(destination, ok: false, error.localizedDescription)
@@ -626,6 +779,115 @@ private struct StyleSlider: View {
             @unknown default: break
             }
         }
+    }
+}
+
+/// A row that's on or off: the name on the grey track, a small switch at
+/// the end, ink when on.
+private struct StyleToggle: View {
+    let title: String
+    @Binding var isOn: Bool
+    @State private var hovering = false
+
+    var body: some View {
+        let shape = RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous)
+        Button {
+            withAnimation(Theme.Motion.snappy) { isOn.toggle() }
+        } label: {
+            HStack {
+                Text(title)
+                    .foregroundStyle(Theme.Palette.ink)
+                Spacer()
+                ZStack(alignment: isOn ? .trailing : .leading) {
+                    Capsule()
+                        .fill(isOn ? Theme.Palette.ink : Theme.Palette.ink.opacity(0.14))
+                        .frame(width: 26, height: 16)
+                    Circle()
+                        .fill(Theme.Palette.paper)
+                        .frame(width: 12, height: 12)
+                        .padding(2)
+                        .shadow(color: .black.opacity(0.12), radius: 1, y: 0.5)
+                }
+            }
+            .font(Theme.Typography.ui(Theme.Typography.control))
+            .padding(.leading, Theme.Space.x3)
+            .padding(.trailing, Theme.Space.x2)
+            .frame(height: 28)
+            .background(shape.fill(hovering ? Theme.Palette.fillHover : Theme.Palette.fill))
+            .contentShape(shape)
+        }
+        .buttonStyle(.plain)
+        .onHover { inside in withAnimation(Theme.Motion.hover) { hovering = inside } }
+        .accessibilityLabel(title)
+        .accessibilityValue(isOn ? "On" : "Off")
+    }
+}
+
+/// Under a recording's preview: play, the timeline with a tick at every
+/// click, the time.
+private struct Scrubber: View {
+    @Binding var time: Double
+    let playing: Bool
+    let duration: Double
+    let clicks: [Double]
+    let togglePlay: () -> Void
+    @State private var hovering = false
+
+    var body: some View {
+        let shape = RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous)
+        HStack(spacing: Theme.Space.x2) {
+            Button(action: togglePlay) {
+                Image(systemName: playing ? "pause.fill" : "play.fill")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(Theme.Palette.ink)
+                    .frame(width: 28, height: 28)
+                    .background(shape.fill(Theme.Palette.fill))
+                    .contentShape(shape)
+            }
+            .buttonStyle(PressStyle())
+            .toolTip(playing ? "Pause" : "Play the preview", align: .center)
+
+            GeometryReader { geo in
+                let width = geo.size.width
+                let x = CGFloat(time / max(duration, 0.01)) * width
+                ZStack(alignment: .leading) {
+                    shape.fill(Theme.Palette.fill)
+                    Rectangle()
+                        .fill(Theme.Palette.ink.opacity(hovering ? 0.065 : 0.05))
+                        .frame(width: max(0, x))
+                    ForEach(Array(clicks.enumerated()), id: \.offset) { _, click in
+                        Circle()
+                            .fill(Theme.Palette.ink3)
+                            .frame(width: 4, height: 4)
+                            .offset(x: CGFloat(click / max(duration, 0.01)) * width - 2)
+                    }
+                    Rectangle()
+                        .fill(Theme.Palette.ink)
+                        .frame(width: 2, height: 14)
+                        .offset(x: min(max(x - 1, 0), width - 2))
+                }
+                .clipShape(shape)
+                .contentShape(shape)
+                .gesture(
+                    DragGesture(minimumDistance: 0).onChanged { drag in
+                        time = Double(min(max(drag.location.x / max(width, 1), 0), 1)) * duration
+                    }
+                )
+                .onHover { inside in withAnimation(Theme.Motion.hover) { hovering = inside } }
+            }
+            .frame(height: 28)
+
+            Text("\(Self.clock(time)) / \(Self.clock(duration))")
+                .font(Theme.Typography.ui(Theme.Typography.caption))
+                .monospacedDigit()
+                .foregroundStyle(Theme.Palette.ink3)
+                .fixedSize()
+        }
+    }
+
+    static func clock(_ seconds: Double) -> String {
+        let whole = Int(seconds)
+        return String(format: "%d:%02d.%d", whole / 60, whole % 60, Int((seconds - Double(whole)) * 10))
     }
 }
 

@@ -221,6 +221,10 @@ final class EntryStore: ObservableObject {
         thumbnails.removeObject(forKey: file as NSString)
         // Only ever here: the old folder in Documents stays as it was.
         try? FileManager.default.removeItem(at: imagesURL.appendingPathComponent(file))
+        // A recording's export studio files go with it.
+        for companion in CursorTrack.companions(of: imagesURL.appendingPathComponent(file)) {
+            try? FileManager.default.removeItem(at: companion)
+        }
     }
 
     /// A small, cached version of the entry's image for grids and lists.

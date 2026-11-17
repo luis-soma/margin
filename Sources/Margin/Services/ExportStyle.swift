@@ -21,6 +21,18 @@ struct ExportStyle: Codable, Equatable {
     var ratioWidth: Double = 3
     var ratioHeight: Double = 2
 
+    // Recordings with a cursor path (made since the export studio came).
+    /// Zoom in where you click, following the pointer.
+    var zoom = true
+    /// 0 to 1: how far in.
+    var zoomAmount: Double = 0.4
+    /// Draw a smooth cursor in place of the recorded one.
+    var smoothCursor = true
+    /// 0 to 1: the drawn cursor's size.
+    var cursorSize: Double = 0.35
+    /// A soft ripple where you click.
+    var showClicks = true
+
     init() {}
 
     enum Backdrop: String, Codable, CaseIterable, Identifiable {
@@ -98,6 +110,7 @@ struct ExportStyle: Codable, Equatable {
     // Older saved styles lack the newer settings: those take their defaults.
     private enum CodingKeys: String, CodingKey {
         case backdrop, picture, padding, radius, shadow, ratio, ratioWidth, ratioHeight
+        case zoom, zoomAmount, smoothCursor, cursorSize, showClicks
     }
 
     init(from decoder: Decoder) throws {
@@ -111,6 +124,11 @@ struct ExportStyle: Codable, Equatable {
         ratio = (try? c.decodeIfPresent(Ratio.self, forKey: .ratio)) ?? fallback.ratio
         ratioWidth = (try? c.decodeIfPresent(Double.self, forKey: .ratioWidth)) ?? fallback.ratioWidth
         ratioHeight = (try? c.decodeIfPresent(Double.self, forKey: .ratioHeight)) ?? fallback.ratioHeight
+        zoom = (try? c.decodeIfPresent(Bool.self, forKey: .zoom)) ?? fallback.zoom
+        zoomAmount = (try? c.decodeIfPresent(Double.self, forKey: .zoomAmount)) ?? fallback.zoomAmount
+        smoothCursor = (try? c.decodeIfPresent(Bool.self, forKey: .smoothCursor)) ?? fallback.smoothCursor
+        cursorSize = (try? c.decodeIfPresent(Double.self, forKey: .cursorSize)) ?? fallback.cursorSize
+        showClicks = (try? c.decodeIfPresent(Bool.self, forKey: .showClicks)) ?? fallback.showClicks
         if backdrop == .picture, picture.map(ExportBackgrounds.exists) != true { backdrop = fallback.backdrop }
     }
 
@@ -330,13 +348,13 @@ enum ExportRenderer {
         CIImage(contentsOf: url, options: [.applyOrientationProperty: true])
     }
 
-    /// The first moment of a recording, for the preview.
-    static func poster(of url: URL) async -> CIImage? {
+    /// A moment of a recording, for the preview.
+    static func poster(of url: URL, at seconds: Double = 0.4) async -> CIImage? {
         let generator = AVAssetImageGenerator(asset: AVURLAsset(url: url))
         generator.appliesPreferredTrackTransform = true
-        generator.requestedTimeToleranceBefore = .zero
-        generator.requestedTimeToleranceAfter = CMTime(seconds: 1, preferredTimescale: 600)
-        guard let image = try? await generator.image(at: CMTime(seconds: 0.4, preferredTimescale: 600)).image else { return nil }
+        generator.requestedTimeToleranceBefore = CMTime(value: 1, timescale: 60)
+        generator.requestedTimeToleranceAfter = CMTime(value: 1, timescale: 60)
+        guard let image = try? await generator.image(at: CMTime(seconds: seconds, preferredTimescale: 600)).image else { return nil }
         return CIImage(cgImage: image)
     }
 
@@ -395,7 +413,7 @@ enum ExportRenderer {
     /// High at a bitrate chosen for screens (much smaller than the system's
     /// "highest quality" export at no visible cost), sound as AAC. Kept
     /// within 4K so every player opens it.
-    static func exportVideo(from url: URL, style: ExportStyle, to output: URL,
+    static func exportVideo(from url: URL, style: ExportStyle, motion: (plan: MotionPlan, drawCursor: Bool)? = nil, to output: URL,
                             progress: @escaping @MainActor (Double) -> Void) async throws {
         let asset = AVURLAsset(url: url)
         guard let track = try await asset.loadTracks(withMediaType: .video).first else { throw VideoError.noVideo }
@@ -412,7 +430,12 @@ enum ExportRenderer {
         let crop = CGRect(origin: .zero, size: renderSize)
 
         let composition = AVMutableVideoComposition(asset: asset) { request in
-            let frame = request.sourceImage.transformed(by: CGAffineTransform(scaleX: fit, y: fit))
+            var source = request.sourceImage
+            source = source.transformed(by: CGAffineTransform(translationX: -source.extent.minX, y: -source.extent.minY))
+            if let motion {
+                source = moving(source, at: request.compositionTime.seconds, plan: motion.plan, style: style, drawCursor: motion.drawCursor)
+            }
+            let frame = source.transformed(by: CGAffineTransform(scaleX: fit, y: fit))
             request.finish(with: render(frame, style: style).cropped(to: crop), context: context)
         }
         composition.renderSize = renderSize

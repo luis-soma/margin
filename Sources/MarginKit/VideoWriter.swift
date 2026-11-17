@@ -45,6 +45,12 @@ public final class VideoWriter {
         writer.add(input)
     }
 
+    /// When the first frame was taken (the video's zero), on the frames' clock.
+    public var startTime: CMTime {
+        lock.lock(); defer { lock.unlock() }
+        return firstTime
+    }
+
     /// Seconds between the first and the last frame written.
     public var writtenDuration: TimeInterval {
         lock.lock(); defer { lock.unlock() }

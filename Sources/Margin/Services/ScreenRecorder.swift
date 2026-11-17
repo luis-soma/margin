@@ -22,6 +22,13 @@ final class ScreenRecorder: NSObject, SCStreamOutput, SCStreamDelegate {
     private var stream: SCStream?
     private var writer: VideoWriter?
     private(set) var startedAt: Date?
+    // For the export studio, out of sight: the same area without the
+    // cursor, and where the cursor went and clicked.
+    private var studioStream: SCStream?
+    private var studioWriter: VideoWriter?
+    private var studioSink: FrameSink?
+    private var pointer: PointerRecorder?
+    private var areaSize: CGSize = .zero
     /// Called on the main queue if the stream stops on its own (e.g. display gone).
     var onUnexpectedStop: ((Error) -> Void)?
 
@@ -57,7 +64,41 @@ final class ScreenRecorder: NSObject, SCStreamOutput, SCStreamDelegate {
         try await stream.startCapture()
         self.stream = stream
         startedAt = Date()
+        await startStudio(filter: filter, config: config, size: size, area: local.offsetBy(dx: bounds.minX, dy: bounds.minY), url: url)
         MarginLog.info("Recording \(Int(local.width))×\(Int(local.height)) pt at \(size.width)×\(size.height) px")
+    }
+
+    /// The cursorless copy and the pointer's path. If any of it fails, the
+    /// recording itself goes on as before.
+    private func startStudio(filter: SCContentFilter, config: SCStreamConfiguration, size: (width: Int, height: Int), area: CGRect, url: URL) async {
+        areaSize = area.size
+        pointer = await MainActor.run { PointerRecorder(area: area) }
+        let clean = SCStreamConfiguration()
+        clean.sourceRect = config.sourceRect
+        clean.width = config.width
+        clean.height = config.height
+        clean.minimumFrameInterval = config.minimumFrameInterval
+        clean.pixelFormat = config.pixelFormat
+        clean.showsCursor = false
+        clean.queueDepth = config.queueDepth
+        do {
+            let writer = try VideoWriter(url: CursorTrack.studioVideo(for: url), width: size.width, height: size.height)
+            let sink = FrameSink { [weak self] sample in self?.studioWriter?.append(sample) }
+            let stream = SCStream(filter: filter, configuration: clean, delegate: nil)
+            try stream.addStreamOutput(sink, type: .screen, sampleHandlerQueue: queue)
+            queue.sync {
+                self.studioWriter = writer
+                self.studioSink = sink
+            }
+            try await stream.startCapture()
+            studioStream = stream
+        } catch {
+            MarginLog.info("Studio copy not recorded: \(error)")
+            queue.sync {
+                self.studioWriter?.cancel()
+                self.studioWriter = nil
+            }
+        }
     }
 
     /// Stops and returns the finished file.
@@ -65,7 +106,13 @@ final class ScreenRecorder: NSObject, SCStreamOutput, SCStreamDelegate {
         let stream = self.stream
         self.stream = nil
         startedAt = nil
+        let studio = studioStream
+        studioStream = nil
+        let pointer = self.pointer
+        self.pointer = nil
         try? await stream?.stopCapture()
+        try? await studio?.stopCapture()
+        let path = await MainActor.run { pointer?.finish() }
         let end = CMClockGetTime(CMClockGetHostTimeClock())
         let writer: VideoWriter? = queue.sync {
             let current = self.writer
@@ -78,17 +125,49 @@ final class ScreenRecorder: NSObject, SCStreamOutput, SCStreamDelegate {
             throw RecorderError.nothingRecorded
         }
         MarginLog.info("Recording saved: \(writer.frameCount) frames")
+        await finishStudio(path: path, main: writer, end: end)
         return writer.url
+    }
+
+    private func finishStudio(path: (moves: [CursorTrack.Point], clicks: [CursorTrack.Point])?, main: VideoWriter, end: CMTime) async {
+        let studio: VideoWriter? = queue.sync {
+            let current = self.studioWriter
+            self.studioWriter = nil
+            self.studioSink = nil
+            return current
+        }
+        var starts = ["main": main.startTime.seconds]
+        if let studio {
+            if await studio.finish(at: end), studio.frameCount > 0 {
+                starts["studio"] = studio.startTime.seconds
+            } else {
+                studio.cancel()
+            }
+        }
+        guard let path, !path.moves.isEmpty else { return }
+        CursorTrack(areaWidth: Double(areaSize.width), areaHeight: Double(areaSize.height),
+                    moves: path.moves, clicks: path.clicks, starts: starts).save(for: main.url)
     }
 
     func cancel() {
         let stream = self.stream
         self.stream = nil
         startedAt = nil
-        Task { try? await stream?.stopCapture() }
+        let studio = studioStream
+        studioStream = nil
+        let pointer = self.pointer
+        self.pointer = nil
+        Task {
+            try? await stream?.stopCapture()
+            try? await studio?.stopCapture()
+        }
+        DispatchQueue.main.async { _ = pointer?.finish() }
         queue.async {
             self.writer?.cancel()
             self.writer = nil
+            self.studioWriter?.cancel()
+            self.studioWriter = nil
+            self.studioSink = nil
         }
     }
 
@@ -111,6 +190,79 @@ final class ScreenRecorder: NSObject, SCStreamOutput, SCStreamDelegate {
     private static func scale(of displayID: CGDirectDisplayID) -> CGFloat {
         let key = NSDeviceDescriptionKey("NSScreenNumber")
         return NSScreen.screens.first { ($0.deviceDescription[key] as? NSNumber)?.uint32Value == displayID }?.backingScaleFactor ?? 2
+    }
+}
+
+/// Hands a stream's frames to a closure: the studio copy's own output.
+private final class FrameSink: NSObject, SCStreamOutput {
+    let handle: (CMSampleBuffer) -> Void
+    init(_ handle: @escaping (CMSampleBuffer) -> Void) { self.handle = handle }
+
+    func stream(_ stream: SCStream, didOutputSampleBuffer sampleBuffer: CMSampleBuffer, of type: SCStreamOutputType) {
+        guard type == .screen, sampleBuffer.isValid,
+              let attachments = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, createIfNecessary: false) as? [[SCStreamFrameInfo: Any]],
+              let rawStatus = attachments.first?[.status] as? Int,
+              SCFrameStatus(rawValue: rawStatus) == .complete else { return }
+        handle(sampleBuffer)
+    }
+}
+
+/// Where the pointer is, 60 times a second, and where it clicks, across the
+/// recorded area. Lives on the main thread.
+final class PointerRecorder {
+    /// The recorded area, global, top-left origin, in points.
+    private let area: CGRect
+    private var moves: [CursorTrack.Point] = []
+    private var clicks: [CursorTrack.Point] = []
+    private var timer: Timer?
+    private var monitors: [Any] = []
+
+    init(area: CGRect) {
+        self.area = area
+        let timer = Timer(timeInterval: 1.0 / 60, repeats: true) { [weak self] _ in self?.sample() }
+        RunLoop.main.add(timer, forMode: .common)
+        self.timer = timer
+        sample()
+        let kinds: NSEvent.EventTypeMask = [.leftMouseDown, .rightMouseDown]
+        if let global = NSEvent.addGlobalMonitorForEvents(matching: kinds, handler: { [weak self] _ in self?.click() }) {
+            monitors.append(global)
+        }
+        if let local = NSEvent.addLocalMonitorForEvents(matching: kinds, handler: { [weak self] event in
+            self?.click()
+            return event
+        }) {
+            monitors.append(local)
+        }
+    }
+
+    /// Stops listening; the path so far.
+    func finish() -> (moves: [CursorTrack.Point], clicks: [CursorTrack.Point]) {
+        timer?.invalidate()
+        timer = nil
+        monitors.forEach(NSEvent.removeMonitor)
+        monitors = []
+        return (moves, clicks)
+    }
+
+    private func point() -> CursorTrack.Point {
+        let location = NSEvent.mouseLocation
+        let primaryHeight = NSScreen.screens.first?.frame.height ?? 0
+        let x = (location.x - area.minX) / max(area.width, 1)
+        let y = (primaryHeight - location.y - area.minY) / max(area.height, 1)
+        return CursorTrack.Point(t: CMClockGetTime(CMClockGetHostTimeClock()).seconds, x: Double(x), y: Double(y))
+    }
+
+    private func sample() {
+        let now = point()
+        // Still pointers make no new points, save one every half second.
+        if let last = moves.last, last.x == now.x, last.y == now.y, now.t - last.t < 0.5 { return }
+        moves.append(now)
+    }
+
+    private func click() {
+        let now = point()
+        moves.append(now)
+        clicks.append(now)
     }
 }
 
