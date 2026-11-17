@@ -22,8 +22,10 @@ struct MotionPlan {
     /// The recorded area in points.
     let area: CGSize
 
-    /// - Parameter file: "main" or "studio": whose first frame is time zero.
-    init?(track: CursorTrack, file: String, duration: Double) {
+    /// - Parameters:
+    ///   - file: "main" or "studio": whose first frame is time zero.
+    ///   - depth: how far in a full zoom goes (2 is twice as close).
+    init?(track: CursorTrack, file: String, duration: Double, depth: CGFloat) {
         guard let start = track.starts[file] ?? track.starts["main"], !track.moves.isEmpty, duration > 0 else { return nil }
         area = CGSize(width: track.areaWidth, height: track.areaHeight)
         let count = Int(duration * Self.rate) + 2
@@ -44,9 +46,9 @@ struct MotionPlan {
                 raw[step] = CGPoint(x: a.x, y: a.y)
             }
         }
+        // The drawn cursor: hand shake gone, still where the hand was.
+        cursor = Self.smoothed(raw, sigma: 0.07)
 
-        cursor = Self.smoothed(raw, sigma: 0.05)
-        camera = Self.smoothed(raw, sigma: 0.45)
         var found: [(t: Double, at: CGPoint)] = []
         for click in track.clicks {
             let t: Double = click.t - start
@@ -57,25 +59,62 @@ struct MotionPlan {
         clicks = found
 
         // Zoomed in from just before a click until a while after the last of
-        // a run of them, easing in and out.
+        // a run of them; clicks within a few seconds keep it in and glide.
         var spans: [(from: Double, to: Double)] = []
         for click in found {
-            if let last = spans.last, click.t - last.to < 1.2 {
-                spans[spans.count - 1].to = click.t + 1.8
+            if let last = spans.last, click.t - last.to < 2.5 {
+                spans[spans.count - 1].to = click.t + 2.0
             } else {
-                spans.append((click.t - 0.3, click.t + 1.8))
+                spans.append((click.t - 0.2, click.t + 2.0))
             }
         }
-        zoom = (0..<count).map { step in
+        let stepped: [CGFloat] = (0..<count).map { step in
             let t = Double(step) / Self.rate
             var level: Double = 0
             for span in spans {
-                let rise = Self.ease((t - (span.from - 0.7)) / 0.7)
-                let fall = 1 - Self.ease((t - span.to) / 0.9)
+                let rise = Self.ease((t - (span.from - 1.0)) / 1.0)
+                let fall = 1 - Self.ease((t - span.to) / 1.2)
                 level = max(level, min(rise, fall))
             }
             return CGFloat(level)
         }
+        let levels = Self.smoothed(stepped.map { CGPoint(x: $0, y: 0) }, sigma: 0.12).map(\.x)
+        zoom = levels
+
+        // The camera rests on the latest click and glides to the next one
+        // before it happens; it only moves for the pointer when the pointer
+        // nears the edge of what's shown.
+        var aim = [CGPoint](repeating: CGPoint(x: 0.5, y: 0.5), count: count)
+        var next = 0
+        for step in 0..<count {
+            let t = Double(step) / Self.rate
+            while next < found.count, found[next].t - 0.6 <= t { next += 1 }
+            if next > 0 {
+                aim[step] = found[next - 1].at
+            } else if let first = found.first {
+                aim[step] = first.at
+            } else {
+                aim[step] = raw[step]
+            }
+        }
+        aim = Self.smoothed(aim, sigma: 0.35)
+        let follow = Self.smoothed(raw, sigma: 0.2)
+        var framed = aim
+        for step in 0..<count {
+            let z = 1 + (depth - 1) * levels[step]
+            let half = 0.5 / z
+            let room = half * 0.72
+            var c = aim[step]
+            let p = follow[step]
+            if p.x > c.x + room { c.x = p.x - room }
+            if p.x < c.x - room { c.x = p.x + room }
+            if p.y > c.y + room { c.y = p.y - room }
+            if p.y < c.y - room { c.y = p.y + room }
+            c.x = min(max(c.x, half), 1 - half)
+            c.y = min(max(c.y, half), 1 - half)
+            framed[step] = c
+        }
+        camera = Self.smoothed(framed, sigma: 0.3)
     }
 
     var hasClicks: Bool { !clicks.isEmpty }
@@ -102,9 +141,10 @@ struct MotionPlan {
                        y: path[low].y + (path[high].y - path[low].y) * share)
     }
 
+    /// Slow out, slow in: a sine curve, no corners.
     private static func ease(_ x: Double) -> Double {
         let x = min(max(x, 0), 1)
-        return x < 0.5 ? 4 * x * x * x : 1 - pow(-2 * x + 2, 3) / 2
+        return (1 - cos(x * .pi)) / 2
     }
 
     /// A Gaussian blur along time: it looks ahead as much as back, so the
@@ -131,30 +171,34 @@ extension ExportRenderer {
     /// Frame `content` (its origin at zero) at video second `t`: the drawn
     /// cursor and click ripples first, so they zoom with the picture, then
     /// the camera.
-    static func moving(_ content: CIImage, at t: Double, plan: MotionPlan, style: ExportStyle, drawCursor: Bool) -> CIImage {
-        let size = content.extent.size
-        let pointScale = size.width / max(plan.area.width, 1)
+    static func moving(_ content: CIImage, at t: Double, plan: MotionPlan, style: ExportStyle, drawCursor: Bool,
+                       crop: CGRect = CGRect(x: 0, y: 0, width: 1, height: 1)) -> CIImage {
+        let full = content.extent.size
+        let pointScale = full.width / max(plan.area.width, 1)
         var image = content
 
         if style.showClicks {
             for click in plan.clicks where t >= click.t && t - click.t < 0.6 {
-                image = ripple(at: location(click.at, in: size), age: (t - click.t) / 0.6, scale: pointScale)
+                image = ripple(at: location(click.at, in: full), age: (t - click.t) / 0.6, scale: pointScale)
                     .composited(over: image)
             }
         }
         if drawCursor, let arrow = arrow(height: 24 * pointScale * CGFloat(0.7 + 1.3 * style.cursorSize)) {
-            let tip = location(plan.cursor(at: t), in: size)
+            let tip = location(plan.cursor(at: t), in: full)
             let placed = arrow.image.transformed(by: CGAffineTransform(translationX: tip.x - arrow.hotSpot.x, y: tip.y - arrow.hotSpot.y))
             image = placed.composited(over: image)
         }
-        image = image.cropped(to: CGRect(origin: .zero, size: size))
+        image = cropped(image.cropped(to: CGRect(origin: .zero, size: full)), to: crop)
+        let size = image.extent.size
 
         let level = style.zoom ? plan.zoom(at: t) : 0
         guard level > 0.001 else { return image }
-        let deepest = 1.3 + 1.4 * CGFloat(style.zoomAmount)
-        let z = 1 + (deepest - 1) * level
+        let z = 1 + (zoomDepth(style) - 1) * level
         let view = CGSize(width: size.width / z, height: size.height / z)
-        let target = location(plan.camera(at: t), in: size)
+        // The camera's aim, inside the crop.
+        let aim = plan.camera(at: t)
+        let inside = CGPoint(x: (aim.x - crop.minX) / max(crop.width, 0.01), y: (aim.y - crop.minY) / max(crop.height, 0.01))
+        let target = location(inside, in: size)
         let origin = CGPoint(x: min(max(target.x - view.width / 2, 0), size.width - view.width),
                              y: min(max(target.y - view.height / 2, 0), size.height - view.height))
         return image
@@ -162,6 +206,11 @@ extension ExportRenderer {
             .transformed(by: CGAffineTransform(translationX: -origin.x, y: -origin.y))
             .applyingFilter("CILanczosScaleTransform", parameters: [kCIInputScaleKey: z, kCIInputAspectRatioKey: 1])
             .cropped(to: CGRect(origin: .zero, size: size))
+    }
+
+    /// How far in a full zoom goes for `style`.
+    static func zoomDepth(_ style: ExportStyle) -> CGFloat {
+        1.3 + 1.4 * CGFloat(style.zoomAmount)
     }
 
     /// 0 to 1 from the top left, as pixels from the bottom left.

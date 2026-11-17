@@ -409,36 +409,88 @@ enum ExportRenderer {
         return Int(min(max(bits, 2_000_000), 10_000_000))
     }
 
+    /// What a recording export needs beyond the style: the motion plan (if
+    /// the recording has a cursor path), whether to draw the cursor, and the
+    /// crop (0 to 1, top-left origin).
+    struct VideoSetup {
+        var plan: MotionPlan?
+        var drawCursor = false
+        var crop = CGRect(x: 0, y: 0, width: 1, height: 1)
+    }
+
+    /// The crop as pixels in Core Image's frame (bottom-left origin).
+    static func cropRect(_ crop: CGRect, in size: CGSize) -> CGRect {
+        CGRect(x: (crop.minX * size.width).rounded(), y: ((1 - crop.maxY) * size.height).rounded(),
+               width: max((crop.width * size.width).rounded(), 2), height: max((crop.height * size.height).rounded(), 2))
+    }
+
+    /// `image` (origin zero) cut to `crop`, back at origin zero.
+    static func cropped(_ image: CIImage, to crop: CGRect) -> CIImage {
+        guard crop != CGRect(x: 0, y: 0, width: 1, height: 1) else { return image }
+        let rect = cropRect(crop, in: image.extent.size)
+        return image.cropped(to: rect).transformed(by: CGAffineTransform(translationX: -rect.minX, y: -rect.minY))
+    }
+
+    /// One frame of a recording, all the way: motion and crop, scaled by
+    /// `fit`, on its backdrop.
+    static func videoFrame(_ source: CIImage, at t: Double, style: ExportStyle, setup: VideoSetup, fit: CGFloat) -> CIImage {
+        var image = source.transformed(by: CGAffineTransform(translationX: -source.extent.minX, y: -source.extent.minY))
+        if let plan = setup.plan {
+            image = moving(image, at: t, plan: plan, style: style, drawCursor: setup.drawCursor, crop: setup.crop)
+        } else {
+            image = cropped(image, to: setup.crop)
+        }
+        if fit < 0.999 {
+            image = image.transformed(by: CGAffineTransform(scaleX: fit, y: fit))
+        }
+        return render(image, style: style)
+    }
+
+    /// The recording's frames in `style`, at most `longest` pixels on the
+    /// longer side (even, for the encoders): for the preview and every export.
+    static func composition(for asset: AVAsset, style: ExportStyle, setup: VideoSetup, longest: CGFloat,
+                            frameDuration: CMTime? = nil) async throws -> AVMutableVideoComposition {
+        guard let track = try await asset.loadTracks(withMediaType: .video).first else { throw VideoError.noVideo }
+        let (natural, transform) = try await track.load(.naturalSize, .preferredTransform)
+        let upright = natural.applying(transform)
+        let full = CGSize(width: abs(upright.width), height: abs(upright.height))
+        let size = cropRect(setup.crop, in: full).size
+        let canvas = layout(for: size, style: style).canvas
+        let fit = min(1, longest / max(canvas.width, canvas.height))
+        let scaledCanvas = layout(for: CGSize(width: size.width * fit, height: size.height * fit), style: style).canvas
+        let renderSize = CGSize(width: max(floor(scaledCanvas.width / 2) * 2, 2), height: max(floor(scaledCanvas.height / 2) * 2, 2))
+        let bounds = CGRect(origin: .zero, size: renderSize)
+
+        let composition = AVMutableVideoComposition(asset: asset) { request in
+            let frame = videoFrame(request.sourceImage, at: request.compositionTime.seconds, style: style, setup: setup, fit: fit)
+            request.finish(with: frame.cropped(to: bounds), context: context)
+        }
+        composition.renderSize = renderSize
+        if let frameDuration { composition.frameDuration = frameDuration }
+        return composition
+    }
+
+    /// The exported size for a recording of `full` pixels.
+    static func videoSize(for full: CGSize, style: ExportStyle, crop: CGRect, longest: CGFloat) -> CGSize {
+        let size = cropRect(crop, in: full).size
+        let canvas = layout(for: size, style: style).canvas
+        let fit = min(1, longest / max(canvas.width, canvas.height))
+        let scaled = layout(for: CGSize(width: size.width * fit, height: size.height * fit), style: style).canvas
+        return CGSize(width: floor(scaled.width / 2) * 2, height: floor(scaled.height / 2) * 2)
+    }
+
     /// The recording in `style`, every frame, as an .mp4 at `output`: H.264
     /// High at a bitrate chosen for screens (much smaller than the system's
     /// "highest quality" export at no visible cost), sound as AAC. Kept
     /// within 4K so every player opens it.
-    static func exportVideo(from url: URL, style: ExportStyle, motion: (plan: MotionPlan, drawCursor: Bool)? = nil, to output: URL,
+    static func exportVideo(from url: URL, style: ExportStyle, setup: VideoSetup = VideoSetup(), to output: URL,
                             progress: @escaping @MainActor (Double) -> Void) async throws {
         let asset = AVURLAsset(url: url)
         guard let track = try await asset.loadTracks(withMediaType: .video).first else { throw VideoError.noVideo }
-        let (natural, transform, frameRate) = try await track.load(.naturalSize, .preferredTransform, .nominalFrameRate)
+        let frameRate = try await track.load(.nominalFrameRate)
         let duration = try await asset.load(.duration).seconds
-        let upright = natural.applying(transform)
-        let size = CGSize(width: abs(upright.width), height: abs(upright.height))
-
-        let full = layout(for: size, style: style)
-        let fit = min(1, 3840 / max(full.canvas.width, full.canvas.height))
-        let scaled = CGSize(width: size.width * fit, height: size.height * fit)
-        let canvas = layout(for: scaled, style: style).canvas
-        let renderSize = CGSize(width: floor(canvas.width / 2) * 2, height: floor(canvas.height / 2) * 2)
-        let crop = CGRect(origin: .zero, size: renderSize)
-
-        let composition = AVMutableVideoComposition(asset: asset) { request in
-            var source = request.sourceImage
-            source = source.transformed(by: CGAffineTransform(translationX: -source.extent.minX, y: -source.extent.minY))
-            if let motion {
-                source = moving(source, at: request.compositionTime.seconds, plan: motion.plan, style: style, drawCursor: motion.drawCursor)
-            }
-            let frame = source.transformed(by: CGAffineTransform(scaleX: fit, y: fit))
-            request.finish(with: render(frame, style: style).cropped(to: crop), context: context)
-        }
-        composition.renderSize = renderSize
+        let composition = try await Self.composition(for: asset, style: style, setup: setup, longest: 3840)
+        let renderSize = composition.renderSize
 
         try? FileManager.default.removeItem(at: output)
         let reader = try AVAssetReader(asset: asset)
@@ -567,6 +619,64 @@ enum ExportRenderer {
             try? FileManager.default.removeItem(at: output)
             throw VideoError.cantExport(writer.error?.localizedDescription ?? reader.error?.localizedDescription ?? "the export stopped")
         }
+        await progress(1)
+    }
+
+    /// The recording as a looping GIF, for places that won't play video:
+    /// 20 frames a second, at most 960 pixels on the longer side.
+    static func exportGIF(from url: URL, style: ExportStyle, setup: VideoSetup = VideoSetup(), to output: URL,
+                          progress: @escaping @MainActor (Double) -> Void) async throws {
+        let fps = 20.0
+        let asset = AVURLAsset(url: url)
+        guard let track = try await asset.loadTracks(withMediaType: .video).first else { throw VideoError.noVideo }
+        let duration = try await asset.load(.duration).seconds
+        let composition = try await Self.composition(for: asset, style: style, setup: setup, longest: 960,
+                                                frameDuration: CMTime(value: 1, timescale: CMTimeScale(fps)))
+        let reader = try AVAssetReader(asset: asset)
+        let frames = AVAssetReaderVideoCompositionOutput(videoTracks: [track], videoSettings: [
+            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
+        ])
+        frames.videoComposition = composition
+        frames.alwaysCopiesSampleData = false
+        guard reader.canAdd(frames) else { throw VideoError.cantExport("the frames can't be read") }
+        reader.add(frames)
+        guard reader.startReading() else {
+            throw VideoError.cantExport(reader.error?.localizedDescription ?? "the recording can't be read")
+        }
+
+        // The GIF is told its frame count up front: exactly that many go in.
+        let count = max(Int((duration * fps).rounded(.up)), 1)
+        try? FileManager.default.removeItem(at: output)
+        guard let destination = CGImageDestinationCreateWithURL(output as CFURL, "com.compuserve.gif" as CFString, count, nil) else {
+            reader.cancelReading()
+            throw VideoError.cantExport("the GIF can't be written")
+        }
+        CGImageDestinationSetProperties(destination, [
+            kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFLoopCount: 0],
+        ] as CFDictionary)
+        let delay = 1 / fps
+        let frameProperties = [
+            kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFDelayTime: delay, kCGImagePropertyGIFUnclampedDelayTime: delay],
+        ] as CFDictionary
+
+        var written = 0
+        var last: CGImage?
+        while written < count, let sample = frames.copyNextSampleBuffer() {
+            guard let buffer = CMSampleBufferGetImageBuffer(sample) else { continue }
+            let image = CIImage(cvPixelBuffer: buffer)
+            guard let frame = context.createCGImage(image, from: image.extent, format: .RGBA8, colorSpace: sRGB) else { continue }
+            CGImageDestinationAddImage(destination, frame, frameProperties)
+            last = frame
+            written += 1
+            if written % 4 == 0 { await progress(min(Double(written) / Double(count), 0.97)) }
+        }
+        reader.cancelReading()
+        guard let last else { throw VideoError.cantExport("no frames came out") }
+        while written < count {
+            CGImageDestinationAddImage(destination, last, frameProperties)
+            written += 1
+        }
+        guard CGImageDestinationFinalize(destination) else { throw VideoError.cantExport("the GIF can't be finished") }
         await progress(1)
     }
 }
