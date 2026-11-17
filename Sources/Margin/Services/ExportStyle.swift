@@ -8,6 +8,8 @@ import CoreImage.CIFilterBuiltins
 /// recordings, kept between exports.
 struct ExportStyle: Codable, Equatable {
     var backdrop: Backdrop = .mist
+    /// With `.picture`: one of your own backgrounds (see `ExportBackgrounds`).
+    var picture: String?
     /// 0 to 1: the room around the capture.
     var padding: Double = 0.45
     /// 0 to 1: how round the capture's corners are.
@@ -15,9 +17,14 @@ struct ExportStyle: Codable, Equatable {
     /// 0 to 1: how far the capture lifts off the backdrop.
     var shadow: Double = 0.5
     var ratio: Ratio = .auto
+    /// With `.custom`: the frame's width to its height.
+    var ratioWidth: Double = 3
+    var ratioHeight: Double = 2
+
+    init() {}
 
     enum Backdrop: String, Codable, CaseIterable, Identifiable {
-        case none, white, mist, graphite, ink, sand, sky, sage, rose, dusk, blur
+        case none, white, mist, graphite, ink, sand, sky, sage, rose, dusk, blur, picture
 
         var id: String { rawValue }
 
@@ -34,6 +41,7 @@ struct ExportStyle: Codable, Equatable {
             case .rose: return "Rose"
             case .dusk: return "Dusk"
             case .blur: return "From the capture"
+            case .picture: return "Your picture"
             }
         }
 
@@ -49,18 +57,18 @@ struct ExportStyle: Codable, Equatable {
             case .sage: return (0xE6EDE2, 0xB3C6AB)
             case .rose: return (0xF6E5E2, 0xDDB2AC)
             case .dusk: return (0x40455F, 0x181A28)
-            case .none, .blur: return nil
+            case .none, .blur, .picture: return nil
             }
         }
 
-        /// A recording has no see-through: no "None" for it.
+        /// The built-in ones. A recording has no see-through: no "None" for it.
         static func available(video: Bool) -> [Backdrop] {
-            video ? allCases.filter { $0 != .none } : allCases
+            allCases.filter { $0 != .picture && !(video && $0 == .none) }
         }
     }
 
     enum Ratio: String, Codable, CaseIterable, Identifiable {
-        case auto, wide, classic, square
+        case auto, wide, classic, square, custom
 
         var id: String { rawValue }
         var name: String {
@@ -69,16 +77,41 @@ struct ExportStyle: Codable, Equatable {
             case .wide: return "16:9"
             case .classic: return "4:3"
             case .square: return "1:1"
+            case .custom: return "Custom"
             }
         }
-        var value: CGFloat? {
-            switch self {
-            case .auto: return nil
-            case .wide: return 16.0 / 9
-            case .classic: return 4.0 / 3
-            case .square: return 1
-            }
+    }
+
+    /// The frame's width over its height, or nil to follow the capture.
+    var ratioValue: CGFloat? {
+        switch ratio {
+        case .auto: return nil
+        case .wide: return 16.0 / 9
+        case .classic: return 4.0 / 3
+        case .square: return 1
+        case .custom:
+            guard ratioWidth > 0, ratioHeight > 0 else { return nil }
+            return CGFloat(min(max(ratioWidth / ratioHeight, 0.1), 10))
         }
+    }
+
+    // Older saved styles lack the newer settings: those take their defaults.
+    private enum CodingKeys: String, CodingKey {
+        case backdrop, picture, padding, radius, shadow, ratio, ratioWidth, ratioHeight
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let fallback = ExportStyle()
+        backdrop = (try? c.decodeIfPresent(Backdrop.self, forKey: .backdrop)) ?? fallback.backdrop
+        picture = try? c.decodeIfPresent(String.self, forKey: .picture)
+        padding = (try? c.decodeIfPresent(Double.self, forKey: .padding)) ?? fallback.padding
+        radius = (try? c.decodeIfPresent(Double.self, forKey: .radius)) ?? fallback.radius
+        shadow = (try? c.decodeIfPresent(Double.self, forKey: .shadow)) ?? fallback.shadow
+        ratio = (try? c.decodeIfPresent(Ratio.self, forKey: .ratio)) ?? fallback.ratio
+        ratioWidth = (try? c.decodeIfPresent(Double.self, forKey: .ratioWidth)) ?? fallback.ratioWidth
+        ratioHeight = (try? c.decodeIfPresent(Double.self, forKey: .ratioHeight)) ?? fallback.ratioHeight
+        if backdrop == .picture, picture.map(ExportBackgrounds.exists) != true { backdrop = fallback.backdrop }
     }
 
     // MARK: Kept between exports
@@ -94,6 +127,45 @@ struct ExportStyle: Codable, Equatable {
         set {
             if let data = try? JSONEncoder().encode(newValue) { UserDefaults.standard.set(data, forKey: key) }
         }
+    }
+}
+
+/// Your own backgrounds: pictures you add in the export studio, copied into
+/// Margin's support folder so they stay put.
+enum ExportBackgrounds {
+    static var folder: URL {
+        let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        return base.appendingPathComponent("Margin/Backgrounds", isDirectory: true)
+    }
+
+    static func url(_ name: String) -> URL { folder.appendingPathComponent(name) }
+
+    static func exists(_ name: String) -> Bool { FileManager.default.fileExists(atPath: url(name).path) }
+
+    /// The pictures, oldest first.
+    static func all() -> [String] {
+        let files = (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: [.creationDateKey], options: [.skipsHiddenFiles])) ?? []
+        return files
+            .sorted { ((try? $0.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast) < ((try? $1.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast) }
+            .map(\.lastPathComponent)
+    }
+
+    /// Copies a picture in; its new name.
+    static func add(_ source: URL) -> String? {
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let ext = source.pathExtension.isEmpty ? "png" : source.pathExtension.lowercased()
+        let name = UUID().uuidString.prefix(8) + "." + ext
+        do {
+            try FileManager.default.copyItem(at: source, to: url(String(name)))
+            return String(name)
+        } catch {
+            return nil
+        }
+    }
+
+    static func remove(_ name: String) {
+        try? FileManager.default.removeItem(at: url(name))
+        ExportRenderer.forget(name)
     }
 }
 
@@ -116,7 +188,7 @@ enum ExportRenderer {
         let unit = sqrt(max(size.width, 1) * max(size.height, 1))
         let pad = CGFloat(style.padding) * 0.18 * unit
         var canvas = CGSize(width: size.width + 2 * pad, height: size.height + 2 * pad)
-        if let ratio = style.ratio.value {
+        if let ratio = style.ratioValue {
             if canvas.width / canvas.height < ratio {
                 canvas.width = canvas.height * ratio
             } else {
@@ -156,7 +228,7 @@ enum ExportRenderer {
         blend.maskImage = shape
         let capture = (blend.outputImage ?? placed).cropped(to: bounds)
 
-        var result = backdrop(style.backdrop, bounds: bounds, capture: image, unit: layout.unit)
+        var result = backdrop(style, bounds: bounds, capture: image)
         if style.shadow > 0.01 {
             let s = CGFloat(style.shadow)
             // A soft, wide shadow under a close one, the way a card lifts.
@@ -180,25 +252,25 @@ enum ExportRenderer {
             .transformed(by: CGAffineTransform(translationX: 0, y: -drop))
     }
 
-    private static func backdrop(_ backdrop: ExportStyle.Backdrop, bounds: CGRect, capture: CIImage, unit: CGFloat) -> CIImage {
-        switch backdrop {
+    private static func backdrop(_ style: ExportStyle, bounds: CGRect, capture: CIImage) -> CIImage {
+        switch style.backdrop {
         case .none:
             return CIImage(color: .clear).cropped(to: bounds)
         case .blur:
             // The capture itself, filling the frame, softly out of focus.
-            let size = capture.extent.size
-            let scale = max(bounds.width / max(size.width, 1), bounds.height / max(size.height, 1)) * 1.15
-            let scaled = capture.transformed(by: CGAffineTransform(scaleX: scale, y: scale))
-            let centered = scaled.transformed(by: CGAffineTransform(
-                translationX: (bounds.width - scaled.extent.width) / 2 - scaled.extent.minX,
-                y: (bounds.height - scaled.extent.height) / 2 - scaled.extent.minY))
-            return centered
+            return covering(bounds, with: capture, zoom: 1.15)
                 .clampedToExtent()
                 .applyingGaussianBlur(sigma: 0.07 * max(bounds.width, bounds.height))
                 .applyingFilter("CIColorControls", parameters: ["inputSaturation": 1.2, "inputBrightness": 0.02])
                 .cropped(to: bounds)
+        case .picture:
+            // Your own picture, filling the frame, its middle kept.
+            guard let name = style.picture, let picture = backgroundPicture(name) else {
+                return CIImage(color: .white).cropped(to: bounds)
+            }
+            return covering(bounds, with: picture, zoom: 1).clampedToExtent().cropped(to: bounds)
         default:
-            guard let pair = backdrop.colors else { return CIImage(color: .white).cropped(to: bounds) }
+            guard let pair = style.backdrop.colors else { return CIImage(color: .white).cropped(to: bounds) }
             let (from, to) = pair
             if from == to { return CIImage(color: ciColor(from)).cropped(to: bounds) }
             let gradient = CIFilter.linearGradient()
@@ -208,6 +280,37 @@ enum ExportRenderer {
             gradient.color1 = ciColor(to)
             return (gradient.outputImage ?? CIImage(color: ciColor(from))).cropped(to: bounds)
         }
+    }
+
+    /// `image` scaled to cover `bounds` (times `zoom`), centred on it.
+    private static func covering(_ bounds: CGRect, with image: CIImage, zoom: CGFloat) -> CIImage {
+        let size = image.extent.size
+        let scale = max(bounds.width / max(size.width, 1), bounds.height / max(size.height, 1)) * zoom
+        let scaled = image.transformed(by: CGAffineTransform(scaleX: scale, y: scale))
+        return scaled.transformed(by: CGAffineTransform(
+            translationX: bounds.midX - scaled.extent.midX,
+            y: bounds.midY - scaled.extent.midY))
+    }
+
+    // Your backgrounds, read once.
+    private static var pictures: [String: CIImage] = [:]
+    private static let picturesLock = NSLock()
+
+    static func backgroundPicture(_ name: String) -> CIImage? {
+        picturesLock.lock()
+        defer { picturesLock.unlock() }
+        if let cached = pictures[name] { return cached }
+        guard let image = picture(at: ExportBackgrounds.url(name)) else { return nil }
+        // Big enough for a 4K frame; smaller is quicker to fill with.
+        let fitted = downsized(image, longest: 4096)
+        pictures[name] = fitted
+        return fitted
+    }
+
+    static func forget(_ name: String) {
+        picturesLock.lock()
+        pictures[name] = nil
+        picturesLock.unlock()
     }
 
     static func ciColor(_ hex: Int) -> CIColor {
@@ -249,10 +352,23 @@ enum ExportRenderer {
         context.createCGImage(image, from: image.extent, format: .RGBA8, colorSpace: sRGB)
     }
 
-    /// The styled picture as a PNG, at the capture's own resolution.
+    /// The styled picture as a PNG at the capture's own resolution: lossless,
+    /// without the see-through channel when nothing is see-through, which
+    /// makes the file about a quarter smaller.
     static func png(_ content: CIImage, style: ExportStyle) -> Data? {
         let styled = render(content, style: style)
-        return context.pngRepresentation(of: styled, format: .RGBA8, colorSpace: sRGB)
+        guard var image = cgImage(styled) else { return nil }
+        if style.backdrop != .none,
+           let opaque = CGContext(data: nil, width: image.width, height: image.height, bitsPerComponent: 8, bytesPerRow: 0,
+                                  space: sRGB, bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue) {
+            opaque.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
+            if let flat = opaque.makeImage() { image = flat }
+        }
+        let data = NSMutableData()
+        guard let destination = CGImageDestinationCreateWithData(data, "public.png" as CFString, 1, nil) else { return nil }
+        CGImageDestinationAddImage(destination, image, nil)
+        guard CGImageDestinationFinalize(destination) else { return nil }
+        return data as Data
     }
 
     // MARK: Recordings
@@ -267,13 +383,24 @@ enum ExportRenderer {
         }
     }
 
-    /// The recording in `style`, every frame, as an .mp4 at `output`. Kept
+    /// A bitrate that keeps screen work crisp without waste: about 0.045 bits
+    /// a pixel a frame, between 2 and 10 Mbit/s. Screens are mostly still,
+    /// so H.264 spends it where things move.
+    static func videoBitrate(_ size: CGSize, fps: Double) -> Int {
+        let bits = size.width * size.height * CGFloat(min(max(fps, 24), 60)) * 0.045
+        return Int(min(max(bits, 2_000_000), 10_000_000))
+    }
+
+    /// The recording in `style`, every frame, as an .mp4 at `output`: H.264
+    /// High at a bitrate chosen for screens (much smaller than the system's
+    /// "highest quality" export at no visible cost), sound as AAC. Kept
     /// within 4K so every player opens it.
     static func exportVideo(from url: URL, style: ExportStyle, to output: URL,
                             progress: @escaping @MainActor (Double) -> Void) async throws {
         let asset = AVURLAsset(url: url)
         guard let track = try await asset.loadTracks(withMediaType: .video).first else { throw VideoError.noVideo }
-        let (natural, transform) = try await track.load(.naturalSize, .preferredTransform)
+        let (natural, transform, frameRate) = try await track.load(.naturalSize, .preferredTransform, .nominalFrameRate)
+        let duration = try await asset.load(.duration).seconds
         let upright = natural.applying(transform)
         let size = CGSize(width: abs(upright.width), height: abs(upright.height))
 
@@ -290,27 +417,132 @@ enum ExportRenderer {
         }
         composition.renderSize = renderSize
 
-        guard let session = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else {
-            throw VideoError.cantExport("this recording can't be re-encoded")
-        }
         try? FileManager.default.removeItem(at: output)
-        session.outputURL = output
-        session.outputFileType = .mp4
-        session.shouldOptimizeForNetworkUse = true
-        session.videoComposition = composition
+        let reader = try AVAssetReader(asset: asset)
+        let writer = try AVAssetWriter(outputURL: output, fileType: .mp4)
+        writer.shouldOptimizeForNetworkUse = true
 
-        let watcher = Task { @MainActor in
-            while !Task.isCancelled {
-                progress(Double(session.progress))
-                try? await Task.sleep(nanoseconds: 120_000_000)
+        let videoOut = AVAssetReaderVideoCompositionOutput(videoTracks: [track], videoSettings: [
+            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
+        ])
+        videoOut.videoComposition = composition
+        videoOut.alwaysCopiesSampleData = false
+        guard reader.canAdd(videoOut) else { throw VideoError.cantExport("the frames can't be read") }
+        reader.add(videoOut)
+
+        let fps = Double(frameRate > 0 ? frameRate : 30)
+        let videoIn = AVAssetWriterInput(mediaType: .video, outputSettings: [
+            AVVideoCodecKey: AVVideoCodecType.h264,
+            AVVideoWidthKey: Int(renderSize.width),
+            AVVideoHeightKey: Int(renderSize.height),
+            AVVideoCompressionPropertiesKey: [
+                AVVideoAverageBitRateKey: videoBitrate(renderSize, fps: fps),
+                AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel,
+                AVVideoH264EntropyModeKey: AVVideoH264EntropyModeCABAC,
+                AVVideoAllowFrameReorderingKey: true,
+                AVVideoMaxKeyFrameIntervalDurationKey: 4,
+                AVVideoExpectedSourceFrameRateKey: Int(min(fps, 60).rounded()),
+            ] as [String: Any],
+            AVVideoColorPropertiesKey: [
+                AVVideoColorPrimariesKey: AVVideoColorPrimaries_ITU_R_709_2,
+                AVVideoTransferFunctionKey: AVVideoTransferFunction_ITU_R_709_2,
+                AVVideoYCbCrMatrixKey: AVVideoYCbCrMatrix_ITU_R_709_2,
+            ],
+        ])
+        videoIn.expectsMediaDataInRealTime = false
+        guard writer.canAdd(videoIn) else { throw VideoError.cantExport("the video can't be written") }
+        writer.add(videoIn)
+
+        // The sound, if there is any, as AAC.
+        var audio: (source: AVAssetReaderTrackOutput, sink: AVAssetWriterInput)?
+        if let sound = try await asset.loadTracks(withMediaType: .audio).first {
+            let description = try await sound.load(.formatDescriptions).first
+            let basic = description.flatMap { CMAudioFormatDescriptionGetStreamBasicDescription($0)?.pointee }
+            let rate = basic.map { $0.mSampleRate > 0 ? $0.mSampleRate : 48_000 } ?? 48_000
+            let channels = min(max(Int(basic?.mChannelsPerFrame ?? 2), 1), 2)
+            let out = AVAssetReaderTrackOutput(track: sound, outputSettings: [AVFormatIDKey: kAudioFormatLinearPCM])
+            let input = AVAssetWriterInput(mediaType: .audio, outputSettings: [
+                AVFormatIDKey: kAudioFormatMPEG4AAC,
+                AVSampleRateKey: rate,
+                AVNumberOfChannelsKey: channels,
+                AVEncoderBitRateKey: channels == 1 ? 96_000 : 128_000,
+            ])
+            input.expectsMediaDataInRealTime = false
+            if reader.canAdd(out), writer.canAdd(input) {
+                reader.add(out)
+                writer.add(input)
+                audio = (source: out, sink: input)
             }
         }
-        await withCheckedContinuation { (done: CheckedContinuation<Void, Never>) in
-            session.exportAsynchronously { done.resume() }
+
+        guard reader.startReading() else {
+            throw VideoError.cantExport(reader.error?.localizedDescription ?? "the recording can't be read")
         }
-        watcher.cancel()
-        guard session.status == .completed else {
-            throw VideoError.cantExport(session.error?.localizedDescription ?? "the export stopped")
+        guard writer.startWriting() else {
+            reader.cancelReading()
+            throw VideoError.cantExport(writer.error?.localizedDescription ?? "the file can't be written")
+        }
+        writer.startSession(atSourceTime: .zero)
+
+        await withCheckedContinuation { (done: CheckedContinuation<Void, Never>) in
+            let group = DispatchGroup()
+            let total = max(duration, 0.1)
+            var reported = -1.0
+
+            group.enter()
+            var videoDone = false
+            videoIn.requestMediaDataWhenReady(on: DispatchQueue(label: "margin.export.video")) {
+                while videoIn.isReadyForMoreMediaData, !videoDone {
+                    guard let sample = videoOut.copyNextSampleBuffer() else {
+                        videoDone = true
+                        videoIn.markAsFinished()
+                        group.leave()
+                        return
+                    }
+                    let seconds = CMSampleBufferGetPresentationTimeStamp(sample).seconds
+                    if !videoIn.append(sample) {
+                        videoDone = true
+                        reader.cancelReading()
+                        videoIn.markAsFinished()
+                        group.leave()
+                        return
+                    }
+                    if seconds - reported >= 0.2 {
+                        reported = seconds
+                        let share = min(seconds / total, 0.99)
+                        Task { @MainActor in progress(share) }
+                    }
+                }
+            }
+
+            if let audio {
+                group.enter()
+                var audioDone = false
+                audio.sink.requestMediaDataWhenReady(on: DispatchQueue(label: "margin.export.audio")) {
+                    while audio.sink.isReadyForMoreMediaData, !audioDone {
+                        guard let sample = audio.source.copyNextSampleBuffer(), audio.sink.append(sample) else {
+                            audioDone = true
+                            audio.sink.markAsFinished()
+                            group.leave()
+                            return
+                        }
+                    }
+                }
+            }
+
+            group.notify(queue: .global()) {
+                if reader.status == .failed || writer.status == .failed {
+                    writer.cancelWriting()
+                    done.resume()
+                } else {
+                    writer.finishWriting { done.resume() }
+                }
+            }
+        }
+
+        guard writer.status == .completed else {
+            try? FileManager.default.removeItem(at: output)
+            throw VideoError.cantExport(writer.error?.localizedDescription ?? reader.error?.localizedDescription ?? "the export stopped")
         }
         await progress(1)
     }

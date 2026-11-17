@@ -1,6 +1,7 @@
 import AppKit
 import CoreImage
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// Dressing a capture for documentation, the way CleanShot's background
 /// tool does: a backdrop, room around it, rounded corners, a shadow and a
@@ -116,7 +117,7 @@ struct ExportStudio: View {
                 Text("Export")
                     .font(Archive.headline(F.titleSize))
                     .foregroundStyle(Archive.ink)
-                Text(isVideo ? "The recording on a backdrop, every frame, for docs and slides." : "The screenshot on a backdrop, for docs and slides.")
+                Text(isVideo ? "The recording on a backdrop, every frame, small and sharp." : "The screenshot on a backdrop, small and lossless.")
                     .font(Archive.sans(F.valueSize))
                     .foregroundStyle(Archive.muted)
                     .fixedSize(horizontal: false, vertical: true)
@@ -124,7 +125,7 @@ struct ExportStudio: View {
             .padding(.bottom, Theme.Space.x2)
 
             group("Background") {
-                Swatches(selection: $style.backdrop, options: ExportStyle.Backdrop.available(video: isVideo), capture: small)
+                Swatches(style: $style, options: ExportStyle.Backdrop.available(video: isVideo), capture: small)
             }
             group("Frame") {
                 VStack(spacing: Theme.Space.x1 + 2) {
@@ -134,7 +135,14 @@ struct ExportStudio: View {
                 }
             }
             group("Shape") {
-                RatioSwitch(selection: $style.ratio)
+                VStack(alignment: .leading, spacing: Theme.Space.x2) {
+                    RatioSwitch(selection: $style.ratio)
+                    if style.ratio == .custom {
+                        RatioFields(width: $style.ratioWidth, height: $style.ratioHeight)
+                            .transition(.opacity.combined(with: .offset(y: -4)))
+                    }
+                }
+                .animation(Theme.Motion.snappy, value: style.ratio == .custom)
             }
             Spacer(minLength: Theme.Space.x4)
             footer
@@ -273,7 +281,8 @@ struct ExportStudio: View {
         busy = false
         progress = nil
         if ok {
-            show("Saved to Downloads")
+            let bytes = (try? destination.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0
+            show(bytes > 0 ? "Saved to Downloads · \(ByteCountFormatter.string(fromByteCount: Int64(bytes), countStyle: .file))" : "Saved to Downloads")
             NSWorkspace.shared.activateFileViewerSelecting([destination])
         } else {
             show(why ?? "Couldn't save the picture")
@@ -301,26 +310,101 @@ struct ExportStudio: View {
 
 // MARK: - Pieces
 
-/// The backdrops, as small squares: the chosen one ringed in ink.
+/// The backdrops, as small squares: the built-in ones, then your own
+/// pictures and a square to add one (or drop pictures on the grid). The
+/// chosen one is ringed in ink.
 private struct Swatches: View {
-    @Binding var selection: ExportStyle.Backdrop
+    @Binding var style: ExportStyle
     let options: [ExportStyle.Backdrop]
     /// For "From the capture": the capture itself, blurred.
     let capture: CIImage?
     @State private var thumbnail: NSImage?
+    @State private var pictures: [String] = ExportBackgrounds.all()
+    @State private var pictureThumbs: [String: NSImage] = [:]
+    @State private var dropping = false
 
     private let columns = Array(repeating: GridItem(.fixed(32), spacing: 8), count: 6)
 
     var body: some View {
         LazyVGrid(columns: columns, alignment: .leading, spacing: 8) {
             ForEach(options) { option in
-                Swatch(option: option, selected: option == selection, thumbnail: thumbnail) {
-                    withAnimation(Theme.Motion.snappy) { selection = option }
+                Swatch(option: option, selected: style.backdrop == option, image: option == .blur ? thumbnail : nil) {
+                    withAnimation(Theme.Motion.snappy) { style.backdrop = option }
                 }
             }
+            ForEach(pictures, id: \.self) { name in
+                Swatch(option: .picture, selected: style.backdrop == .picture && style.picture == name, image: pictureThumbs[name]) {
+                    withAnimation(Theme.Motion.snappy) {
+                        style.picture = name
+                        style.backdrop = .picture
+                    }
+                }
+                .contextMenu {
+                    Button("Remove This Background") { remove(name) }
+                }
+                .onAppear { loadThumb(name) }
+            }
+            AddSwatch(highlighted: dropping, action: choose)
+        }
+        .onDrop(of: [.fileURL], isTargeted: $dropping) { providers in
+            for provider in providers {
+                _ = provider.loadObject(ofClass: URL.self) { url, _ in
+                    guard let url else { return }
+                    DispatchQueue.main.async { add([url]) }
+                }
+            }
+            return true
         }
         .onAppear(perform: makeThumbnail)
         .onChange(of: capture == nil) { _ in makeThumbnail() }
+    }
+
+    private func choose() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.image]
+        panel.allowsMultipleSelection = true
+        panel.canChooseDirectories = false
+        panel.message = "Choose pictures to use as backgrounds"
+        panel.prompt = "Add"
+        panel.begin { response in
+            guard response == .OK else { return }
+            add(panel.urls)
+        }
+    }
+
+    private func add(_ urls: [URL]) {
+        let images = urls.filter { NSImage(contentsOf: $0) != nil }
+        var last: String?
+        for url in images { last = ExportBackgrounds.add(url) ?? last }
+        pictures = ExportBackgrounds.all()
+        if let last {
+            withAnimation(Theme.Motion.snappy) {
+                style.picture = last
+                style.backdrop = .picture
+            }
+        }
+    }
+
+    private func remove(_ name: String) {
+        ExportBackgrounds.remove(name)
+        pictures = ExportBackgrounds.all()
+        pictureThumbs[name] = nil
+        if style.backdrop == .picture, style.picture == name {
+            style.picture = nil
+            style.backdrop = ExportStyle().backdrop
+        }
+    }
+
+    private func loadThumb(_ name: String) {
+        guard pictureThumbs[name] == nil else { return }
+        let url = ExportBackgrounds.url(name)
+        Task.detached(priority: .utility) {
+            let small = ExportRenderer.picture(at: url).map { ExportRenderer.downsized($0, longest: 96) }
+            let image = small.flatMap(ExportRenderer.cgImage)
+            await MainActor.run {
+                if let image { pictureThumbs[name] = NSImage(cgImage: image, size: NSSize(width: image.width, height: image.height)) }
+            }
+        }
     }
 
     private func makeThumbnail() {
@@ -332,10 +416,100 @@ private struct Swatches: View {
     }
 }
 
+/// The square that adds a picture: a plus on the grey track.
+private struct AddSwatch: View {
+    var highlighted = false
+    let action: () -> Void
+    @State private var hovering = false
+
+    var body: some View {
+        let shape = RoundedRectangle(cornerRadius: Theme.Radius.chip, style: .continuous)
+        Button(action: action) {
+            Image(systemName: "plus")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(hovering || highlighted ? Theme.Palette.ink : Theme.Palette.ink2)
+                .frame(width: 32, height: 32)
+                .background(shape.fill(hovering || highlighted ? Theme.Palette.fillSelected : Theme.Palette.fill))
+                .contentShape(shape)
+        }
+        .buttonStyle(PressStyle(scale: 0.94))
+        .onHover { inside in withAnimation(Theme.Motion.hover) { hovering = inside } }
+        .toolTip("Add a background", "A picture of your own, or drop one here", align: .center)
+        .accessibilityLabel("Add a background")
+    }
+}
+
+/// Width to height for a custom frame: two numbers either side of a colon.
+private struct RatioFields: View {
+    @Binding var width: Double
+    @Binding var height: Double
+
+    var body: some View {
+        HStack(spacing: Theme.Space.x2) {
+            NumberField(value: $width, label: "Width")
+            Text(":")
+                .font(Theme.Typography.ui(Theme.Typography.control, .medium))
+                .foregroundStyle(Theme.Palette.ink3)
+            NumberField(value: $height, label: "Height")
+            Button {
+                let old = width
+                width = height
+                height = old
+            } label: {
+                Image(systemName: "arrow.left.arrow.right")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(Theme.Palette.ink2)
+                    .frame(width: 28, height: 28)
+                    .background(RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous).fill(Theme.Palette.fill))
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(PressStyle())
+            .toolTip("Swap width and height", align: .center)
+        }
+    }
+}
+
+/// A number on the grey track; Return or leaving the field takes it.
+private struct NumberField: View {
+    @Binding var value: Double
+    let label: String
+    @State private var text = ""
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        TextField(label, text: $text)
+            .textFieldStyle(.plain)
+            .multilineTextAlignment(.center)
+            .font(Theme.Typography.ui(Theme.Typography.control))
+            .monospacedDigit()
+            .foregroundStyle(Theme.Palette.ink)
+            .focused($focused)
+            .frame(height: 28)
+            .frame(maxWidth: .infinity)
+            .background(RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous).fill(focused ? Theme.Palette.fillSelected : Theme.Palette.fill))
+            .onAppear { text = Self.format(value) }
+            .onChange(of: value) { new in if !focused { text = Self.format(new) } }
+            .onChange(of: focused) { now in if !now { commit() } }
+            .onSubmit(commit)
+            .accessibilityLabel(label)
+    }
+
+    private func commit() {
+        let cleaned = text.replacingOccurrences(of: ",", with: ".").trimmingCharacters(in: .whitespaces)
+        if let number = Double(cleaned), number > 0, number <= 10_000 { value = number }
+        text = Self.format(value)
+    }
+
+    static func format(_ value: Double) -> String {
+        value.rounded() == value ? String(Int(value)) : String(format: "%g", value)
+    }
+}
+
 private struct Swatch: View {
     let option: ExportStyle.Backdrop
     let selected: Bool
-    let thumbnail: NSImage?
+    /// The capture (blurred) or your picture.
+    let image: NSImage?
     let action: () -> Void
     @State private var hovering = false
 
@@ -368,12 +542,20 @@ private struct Swatch: View {
         case .none:
             Checkerboard(square: 6)
         case .blur:
-            if let thumbnail {
-                Image(nsImage: thumbnail)
+            if let image {
+                Image(nsImage: image)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .blur(radius: 4)
                     .scaleEffect(1.3)
+            } else {
+                Theme.Palette.fill
+            }
+        case .picture:
+            if let image {
+                Image(nsImage: image)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
             } else {
                 Theme.Palette.fill
             }
