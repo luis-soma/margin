@@ -253,6 +253,8 @@ final class FilmModel: ObservableObject {
     let loop: TimeInterval
     @Published var clockStart = Date()
     @Published var card: CardStage?
+    /// The card has come down from the top edge to where it rests.
+    @Published var cardDown = false
     @Published var typed = ""
     @Published var archive: Archive = .before
     /// The archive's time scale: the weeks (2) to the day (0), and how long
@@ -288,6 +290,7 @@ final class FilmModel: ObservableObject {
         quiet.disablesAnimations = true
         withTransaction(quiet) {
             card = nil
+            cardDown = false
             typed = ""
             archive = .before
             cursor = Self.rest
@@ -302,6 +305,10 @@ final class FilmModel: ObservableObject {
     /// the field for why.
     func showCard() {
         card = CardStage(.card(AnyView(FilmCard(model: self))))
+        // Down from behind the frame's top edge, settling softly.
+        DispatchQueue.main.async { [weak self] in
+            withAnimation(.timingCurve(0.2, 0.8, 0.2, 1, duration: 0.6)) { self?.cardDown = true }
+        }
     }
 
     /// As QuickCaptureController.close: the card rises a little and fades.
@@ -341,7 +348,7 @@ final class FilmModel: ObservableObject {
     /// turns to the text beam as it lands, as over any field.
     func moveToField() {
         let point = field == .zero
-            ? CGPoint(x: FilmStudio.size.width / 2 - 120, y: 300)
+            ? CGPoint(x: FilmStudio.size.width / 2 - 120, y: 300 + FilmStage.cardTop)
             : CGPoint(x: field.minX + min(150, field.width * 0.4), y: field.midY)
         move(to: point, duration: 0.6)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in self?.pointer = .beam }
@@ -395,6 +402,8 @@ struct FilmStage: View {
     @ObservedObject var model: FilmModel
 
     static let archiveSize = CGSize(width: 1060, height: 620)
+    /// The card's distance from the top of the frame.
+    static let cardTop: CGFloat = 40
     /// The stage's own coordinates, before the camera.
     static let space = "filmStage"
 
@@ -415,8 +424,12 @@ struct FilmStage: View {
                 .padding(.top, 36)
 
             if let stage = model.card {
+                // Still hanging from the top, with a little air above it,
+                // and dropping in from the edge so it reads as coming down.
                 CardHost.film(stage)
                     .frame(width: 640, height: 520, alignment: .top)
+                    .padding(.top, FilmStage.cardTop)
+                    .offset(y: model.cardDown ? 0 : -(FilmStage.cardTop + 36))
                     .id(ObjectIdentifier(stage))
             }
 

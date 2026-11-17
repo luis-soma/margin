@@ -47,11 +47,13 @@ struct FocusView: View {
     /// How far the picture is zoomed in; bumping the token sends it back to fit.
     @State private var zoom: CGFloat = 1
     @State private var resetToken = 0
+    /// The export studio is open over the panel (the pencil under the details).
+    @State private var editing = false
 
     private var entry: Entry? { store.entry(id: entryID) }
 
     var body: some View {
-        let _ = arrows.step = { offset in step(offset) }
+        let _ = arrows.step = { offset in if !editing { step(offset) } }
         ZStack {
             // The repo shows through, softened under a pale veil.
             Rectangle()
@@ -67,9 +69,19 @@ struct FocusView: View {
                     let F = Archive.Focus.self
                     let inset = F.inset
                     let size = CGSize(width: max(0, geo.size.width - inset * 2), height: max(0, geo.size.height - F.insetTop - inset))
-                    panel(entry, size: size, stacked: stacked)
-                        .frame(width: size.width, height: size.height)
-                        .offset(x: inset, y: F.insetTop)
+                    Group {
+                        if editing, let source = exportSource(entry) {
+                            ExportStudio(entry: entry, source: source) {
+                                withAnimation(Theme.Motion.settle) { editing = false }
+                            }
+                            .transition(.opacity.combined(with: .scale(scale: 0.99)))
+                        } else {
+                            panel(entry, size: size, stacked: stacked)
+                                .transition(.opacity)
+                        }
+                    }
+                    .frame(width: size.width, height: size.height)
+                    .offset(x: inset, y: F.insetTop)
                 }
             }
             shortcuts
@@ -251,6 +263,17 @@ struct FocusView: View {
     private func zoomableURL(_ entry: Entry) -> URL? {
         guard (entry.frames?.count ?? 0) <= 1, store.mediaURL(for: entry) == nil else { return nil }
         return store.imageURL(for: entry)
+    }
+
+    /// What the export studio dresses: a single picture or a recording.
+    private func exportSource(_ entry: Entry) -> URL? {
+        if let media = store.mediaURL(for: entry) {
+            return ["mp4", "mov", "m4v"].contains(media.pathExtension.lowercased()) ? media : nil
+        }
+        // A website or prototype too: its screenshot.
+        guard (entry.frames?.count ?? 0) <= 1, let url = store.imageURL(for: entry),
+              ["png", "jpg", "jpeg", "heic", "tiff", "gif", "webp"].contains(url.pathExtension.lowercased()) else { return nil }
+        return url
     }
 
     private func resetZoom() {
@@ -451,6 +474,14 @@ struct FocusView: View {
                     Image(systemName: "folder").font(.system(size: 13))
                 }
             }
+            if exportSource(entry) != nil {
+                HeaderTool(help: "Edit and export", detail: "Backdrop, padding, corners and shadow", action: {
+                    stopTyping()
+                    withAnimation(Theme.Motion.settle) { editing = true }
+                }) {
+                    Image(systemName: "pencil").font(.system(size: 13.5))
+                }
+            }
             HeaderTool(help: "Download to your Downloads folder", action: { download(entry) }) {
                 // The arrow makes the symbol sit low in its box: up a point,
                 // so it looks centred in the pill like the bin beside it.
@@ -571,7 +602,10 @@ struct FocusView: View {
     /// Esc, arrows, ⌘S and ⌘C, but not while you're typing a note.
     private var shortcuts: some View {
         ZStack {
-            Button("", action: close).keyboardShortcut(.cancelAction)
+            Button("") {
+                if editing { withAnimation(Theme.Motion.settle) { editing = false } } else { close() }
+            }
+            .keyboardShortcut(.cancelAction)
             Button("") { if let entry { save(entry) } }.keyboardShortcut("s", modifiers: .command)
             Button("") { if let entry { copy(entry) } }.keyboardShortcut("c", modifiers: .command)
             Button("", action: deleteCurrent).keyboardShortcut(.delete, modifiers: .command)
@@ -846,7 +880,7 @@ private struct EditableNote: View {
 }
 
 /// Previous, next or close: ink, faint when there's nowhere to go.
-private struct NavIcon: View {
+struct NavIcon: View {
     let symbol: String
     var tint = Archive.ink
     let action: () -> Void
