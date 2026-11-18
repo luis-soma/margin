@@ -32,6 +32,8 @@ This needs Margin's tools (`margin_projects`, `margin_project`, `margin_add`, `m
 Look through everything you can reach for this work:
 - This chat, and when you're in a Claude project: the project's files and instructions, and its other chats (search past chats, open the relevant ones).
 - Artifacts and documents made along the way, and links that came up.
+- Builds and prototypes: HTML pages made with Claude or Claude Code, kept on the designer's Mac or made as artifacts in a chat. These are worth keeping as they ran.
+- Files on the designer's Mac that belong to the work (exports, PDFs, recordings, pictures, HTML builds). If the material mentions a file but not where it is, ask the designer once for its path (they can drag it into the chat, or copy it from Finder with Option-Command-C).
 - Figma: frames and files linked or discussed. With the Figma connector, list the important frames (with their node links).
 - Dates: use when each thing actually happened (a chat's date, a file's date, a date mentioned). Don't put everything at today. If you only know the week or month, use its first day and say in the body that the date is approximate.
 
@@ -45,12 +47,14 @@ Leave out small talk, repeated drafts and anything private that isn't about the 
 
 ## 5. Add it
 Call `margin_add` with up to 20 captures at a time, oldest first. For each:
-- `kind`: `note` (a step, finding or idea), `decision`, `text` (an excerpt worth keeping as written), `link` (a website), `figma` (a Figma frame), `inspiration` (a reference), `image` (a picture with an address).
+- `kind`: `note` (a step, finding or idea), `decision`, `text` (an excerpt worth keeping as written), `link` (a website), `figma` (a Figma frame), `inspiration` (a reference), `image` (a picture with an address), `prototype` (an HTML page or build, kept live), `recording`, `file` (any other file).
 - `title`: short and specific, in plain words ("Narrowed the topic to repair cafés", not "Update").
 - `body`: the annotation. A few sentences on what it was, what it changed and how it connects to what came before. Facts from the material, not praise.
 - `tags`: one to three short topics (for example "research", "concept", "feedback"), the same words across the project.
 - `when`: the date it happened (YYYY-MM-DD, or a full ISO time if known).
 - `figma_url` for frames (with node-id), `link` for websites and documents, `image_url` for a picture you have a public address for.
+- `file` for anything on the designer's Mac: the full path, such as `/Users/name/Projects/app/index.html`. Margin brings it in the way a dropped file comes in: an HTML page, or a folder with an index.html, becomes a live prototype you can click through in Margin (with its CSS, scripts and pictures); images become pictures, videos recordings, text and Markdown notes, anything else the file with its preview. Set `when` to when it was made, if you know.
+- `html` for a page that only exists in this chat (an HTML artifact or prototype you made): pass its complete source, and it's kept as a live prototype.
 - `why`: only the designer's own words for their reasoning, quoted from what they wrote. Never your interpretation. Leave it out otherwise.
 - `alternatives` for decisions: what else was considered.
 - `source`: where it came from ("Claude chat", "Figma", "Claude project file").

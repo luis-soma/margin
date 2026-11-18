@@ -108,6 +108,9 @@ struct RepoView: View {
     @State private var dropping = false
     /// "Added 3 files", shortly after a drop.
     @State private var dropNote: String?
+    /// Dropped files, read and waiting to be checked before they go in.
+    @State private var pendingImport: [FileImport.Item]?
+    @State private var importProject = ""
 
     private var inProject: Bool { !atHome }
 
@@ -452,6 +455,21 @@ struct RepoView: View {
             return true
         }
         .overlay { if dropping { dropTarget.transition(.opacity) } }
+        // What was dropped, to check before it goes in.
+        .overlay {
+            if pendingImport != nil {
+                ZStack {
+                    Color.black.opacity(0.08)
+                        .contentShape(Rectangle())
+                        .onTapGesture { withAnimation(Brand.motion) { pendingImport = nil } }
+                    ImportReview(items: Binding(get: { pendingImport ?? [] }, set: { pendingImport = $0 }),
+                                 project: importProject, add: finishImport,
+                                 cancel: { withAnimation(Brand.motion) { pendingImport = nil } })
+                        .transition(.opacity.combined(with: .scale(scale: 0.97)))
+                }
+                .transition(.opacity)
+            }
+        }
         // Ask reading: a slow band of clarity passes over the archive.
         .overlay {
             if ask.look?.phase == .reading { ReadingSweep().transition(.opacity) }
@@ -501,7 +519,20 @@ struct RepoView: View {
                 }
             }
             guard !urls.isEmpty else { return }
-            let added = await FileImport.importFiles(urls, into: store, project: project)
+            let items = await FileImport.prepare(urls)
+            guard !items.isEmpty else { return }
+            importProject = project
+            withAnimation(Brand.motion) { pendingImport = items }
+        }
+    }
+
+    /// Adds the checked files, then says how many went in.
+    private func finishImport() {
+        guard let items = pendingImport else { return }
+        let project = importProject
+        Task { @MainActor in
+            let added = await FileImport.add(items, into: store, project: project)
+            withAnimation(Brand.motion) { pendingImport = nil }
             let note: String
             switch added.count {
             case 0: note = "Already in \(project)"

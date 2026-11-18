@@ -15,8 +15,10 @@ import MarginKit
 /// - `GET /margin/project?name=`: what a project already has, so nothing
 ///   is brought in twice.
 /// - `POST /margin/captures`: `{project, captures: [...]}`; each capture
-///   has a kind, title, body, when, and a link, a Figma frame or a
-///   picture's address. Margin fetches the pictures itself.
+///   has a kind, title, body, when, and a link, a Figma frame, a picture's
+///   address, a file on this Mac (`file`) or a page's HTML (`html`). Margin
+///   fetches the pictures itself; files come in the way a dropped file does,
+///   HTML pages and site folders as live prototypes.
 @MainActor
 final class ClaudeImport {
     static let shared = ClaudeImport()
@@ -101,6 +103,24 @@ final class ClaudeImport {
         var batch: [Entry] = []
         let existing = store.entries(in: project)
         for item in items.prefix(40) {
+            // A file on this Mac or a page's HTML: brought in the way a drop is.
+            if item["file"] != nil || item["html"] != nil {
+                let title = (item["title"] as? String)?.trimmed ?? ""
+                let body = (item["body"] as? String)?.trimmed ?? ""
+                if !title.isEmpty, (existing + batch).contains(where: { $0.title == title && $0.body == body }) {
+                    skipped += 1
+                    continue
+                }
+                let made = await fileEntries(item, project: project, store: store)
+                if let note = made.note { notes.append(note) }
+                for var entry in made.entries {
+                    annotate(&entry, with: item)
+                    if entry.imageFile != nil { pictured += 1 }
+                    batch.append(entry)
+                    added += 1
+                }
+                continue
+            }
             guard var entry = makeEntry(item, project: project) else {
                 notes.append("Skipped one without a title or text.")
                 continue
@@ -156,6 +176,68 @@ final class ClaudeImport {
         entry.sourceApp = (item["source"] as? String)?.trimmed.nilIfEmpty ?? "Claude"
         entry.tags = (item["tags"] as? [String]) ?? []
         return entry
+    }
+
+    /// The entries for a `file` (a path on this Mac: any file, an HTML page,
+    /// a site folder or a folder of files) or for `html` (a page's source, for
+    /// an artifact that only exists in the chat), and why if none came.
+    private func fileEntries(_ item: [String: Any], project: String, store: EntryStore) async -> (entries: [Entry], note: String?) {
+        let title = (item["title"] as? String)?.trimmed ?? ""
+        if let html = item["html"] as? String, !html.trimmed.isEmpty {
+            var entry = Entry(kind: .capture, project: project)
+            entry.label = title.nilIfEmpty
+            guard await FileImport.makePrototype(html: html, into: &entry, store: store) else {
+                return ([], "A page's HTML couldn't be saved.")
+            }
+            return ([entry], nil)
+        }
+        guard let raw = (item["file"] as? String)?.trimmed, !raw.isEmpty else { return ([], nil) }
+        let url: URL = raw.hasPrefix("file://")
+            ? (URL(string: raw) ?? URL(fileURLWithPath: raw))
+            : URL(fileURLWithPath: (raw as NSString).expandingTildeInPath)
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            return ([], "Couldn't find \(raw) on this Mac. Ask the designer where the file is, then pass its full path.")
+        }
+        var prepared = await FileImport.prepare([url])
+        guard !prepared.isEmpty else { return ([], "\(url.lastPathComponent) has nothing to bring in.") }
+        let wanted = Self.fileKind(item["kind"] as? String)
+        let when = Self.date(item["when"] as? String)
+        for index in prepared.indices {
+            if let wanted, prepared[index].kinds.contains(wanted) { prepared[index].kind = wanted }
+            if let when { prepared[index].date = when }
+            if prepared.count == 1, !title.isEmpty { prepared[index].name = title }
+        }
+        var entries: [Entry] = []
+        for one in prepared {
+            if let entry = await FileImport.makeEntry(one, store: store, project: project) { entries.append(entry) }
+        }
+        return (entries, entries.isEmpty ? "\(url.lastPathComponent) couldn't be brought in." : nil)
+    }
+
+    /// What a file was asked to become.
+    private static func fileKind(_ text: String?) -> FileImport.Kind? {
+        switch text?.lowercased() {
+        case "prototype", "html", "site", "website", "build": return .prototype
+        case "recording", "video", "movie": return .recording
+        case "image", "picture", "screenshot", "capture": return .picture
+        case "note", "text", "markdown": return .note
+        case "link": return .link
+        case "file", "document", "pdf": return .file
+        default: return nil
+        }
+    }
+
+    /// Claude's words on a file that came in: title, annotation, the
+    /// designer's reasons and tags.
+    private func annotate(_ entry: inout Entry, with item: [String: Any]) {
+        if let title = (item["title"] as? String)?.trimmed, !title.isEmpty { entry.title = title }
+        if let body = (item["body"] as? String)?.trimmed, !body.isEmpty {
+            entry.body = entry.kind == .note && !entry.body.isEmpty ? body + "\n\n" + entry.body : body
+        }
+        entry.rationale = (item["why"] as? String)?.trimmed ?? ""
+        entry.alternatives = (item["alternatives"] as? String)?.trimmed ?? ""
+        if let tags = item["tags"] as? [String], !tags.isEmpty { entry.tags = tags }
+        entry.sourceApp = (item["source"] as? String)?.trimmed.nilIfEmpty ?? entry.sourceApp ?? "Claude"
     }
 
     /// Already in the project: the same link with the same title, or the

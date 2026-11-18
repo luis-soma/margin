@@ -86,7 +86,7 @@ let tools: [[String: Any]] = [
     ],
     [
         "name": "margin_add",
-        "description": "Adds captures to a Margin project's timeline, each at the date it happened. Up to 20 per call, oldest first. A project that doesn't exist yet is made. Margin fetches pictures itself: Figma frames from figma_url, pictures from image_url, websites from link. Captures already in the project are skipped.",
+        "description": "Adds captures to a Margin project's timeline, each at the date it happened. Up to 20 per call, oldest first. A project that doesn't exist yet is made. Margin fetches pictures itself: Figma frames from figma_url, pictures from image_url, websites from link. Files on the designer's Mac come in from `file` (a full path): HTML pages and site folders become live prototypes you can click through, images pictures, videos recordings, text notes, anything else the file with its preview. A page that only exists in this chat (an HTML artifact) can be passed as `html`. Captures already in the project are skipped.",
         "inputSchema": [
             "type": "object",
             "properties": [
@@ -97,13 +97,15 @@ let tools: [[String: Any]] = [
                     "items": [
                         "type": "object",
                         "properties": [
-                            "kind": ["type": "string", "enum": ["note", "decision", "text", "link", "figma", "inspiration", "image"]],
+                            "kind": ["type": "string", "enum": ["note", "decision", "text", "link", "figma", "inspiration", "image", "prototype", "recording", "file"]],
                             "title": ["type": "string", "description": "Short and specific."],
                             "body": ["type": "string", "description": "What it was and what it changed, a few sentences."],
                             "when": ["type": "string", "description": "When it happened: YYYY-MM-DD or an ISO 8601 time."],
                             "link": ["type": "string", "description": "A website or document address."],
                             "figma_url": ["type": "string", "description": "A Figma link with node-id, for a frame."],
                             "image_url": ["type": "string", "description": "A public address of a picture."],
+                            "file": ["type": "string", "description": "A full path to a file or folder on the designer's Mac (e.g. /Users/name/Desktop/build/index.html). HTML pages and folders with an index.html become live prototypes; kind can say what else it should be."],
+                            "html": ["type": "string", "description": "The complete HTML of a page made in this chat (an artifact or a prototype), to keep as a live prototype."],
                             "why": ["type": "string", "description": "The designer's own words for why, quoted. Leave out if they didn't say."],
                             "alternatives": ["type": "string", "description": "Decisions: what else was considered."],
                             "source": ["type": "string", "description": "Where it came from, e.g. Claude chat, Figma."],
