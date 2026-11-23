@@ -163,8 +163,18 @@ struct RepoView: View {
         }
         .frame(minWidth: 600, minHeight: 380)
         .background(Brand.background)
+        // Captures carried from the timeline: a small stack under the pointer.
+        .overlay { CaptureDragLayer() }
         .ignoresSafeArea()
         .coordinateSpace(name: "repo")
+        // Captures moved to another project: say where.
+        .onReceive(NotificationCenter.default.publisher(for: CaptureDrag.moved)) { note in
+            guard let line = note.object as? String else { return }
+            withAnimation(Brand.motion) { dropNote = line }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.6) {
+                if dropNote == line { withAnimation(Brand.motion) { dropNote = nil } }
+            }
+        }
         // The hand-off window closed itself (Esc, its own close): untick the icon.
         .onReceive(NotificationCenter.default.publisher(for: AppModel.handoffClosed)) { _ in handingOver = false }
         // The welcome tour opens a project to show the archive.

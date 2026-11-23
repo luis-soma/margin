@@ -627,6 +627,12 @@ struct TimeZoomView: View {
     /// The canvas is up (from the moment clustering starts until the
     /// artifacts have landed back on the timeline).
     @State private var canvasUp = false
+    /// Captures picked out to move together: by dragging a box on empty
+    /// space, or Shift-clicking.
+    @State private var selected: Set<UUID> = []
+    @State private var marquee: CGRect?
+    @State private var marqueeBase: Set<UUID> = []
+    @ObservedObject private var carrying = CaptureDrag.shared
     @EnvironmentObject private var intelligence: Intelligence
     @EnvironmentObject private var store: EntryStore
     /// What Ask is showing: answers lit, the rest quiet.
@@ -658,7 +664,12 @@ struct TimeZoomView: View {
         }
         // Use the new list handed in: the closure's own `entries` can still be
         // the previous one, which made toggles show the state before.
-        .onChange(of: entries) { new in model.update(entries: new, size: model.size) }
+        .onChange(of: entries) { new in
+            model.update(entries: new, size: model.size)
+            let ids = Set(new.map(\.id))
+            if !selected.isSubset(of: ids) { selected.formIntersection(ids) }
+        }
+        .onChange(of: clustering) { _ in selected = [] }
         // Picture sizes that were in iCloud arrived: lay out with the real ones.
         .onChange(of: store.aspectsVersion) { _ in model.relayout() }
         .onChange(of: level) { new in
@@ -728,6 +739,23 @@ struct TimeZoomView: View {
         let linkOpacity = closeUp(blend.low.scale) * (1 - t) + closeUp(blend.high.scale) * t
 
         ZStack(alignment: .topLeading) {
+            // Empty space: a click clears the selection, a drag draws a box
+            // that selects what it touches.
+            Color.clear
+                .frame(width: size.width, height: size.height)
+                .contentShape(Rectangle())
+                .onTapGesture { if !selected.isEmpty { withAnimation(Theme.Motion.snappy) { selected = [] } } }
+                .gesture(boxSelect(visible), including: interactive && !canvasUp ? .all : .none)
+            // The box being drawn: a hairline, the faintest wash.
+            if let box = marquee {
+                Rectangle()
+                    .fill(Archive.ink.opacity(0.035))
+                    .overlay(Rectangle().strokeBorder(Archive.ink.opacity(0.5), lineWidth: 1))
+                    .frame(width: box.width, height: box.height)
+                    .offset(x: box.minX, y: box.minY)
+                    .allowsHitTesting(false)
+                    .zIndex(5)
+            }
             // The timeline's line with a tick beside every section's date.
             TimeRail(low: blend.low, high: blend.high, fraction: blend.fraction, offset: model.offset)
                 .frame(width: size.width, height: size.height)
@@ -740,7 +768,9 @@ struct TimeZoomView: View {
             ForEach(visible, id: \.0.id) { entry, rect in
                 // The answer you've stepped to: outlined.
                 let answer: Bool = (askLook?.phase == .found && askLook?.current == entry.id) || filmFocus == entry.id
-                ZoomThumb(entry: entry, size: rect.size)
+                    || selected.contains(entry.id)
+                let carried = carrying.showsStack && carrying.ids.contains(entry.id)
+                ZoomThumb(entry: entry, size: rect.size, shiftClick: { toggle(entry.id) })
                     .overlay(alignment: .topTrailing) {
                         // Mark top right: where it lives (Figma, a build, a link).
                         // No screenshot mark on plain captures.
@@ -761,6 +791,11 @@ struct TimeZoomView: View {
                     )
                     .opacity(askLook?.opacity(entry.id) ?? 1)
                     .animation(askLook?.motion(entry.id) ?? .easeInOut(duration: 0.3), value: askLook)
+                    .animation(Theme.Motion.snappy, value: selected.contains(entry.id))
+                    // Carried to another project: it waits here, faint.
+                    .opacity(carried ? 0.35 : 1)
+                    .animation(Theme.Motion.snappy, value: carried)
+                    .gesture(carry(entry.id), including: interactive && !canvasUp ? .all : .none)
                     // The film studio's pointer needs to know where this capture is.
                     .background {
                         if filmTarget == entry.id {
@@ -814,12 +849,70 @@ struct TimeZoomView: View {
             }
         ))
         .overlay(alignment: .trailing) { scrollIndicator(size: size) }
+        // What's selected, and what to do with it; Esc lets go.
+        .overlay(alignment: .bottom) {
+            if !selected.isEmpty, !carrying.isActive, !canvasUp {
+                SelectionHint(count: selected.count) { withAnimation(Theme.Motion.snappy) { selected = [] } }
+                    .padding(.bottom, 64)
+                    .transition(.opacity.combined(with: .offset(y: 6)))
+            }
+        }
+        .animation(Theme.Motion.snappy, value: selected.isEmpty || carrying.isActive)
+        .background {
+            if !selected.isEmpty, interactive {
+                Button("") { withAnimation(Theme.Motion.snappy) { selected = [] } }
+                    .keyboardShortcut(.cancelAction)
+                    .opacity(0)
+                    .allowsHitTesting(false)
+            }
+        }
         // Ask for the AI lines of the labels in view.
         .task(id: labels.filter(\.label.wantsAI).map(\.label.id).joined(separator: ",")) {
             for item in labels where item.label.wantsAI && item.opacity > 0.5 {
                 intelligence.requestSummary(for: item.label.entries, level: item.scale.level)
             }
         }
+    }
+
+    /// Shift- or Command-click: in or out of the selection.
+    private func toggle(_ id: UUID) {
+        withAnimation(Theme.Motion.snappy) {
+            if selected.contains(id) { selected.remove(id) } else { selected.insert(id) }
+        }
+    }
+
+    /// Drag on empty space to draw a box: what it touches is selected. With
+    /// Shift held, the box adds to what's already selected.
+    private func boxSelect(_ visible: [(Entry, CGRect)]) -> some Gesture {
+        DragGesture(minimumDistance: 4)
+            .onChanged { value in
+                if marquee == nil { marqueeBase = NSEvent.modifierFlags.contains(.shift) ? selected : [] }
+                let a = value.startLocation, b = value.location
+                let box = CGRect(x: min(a.x, b.x), y: min(a.y, b.y), width: abs(b.x - a.x), height: abs(b.y - a.y))
+                marquee = box
+                var hit = marqueeBase
+                for (entry, rect) in visible where rect.offsetBy(dx: 0, dy: -model.offset).intersects(box) {
+                    hit.insert(entry.id)
+                }
+                if hit != selected { selected = hit }
+            }
+            .onEnded { _ in
+                marquee = nil
+                marqueeBase = []
+            }
+    }
+
+    /// Drag a capture (and the rest of the selection, if it's in it) onto a
+    /// project in the sidebar to move it there.
+    private func carry(_ id: UUID) -> some Gesture {
+        DragGesture(minimumDistance: 4, coordinateSpace: .global)
+            .onChanged { value in
+                let ids = selected.contains(id) ? entries.map(\.id).filter { selected.contains($0) } : [id]
+                carrying.drag(ids, from: store.currentProject, at: value.location, stack: true)
+            }
+            .onEnded { _ in
+                if carrying.end(store: store) != nil { selected = [] }
+            }
     }
 
     /// Where every artifact is on the timeline right now, in this view's
@@ -1214,6 +1307,8 @@ private struct ZoomThumb: View {
     @Environment(\.colorScheme) private var scheme
     let entry: Entry
     let size: CGSize
+    /// Shift- or Command-click: picks it out instead of opening it.
+    var shiftClick: (() -> Void)? = nil
     /// The pointer has rested on it. Lights up only after a short rest, so
     /// cards passing under a still pointer while you scroll stay quiet.
     @State private var hovering = false
@@ -1264,7 +1359,10 @@ private struct ZoomThumb: View {
                 }
             }
         }
-        .onTapGesture { focusMoment(entry) }
+        .onTapGesture {
+            let keys = NSEvent.modifierFlags
+            if let shiftClick, keys.contains(.shift) || keys.contains(.command) { shiftClick() } else { focusMoment(entry) }
+        }
         .onHover { inside in
             pendingHover?.cancel()
             pendingHover = nil
@@ -1384,5 +1482,39 @@ private struct ZoomEvents: NSViewRepresentable {
         deinit {
             if let monitor { NSEvent.removeMonitor(monitor) }
         }
+    }
+}
+
+/// The selection, floating over the timeline: how many, and that they can
+/// be dragged onto a project. The × lets go.
+private struct SelectionHint: View {
+    let count: Int
+    let clear: () -> Void
+    @State private var hovering = false
+
+    var body: some View {
+        HStack(spacing: Theme.Space.x2) {
+            Text(count == 1 ? "1 selected" : "\(count) selected")
+                .font(Theme.Typography.ui(Theme.Typography.control, .medium))
+                .foregroundStyle(Theme.Palette.ink)
+                .monospacedDigit()
+            Text("Drag onto a project to move")
+                .font(Theme.Typography.ui(Theme.Typography.control))
+                .foregroundStyle(Theme.Palette.ink3)
+            Button(action: clear) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(hovering ? Theme.Palette.ink : Theme.Palette.ink3)
+                    .frame(width: 20, height: 20)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .onHover { inside in withAnimation(Theme.Motion.hover) { hovering = inside } }
+            .toolTip("Clear the selection", "esc", align: .center)
+        }
+        .padding(.leading, Theme.Space.x3)
+        .padding(.trailing, Theme.Space.x1)
+        .frame(height: 32)
+        .background(FloatingSurface(shape: Capsule(), frosted: true))
     }
 }

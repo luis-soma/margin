@@ -451,7 +451,7 @@ struct ClusterCanvas: View {
     }
 
     private func drag(_ id: UUID) -> some Gesture {
-        DragGesture(minimumDistance: 3)
+        DragGesture(minimumDistance: 3, coordinateSpace: .global)
             .onChanged { value in
                 if dragging != id {
                     dragging = id
@@ -459,8 +459,20 @@ struct ClusterCanvas: View {
                     group = selected.contains(id) && selected.count > 1 ? selected : [id]
                 }
                 dragDelta = value.translation
+                // Carried over the sidebar, they can go to another project.
+                CaptureDrag.shared.drag(entries.map(\.id).filter { group.contains($0) }, from: project, at: value.location, stack: false)
             }
             .onEnded { value in
+                // Let go on a project in the sidebar: they move there.
+                if CaptureDrag.shared.target != nil {
+                    CaptureDrag.shared.end(store: store)
+                    selected.subtract(group)
+                    dragging = nil
+                    group = []
+                    dragDelta = .zero
+                    return
+                }
+                CaptureDrag.shared.cancel()
                 // They stay where you let go, then settle into the nearest free spots.
                 var moves: [(UUID, MapPoint)] = []
                 let together: Set<UUID> = group.isEmpty ? [id] : group

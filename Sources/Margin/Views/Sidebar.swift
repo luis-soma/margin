@@ -40,6 +40,11 @@ struct ProjectSidebar: View {
     @AppStorage("projectOrder") private var orderList = ""
     /// The project being dragged to a new place.
     @State private var dragging: String?
+    /// The row last swapped with while dragging: not swapped again until the
+    /// pointer has left it, so rows don't flick back and forth.
+    @State private var swappedWith: String?
+    /// Captures being carried from the timeline or the map onto a project.
+    @ObservedObject private var captureDrag = CaptureDrag.shared
     /// The project whose right-click menu is open, and where its rows are.
     @State private var menuFor: String?
     @State private var rowFrames: [String: CGRect] = [:]
@@ -155,12 +160,6 @@ struct ProjectSidebar: View {
             FloatingSurface(shape: shape, frosted: true)
         }
         .coordinateSpace(name: RailTip.space)
-        // Let go between rows: the drag ends where the project now is.
-        .onDrop(of: [.text], isTargeted: nil) { _ in
-            let wasDragging = dragging != nil
-            dragging = nil
-            return wasDragging
-        }
         // The toggle rides the card's edge: inside its top right corner when
         // open, just outside the rail when collapsed, on the same curve.
         .overlay(alignment: .topLeading) {
@@ -256,22 +255,52 @@ struct ProjectSidebar: View {
         }
         // On hover, open: the dots to the project's page.
         .modifier(RowMore(open: shown && dragging == nil, action: projectSettings.map { go in { go(name) } }))
-        // Drag a project up or down to put it where you want it.
-        .opacity(dragging == name ? 0.5 : 1)
-        .onDrag {
-            dragging = name
-            tip = nil
-            endWithMouseUp()
-            return NSItemProvider(object: name as NSString)
+        // Captures carried over this row: it takes them in.
+        .overlay {
+            if captureDrag.target == name {
+                RoundedRectangle(cornerRadius: Theme.Radius.row, style: .continuous)
+                    .fill(Theme.Palette.fillSelected)
+                    .overlay(RoundedRectangle(cornerRadius: Theme.Radius.row, style: .continuous)
+                        .strokeBorder(Theme.Palette.ink, lineWidth: 1.5))
+                    .allowsHitTesting(false)
+                    .transition(.opacity)
+            }
         }
-        .onDrop(of: [.text], delegate: ProjectDrop(target: name, dragging: $dragging, move: move))
+        .scaleEffect(captureDrag.target == name ? 1.02 : 1)
+        // Drag a project up or down to put it where you want it: it takes the
+        // place of each row you pass over, the others making room.
+        .opacity(dragging == name ? 0.55 : 1)
+        .highPriorityGesture(
+            DragGesture(minimumDistance: 5, coordinateSpace: .named(RailTip.space))
+                .onChanged { value in
+                    if dragging != name {
+                        dragging = name
+                        tip = nil
+                        menuFor = nil
+                    }
+                    let over = rowFrames.first(where: { $0.key != name && $0.value.contains(value.location) })?.key
+                    if over != swappedWith {
+                        if let over { move(name, onto: over) }
+                        swappedWith = over
+                    }
+                }
+                .onEnded { _ in
+                    swappedWith = nil
+                    withAnimation(Theme.Motion.snappy) { dragging = nil }
+                }
+        )
         // Right-click: Margin's own menu, beside the row.
         .onRightClick {
             tip = nil
             withAnimation(Theme.Motion.enter) { menuFor = name }
         }
         .background(GeometryReader { geo in
-            Color.clear.preference(key: RowFramesKey.self, value: [name: geo.frame(in: .named(RailTip.space))])
+            let global = geo.frame(in: .global)
+            Color.clear
+                .preference(key: RowFramesKey.self, value: [name: geo.frame(in: .named(RailTip.space))])
+                .onAppear { CaptureDrag.shared.rows[name] = global }
+                .onChange(of: global) { CaptureDrag.shared.rows[name] = $0 }
+                .onDisappear { CaptureDrag.shared.rows[name] = nil }
         })
     }
 
@@ -291,17 +320,6 @@ struct ProjectSidebar: View {
             if icons.hasOwn(name, store: store) {
                 MarginMenuItem(title: "Use a project picture", action: run { icons.automatic(for: name, store: store) }) { CropGlyph() }
             }
-        }
-    }
-
-    /// A drag let go outside the sidebar never lands on a row: the drag
-    /// ends when the button comes up, wherever it is.
-    private func endWithMouseUp() {
-        let state = $dragging
-        Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
-            guard NSEvent.pressedMouseButtons & 1 == 0 else { return }
-            timer.invalidate()
-            MainActor.assumeIsolated { state.wrappedValue = nil }
         }
     }
 
@@ -350,32 +368,6 @@ private struct RowMore: ViewModifier {
                 }
             }
             .onHover { inside in withAnimation(Theme.Motion.hover) { hovering = inside } }
-    }
-}
-
-/// A project row as a place to drop another: the dragged one moves into
-/// its place as it passes over, so the list makes room as you drag.
-private struct ProjectDrop: DropDelegate {
-    let target: String
-    @Binding var dragging: String?
-    let move: (String, String) -> Void
-
-    func dropEntered(info: DropInfo) {
-        guard let dragging, dragging != target else { return }
-        move(dragging, target)
-    }
-
-    func dropUpdated(info: DropInfo) -> DropProposal? {
-        DropProposal(operation: .move)
-    }
-
-    func validateDrop(info: DropInfo) -> Bool {
-        dragging != nil
-    }
-
-    func performDrop(info: DropInfo) -> Bool {
-        dragging = nil
-        return true
     }
 }
 
