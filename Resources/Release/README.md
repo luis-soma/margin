@@ -63,11 +63,12 @@ Margin lives in the menu bar (the bracket-and-dot icon).
   background (or add your own), padding, corners, shadow and a size or ratio.
   Crop if you need to. For recordings, Motion adds zoom on clicks, a smooth
   cursor and click ripples. Export as PNG, MP4 or GIF.
-- **Edit a recording:** under its preview, drag the ink handles to trim the
-  ends. **Split** (S) at the playhead, click a part, then pick a speed or
-  **Cut** it (⌫); speed changes ease in. **Zoom** (Z) adds a moment framed
-  closer: drag the box on the picture to frame it, and drag the bar on the
-  timeline to move it or change its length. ⌘Z undoes.
+- **Edit a recording:** under its preview is a strip of its frames. Drag
+  the ends of the ink frame to trim. Drag across the strip to pick a part,
+  then choose **Cut**, a speed (½× to 4×, easing in and out) or **Zoom** in
+  the small bar above it. For a zoom, drag the box on the picture to frame
+  it; drag its bar on the strip to move it or an end to change its length.
+  Click a cut, a speed or a zoom to change or remove it. ⌘Z undoes.
 - **Bring files in:** drag any file onto a project. A short review shows what
   each becomes and when it happened; change either before you add it. HTML
   files and site folders become prototypes you can click through.
