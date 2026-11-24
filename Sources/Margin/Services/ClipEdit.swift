@@ -39,7 +39,7 @@ struct ClipEdit: Codable, Equatable {
     var zooms: [Zoom] = []
 
     /// The speeds offered, slowest first.
-    static let rates: [Double] = [0.5, 1, 2, 4, 8]
+    static let rates: [Double] = [0.5, 1, 2, 4]
     /// How long a change of speed takes to ease in, either side of a split.
     static let ramp = 0.35
     static let zoomRamp = 0.7
@@ -61,6 +61,55 @@ struct ClipEdit: Codable, Equatable {
         guard let index = all.firstIndex(where: { $0.id == id }) else { return }
         body(&all[index])
         segments = all
+    }
+
+    /// Applies `body` to everything between `a` and `b`, splitting at both
+    /// ends first, then joins neighbours that came out the same. Returns
+    /// the stretch that now covers the middle of the range.
+    @discardableResult
+    mutating func apply(from a: Double, to b: Double, duration: Double, _ body: (inout Segment) -> Void) -> UUID? {
+        let a = max(a, 0), b = min(b, duration)
+        guard b - a > 0.05 else { return nil }
+        var all = pieces(duration)
+        func split(_ t: Double) {
+            guard let index = all.firstIndex(where: { t > $0.from + 0.02 && t < $0.to - 0.02 }) else { return }
+            var right = all[index]
+            right.id = UUID()
+            right.from = t
+            all[index].to = t
+            all.insert(right, at: index + 1)
+        }
+        split(a)
+        split(b)
+        for index in all.indices where all[index].from >= a - 0.021 && all[index].to <= b + 0.021 {
+            body(&all[index])
+        }
+        segments = all
+        tidy(duration)
+        let middle = (a + b) / 2
+        return pieces(duration).first { middle >= $0.from && middle <= $0.to }?.id
+    }
+
+    /// Joins touching stretches that play the same, and forgets the splits
+    /// entirely when nothing is left but one plain stretch.
+    mutating func tidy(_ duration: Double) {
+        var joined: [Segment] = []
+        for piece in pieces(duration) {
+            if let last = joined.last, last.rate == piece.rate, last.removed == piece.removed {
+                joined[joined.count - 1].to = piece.to
+            } else {
+                joined.append(piece)
+            }
+        }
+        segments = joined.count == 1 && joined[0].rate == 1 && !joined[0].removed ? [] : joined
+    }
+
+    /// Whether anything would be left if `id` were cut too.
+    func keepsSomething(without id: UUID?, duration: Double) -> Bool {
+        let start = start, end = end(duration)
+        return pieces(duration).contains { piece in
+            piece.id != id && !piece.removed && min(piece.to, end) - max(piece.from, start) > 0.1
+        }
     }
 
     /// What decides the edited video's timing, for knowing when to build it again.

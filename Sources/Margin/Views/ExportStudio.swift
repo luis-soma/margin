@@ -84,10 +84,6 @@ struct ExportStudio: View {
         if case .zoom(let id) = selection { return id }
         return nil
     }
-    private var selectedSegment: ClipEdit.Segment? {
-        guard case .segment(let id) = selection else { return nil }
-        return edit.pieces(duration).first { $0.id == id }
-    }
 
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: F.radius, style: .continuous)
@@ -146,7 +142,7 @@ struct ExportStudio: View {
 
     private var stage: some View {
         GeometryReader { geo in
-            let timeline: CGFloat = isVideo ? 28 + Theme.Space.x3 + EditTimeline.height + 24 : 60
+            let timeline: CGFloat = isVideo ? EditTimeline.barHeight + 16 + EditTimeline.height + 20 : 60
             let room = CGSize(width: max(80, geo.size.width - 2 * F.leading),
                               height: max(80, geo.size.height - 2 * F.verticalMargin * 0.75 - timeline))
             ZStack {
@@ -207,13 +203,8 @@ struct ExportStudio: View {
                 // Crop for a picture.
                 Group {
                     if isVideo, !cropping, player.duration > 0 {
-                        VStack(spacing: Theme.Space.x3) {
-                            editBar
-                            EditTimeline(edit: $edit, selection: $selection, duration: duration, playhead: sourceTime,
-                                         clicks: plan?.clicks.map(\.t) ?? [], thumbnails: thumbs.images,
-                                         seek: seekSource, willChange: remember)
-                        }
-                        .frame(maxWidth: 680)
+                        editRow
+                            .frame(maxWidth: 720)
                         .transition(.opacity)
                     } else {
                         stageTools
@@ -241,53 +232,35 @@ struct ExportStudio: View {
         .animation(Theme.Motion.snappy, value: cropping)
     }
 
-    /// Over the timeline: play and the time, then what you can do to what's
-    /// picked, or Split, Zoom and Crop.
-    private var editBar: some View {
-        HStack(spacing: Theme.Space.x2) {
+    /// Under a recording: play, its strip of frames, the time and Crop.
+    private var editRow: some View {
+        HStack(alignment: .center, spacing: Theme.Space.x2) {
             PlayButton(playing: player.playing) {
-                if selection != nil, framingID != nil { selection = nil }
+                if framingID != nil { selection = nil }
                 player.toggle()
             }
-            Text("\(EditTimeline.clock(player.time)) / \(EditTimeline.clock(player.duration))")
-                .font(Theme.Typography.ui(Theme.Typography.caption))
-                .monospacedDigit()
-                .foregroundStyle(Theme.Palette.ink3)
-                .fixedSize()
-            Spacer(minLength: Theme.Space.x2)
-            if let segment = selectedSegment {
-                SpeedSwitch(rate: segment.rate) { rate in setRate(rate, for: segment.id) }
-                    .disabled(segment.removed)
-                    .opacity(segment.removed ? 0.4 : 1)
-                ChipButton(title: segment.removed ? "Keep" : "Cut", symbol: segment.removed ? "arrow.uturn.backward" : "scissors") {
-                    toggleCut(segment.id)
-                }
-                .toolTip(segment.removed ? "Put it back" : "Cut this part out", "⌫", align: .center)
-                ChipButton(title: "Done", primary: true) { selection = nil }
-            } else if let id = framingID {
-                Text("Drag the box to frame it")
-                    .font(Theme.Typography.ui(Theme.Typography.caption))
+            EditTimeline(edit: $edit, selection: $selection, duration: duration, playhead: sourceTime,
+                         clicks: plan?.clicks.map(\.t) ?? [], thumbnails: thumbs.images,
+                         seek: seekSource, willChange: remember, act: perform)
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(EditTimeline.clock(player.time))
+                    .foregroundStyle(Theme.Palette.ink)
+                Text(EditTimeline.clock(player.duration))
                     .foregroundStyle(Theme.Palette.ink3)
-                    .fixedSize()
-                ChipButton(title: "Remove", symbol: "trash") { removeZoom(id) }
-                    .toolTip("Remove this zoom", "⌫", align: .center)
-                ChipButton(title: "Done", primary: true) { selection = nil }
-            } else {
-                ChipButton(title: "Split", symbol: "scissors") { split() }
-                    .toolTip("Split at the playhead", "S", align: .center)
-                ChipButton(title: "Zoom", symbol: "plus.magnifyingglass") { addZoom() }
-                    .toolTip("Frame this moment closer", "Z", align: .center)
-                stageTools
             }
+            .font(Theme.Typography.ui(Theme.Typography.caption))
+            .monospacedDigit()
+            .fixedSize()
+            ChipButton(title: "", symbol: "crop") { startCropping() }
+                .toolTip(crop == ExportCrops.full ? "Crop" : "Cropped", align: .center)
+                .disabled(small == nil)
         }
-        .animation(Theme.Motion.snappy, value: selection)
+        .padding(.top, EditTimeline.barHeight + 16)
     }
 
-    /// The edit's keys: S, Z, ⌫, ⌘Z and ⇧⌘Z.
+    /// The edit's keys: ⌫ cuts or removes what's picked, ⌘Z and ⇧⌘Z.
     private var editKeys: some View {
         ZStack {
-            Button("") { split() }.keyboardShortcut("s", modifiers: [])
-            Button("") { addZoom() }.keyboardShortcut("z", modifiers: [])
             Button("") { deleteSelection() }.keyboardShortcut(.delete, modifiers: [])
             Button("") { undo() }.keyboardShortcut("z", modifiers: .command)
             Button("") { redo() }.keyboardShortcut("z", modifiers: [.command, .shift])
@@ -313,62 +286,78 @@ struct ExportStudio: View {
         player.seek(map?.output(at: seconds) ?? seconds)
     }
 
-    private func split() {
-        guard duration > 0, !cropping else { return }
-        var next = edit
-        guard next.split(at: sourceTime, duration: duration) != nil else {
-            return show("Move the playhead away from the ends to split")
+    /// The span that's picked, in seconds.
+    private var pickedSpan: (Double, Double)? {
+        switch selection {
+        case .range(let a, let b): return (a, b)
+        case .segment(let id): return edit.pieces(duration).first { $0.id == id }.map { ($0.from, $0.to) }
+        default: return nil
         }
-        remember()
-        edit = next
     }
 
-    private func addZoom() {
-        guard duration > 0, !cropping else { return }
-        var next = edit
-        guard let id = next.addZoom(at: sourceTime, duration: duration) else {
-            return show("There's no room for a zoom here")
-        }
-        // Framed on the first click inside it, if there is one.
-        if let index = next.zooms.firstIndex(where: { $0.id == id }) {
-            let zoom = next.zooms[index]
-            if let click = plan?.clicks.first(where: { $0.t >= zoom.from && $0.t <= zoom.to }) {
-                let x = (click.at.x - crop.minX) / max(crop.width, 0.01)
-                let y = (click.at.y - crop.minY) / max(crop.height, 0.01)
-                next.zooms[index].x = FramingOverlay.clamped(x, depth: zoom.depth)
-                next.zooms[index].y = FramingOverlay.clamped(y, depth: zoom.depth)
+    /// Something from the bar over a selection.
+    private func perform(_ action: EditAction) {
+        switch action {
+        case .cut:
+            guard let span = pickedSpan else { return }
+            var next = edit
+            let id = next.apply(from: span.0, to: span.1, duration: duration) { $0.removed = true; $0.rate = 1 }
+            guard next.keepsSomething(without: nil, duration: duration) else { return show("Something has to stay") }
+            change(to: next, select: id.map { .segment($0) })
+        case .keep:
+            guard let span = pickedSpan else { return }
+            var next = edit
+            next.apply(from: span.0, to: span.1, duration: duration) { $0.removed = false }
+            change(to: next, select: nil)
+        case .speed(let rate):
+            guard let span = pickedSpan else { return }
+            var next = edit
+            let id = next.apply(from: span.0, to: span.1, duration: duration) { $0.rate = rate }
+            change(to: next, select: rate == 1 ? nil : id.map { .segment($0) })
+        case .zoom:
+            guard let span = pickedSpan else { return }
+            addZoom(from: span.0, to: span.1)
+        case .remove:
+            if case .zoom(let id) = selection {
+                remember()
+                edit.zooms.removeAll { $0.id == id }
+                selection = nil
             }
         }
+    }
+
+    private func change(to next: ClipEdit, select: EditSelection?) {
         remember()
         edit = next
-        selection = .zoom(id)
+        withAnimation(Theme.Motion.snappy) { selection = select }
     }
 
-    private func setRate(_ rate: Double, for id: UUID) {
-        remember()
-        edit.change(id, duration: duration) { $0.rate = rate }
-    }
-
-    private func toggleCut(_ id: UUID) {
-        let pieces = edit.pieces(duration)
-        let kept = pieces.filter { !$0.removed && $0.id != id }
-        if pieces.first(where: { $0.id == id })?.removed == false, kept.isEmpty {
-            return show("Split first, then cut a part out")
+    /// A zoom over the picked span, framed on the first click inside it.
+    private func addZoom(from a: Double, to b: Double) {
+        var next = edit
+        let length = max(b - a, 0.8)
+        let from = min(max(a, 0), max(duration - length, 0))
+        // Over any zoom it would overlap.
+        next.zooms.removeAll { $0.from < from + length && $0.to > from }
+        var zoom = ClipEdit.Zoom(from: from, to: min(from + length, duration))
+        if let click = plan?.clicks.first(where: { $0.t >= zoom.from && $0.t <= zoom.to }) {
+            let x = (click.at.x - crop.minX) / max(crop.width, 0.01)
+            let y = (click.at.y - crop.minY) / max(crop.height, 0.01)
+            zoom.x = FramingOverlay.clamped(x, depth: zoom.depth)
+            zoom.y = FramingOverlay.clamped(y, depth: zoom.depth)
         }
-        remember()
-        edit.change(id, duration: duration) { $0.removed.toggle() }
-    }
-
-    private func removeZoom(_ id: UUID) {
-        remember()
-        edit.zooms.removeAll { $0.id == id }
-        selection = nil
+        next.zooms.append(zoom)
+        next.zooms.sort { $0.from < $1.from }
+        change(to: next, select: .zoom(zoom.id))
     }
 
     private func deleteSelection() {
         switch selection {
-        case .segment(let id): toggleCut(id)
-        case .zoom(let id): removeZoom(id)
+        case .range: perform(.cut)
+        case .segment(let id):
+            let removed = edit.pieces(duration).first { $0.id == id }?.removed ?? false
+            perform(removed ? .keep : .speed(1))
+        case .zoom: perform(.remove)
         case nil: break
         }
     }
@@ -388,6 +377,7 @@ struct ExportStudio: View {
     private func dropStaleSelection() {
         switch selection {
         case .segment(let id) where !edit.pieces(duration).contains(where: { $0.id == id }): selection = nil
+        case .range: selection = nil
         case .zoom(let id) where !edit.zooms.contains(where: { $0.id == id }): selection = nil
         default: break
         }
@@ -1065,11 +1055,12 @@ struct ChipButton: View {
                 if let symbol {
                     Image(systemName: symbol).font(.system(size: 11, weight: .medium))
                 }
-                Text(title)
+                if !title.isEmpty { Text(title) }
             }
             .font(Theme.Typography.ui(Theme.Typography.control, .medium))
             .foregroundStyle(primary ? Theme.Palette.paper : Theme.Palette.ink)
-            .padding(.horizontal, Theme.Space.x3)
+            .padding(.horizontal, title.isEmpty ? 0 : Theme.Space.x3)
+            .frame(minWidth: 28)
             .frame(height: 28)
             .background(shape.fill(primary ? Theme.Palette.ink.opacity(hovering ? 0.86 : 1) : (hovering ? Theme.Palette.fillHover : Theme.Palette.fill)))
             .contentShape(shape)
