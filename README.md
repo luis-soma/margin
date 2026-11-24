@@ -37,8 +37,10 @@ Needs macOS 13 or later.
 - **Ask.** Ask about a project in your own words. Margin finds the captures
   on the timeline or sorts the map around your question.
 - **Export.** Dress a screenshot or recording for docs: a background, padding,
-  rounded corners, a shadow and a size. Crop it, and for recordings zoom on
-  clicks with a smooth cursor. Save as PNG, MP4 or GIF.
+  rounded corners, a shadow and a size. Crop it. For recordings: trim, cut
+  parts out, speed parts up or slow them down with eased ramps, frame
+  moments closer, and zoom on clicks with a smooth cursor. Save as PNG, MP4
+  or GIF.
 - **Bring anything in.** Drop any file on a project. Pictures, videos, notes
   and links come in as themselves; an HTML file or site folder becomes a
   prototype you can click through. Check the kind and date before it's added.
