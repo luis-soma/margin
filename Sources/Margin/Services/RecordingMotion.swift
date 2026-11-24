@@ -168,43 +168,64 @@ struct MotionPlan {
 }
 
 extension ExportRenderer {
-    /// Frame `content` (its origin at zero) at video second `t`: the drawn
-    /// cursor and click ripples first, so they zoom with the picture, then
-    /// the camera.
-    static func moving(_ content: CIImage, at t: Double, plan: MotionPlan, style: ExportStyle, drawCursor: Bool,
-                       crop: CGRect = CGRect(x: 0, y: 0, width: 1, height: 1)) -> CIImage {
+    /// Frame `content` (its origin at zero) at recording second `t`: the
+    /// drawn cursor and click ripples first, so they zoom with the picture,
+    /// then the camera. The camera follows clicks (with a plan and Zoom on
+    /// clicks on) and eases into any moment framed by hand.
+    static func moving(_ content: CIImage, at t: Double, plan: MotionPlan?, style: ExportStyle, drawCursor: Bool,
+                       crop: CGRect = CGRect(x: 0, y: 0, width: 1, height: 1),
+                       framing: (center: CGPoint, depth: CGFloat, weight: CGFloat)? = nil) -> CIImage {
         let full = content.extent.size
-        let pointScale = full.width / max(plan.area.width, 1)
         var image = content
 
-        if style.showClicks {
-            for click in plan.clicks where t >= click.t && t - click.t < 0.6 {
-                image = ripple(at: location(click.at, in: full), age: (t - click.t) / 0.6, scale: pointScale)
-                    .composited(over: image)
+        if let plan {
+            let pointScale = full.width / max(plan.area.width, 1)
+            if style.showClicks {
+                for click in plan.clicks where t >= click.t && t - click.t < 0.6 {
+                    image = ripple(at: location(click.at, in: full), age: (t - click.t) / 0.6, scale: pointScale)
+                        .composited(over: image)
+                }
+            }
+            if drawCursor, let arrow = arrow(height: 24 * pointScale * CGFloat(0.7 + 1.3 * style.cursorSize)) {
+                let tip = location(plan.cursor(at: t), in: full)
+                let placed = arrow.image.transformed(by: CGAffineTransform(translationX: tip.x - arrow.hotSpot.x, y: tip.y - arrow.hotSpot.y))
+                image = placed.composited(over: image)
             }
         }
-        if drawCursor, let arrow = arrow(height: 24 * pointScale * CGFloat(0.7 + 1.3 * style.cursorSize)) {
-            let tip = location(plan.cursor(at: t), in: full)
-            let placed = arrow.image.transformed(by: CGAffineTransform(translationX: tip.x - arrow.hotSpot.x, y: tip.y - arrow.hotSpot.y))
-            image = placed.composited(over: image)
-        }
         image = cropped(image.cropped(to: CGRect(origin: .zero, size: full)), to: crop)
-        let size = image.extent.size
 
-        let level = style.zoom ? plan.zoom(at: t) : 0
-        guard level > 0.001 else { return image }
-        let z = 1 + (zoomDepth(style) - 1) * level
-        let view = CGSize(width: size.width / z, height: size.height / z)
-        // The camera's aim, inside the crop.
-        let aim = plan.camera(at: t)
-        let inside = CGPoint(x: (aim.x - crop.minX) / max(crop.width, 0.01), y: (aim.y - crop.minY) / max(crop.height, 0.01))
-        let target = location(inside, in: size)
+        // Where the camera is and how close, 0 to 1 from the top left.
+        var depth: CGFloat = 1
+        var center = CGPoint(x: 0.5, y: 0.5)
+        if let plan, style.zoom {
+            let level = plan.zoom(at: t)
+            if level > 0.001 {
+                depth = 1 + (zoomDepth(style) - 1) * level
+                let aim = plan.camera(at: t)
+                center = CGPoint(x: (aim.x - crop.minX) / max(crop.width, 0.01), y: (aim.y - crop.minY) / max(crop.height, 0.01))
+            }
+        }
+        if let framing, framing.weight > 0.001 {
+            let w = framing.weight
+            depth = exp(log(depth) * (1 - w) + log(max(framing.depth, 1)) * w)
+            center = CGPoint(x: center.x + (framing.center.x - center.x) * w, y: center.y + (framing.center.y - center.y) * w)
+        }
+        guard depth > 1.001 else { return image }
+        return zoomed(image, depth: depth, center: center)
+    }
+
+    /// `image` (origin zero) shown `depth` times closer around `center`
+    /// (0 to 1 from the top left), kept inside the picture, at its own size.
+    static func zoomed(_ image: CIImage, depth: CGFloat, center: CGPoint) -> CIImage {
+        let size = image.extent.size
+        let view = CGSize(width: size.width / depth, height: size.height / depth)
+        let target = location(center, in: size)
         let origin = CGPoint(x: min(max(target.x - view.width / 2, 0), size.width - view.width),
                              y: min(max(target.y - view.height / 2, 0), size.height - view.height))
         return image
             .cropped(to: CGRect(origin: origin, size: view))
             .transformed(by: CGAffineTransform(translationX: -origin.x, y: -origin.y))
-            .applyingFilter("CILanczosScaleTransform", parameters: [kCIInputScaleKey: z, kCIInputAspectRatioKey: 1])
+            .applyingFilter("CILanczosScaleTransform", parameters: [kCIInputScaleKey: depth, kCIInputAspectRatioKey: 1])
             .cropped(to: CGRect(origin: .zero, size: size))
     }
 

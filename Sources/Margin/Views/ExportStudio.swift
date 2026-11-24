@@ -41,11 +41,22 @@ struct ExportStudio: View {
     @State private var plans = PlanCache()
     @StateObject private var player = PreviewPlayer()
 
+    // Editing a recording's time and framing
+    @State private var edit: ClipEdit
+    @State private var map: TimeMap?
+    @State private var mapKey = ""
+    @State private var rebuild = 0
+    @State private var selection: EditSelection?
+    @State private var framingImage: CGImage?
+    @State private var history = EditHistory()
+    @StateObject private var thumbs = ClipThumbnails()
+
     init(entry: Entry, source: URL, close: @escaping () -> Void) {
         self.entry = entry
         self.source = source
         self.close = close
         _crop = State(initialValue: ExportCrops.crop(for: entry.id))
+        _edit = State(initialValue: ExportEdits.edit(for: entry.id))
     }
 
     private var isVideo: Bool { ["mp4", "mov", "m4v"].contains(source.pathExtension.lowercased()) }
@@ -64,7 +75,18 @@ struct ExportStudio: View {
         return plans.plan(track: track, file: drawsCursor ? "studio" : "main", duration: duration, depth: ExportRenderer.zoomDepth(style))
     }
     private var setup: ExportRenderer.VideoSetup {
-        ExportRenderer.VideoSetup(plan: plan, drawCursor: drawsCursor, crop: crop)
+        ExportRenderer.VideoSetup(plan: plan, drawCursor: drawsCursor, crop: crop,
+                                  edit: duration > 0 && !edit.isEmpty(duration) ? edit : nil, map: map)
+    }
+    /// Where the preview is, in the recording's own seconds.
+    private var sourceTime: Double { map?.source(at: player.time) ?? player.time }
+    private var framingID: UUID? {
+        if case .zoom(let id) = selection { return id }
+        return nil
+    }
+    private var selectedSegment: ClipEdit.Segment? {
+        guard case .segment(let id) = selection else { return nil }
+        return edit.pieces(duration).first { $0.id == id }
     }
 
     var body: some View {
@@ -114,6 +136,9 @@ struct ExportStudio: View {
             refresh()
         }
         .onChange(of: format) { new in UserDefaults.standard.set(new.rawValue, forKey: "exportFormat") }
+        .onChange(of: edit) { new in editChanged(new) }
+        .onChange(of: selection) { new in selectionChanged(new) }
+        .background { if isVideo { editKeys } }
         .onDisappear { player.stop() }
     }
 
@@ -121,7 +146,7 @@ struct ExportStudio: View {
 
     private var stage: some View {
         GeometryReader { geo in
-            let timeline: CGFloat = 60
+            let timeline: CGFloat = isVideo ? 28 + Theme.Space.x3 + EditTimeline.height + 24 : 60
             let room = CGSize(width: max(80, geo.size.width - 2 * F.leading),
                               height: max(80, geo.size.height - 2 * F.verticalMargin * 0.75 - timeline))
             ZStack {
@@ -132,6 +157,15 @@ struct ExportStudio: View {
                         .interpolation(.high)
                         .frame(width: size.width, height: size.height)
                         .overlay(CropOverlay(crop: $crop))
+                        .offset(y: -timeline / 2)
+                        .transition(.opacity)
+                } else if let id = framingID, let framingImage {
+                    let size = fitted(CGSize(width: framingImage.width, height: framingImage.height), in: room)
+                    Image(decorative: framingImage, scale: 1)
+                        .resizable()
+                        .interpolation(.high)
+                        .frame(width: size.width, height: size.height)
+                        .overlay(FramingOverlay(zoom: zoomBinding(id), willChange: remember))
                         .offset(y: -timeline / 2)
                         .transition(.opacity)
                 } else if isVideo, player.renderSize != .zero {
@@ -167,18 +201,24 @@ struct ExportStudio: View {
             }
             .frame(width: geo.size.width, height: geo.size.height)
             .animation(Theme.Motion.settle, value: cropping)
+            .animation(Theme.Motion.settle, value: framingID)
             .overlay(alignment: .bottom) {
-                // Under the preview: the timeline for a recording, and Crop.
-                HStack(spacing: Theme.Space.x2) {
+                // Under the preview: a recording's timeline and its tools;
+                // Crop for a picture.
+                Group {
                     if isVideo, !cropping, player.duration > 0 {
-                        Scrubber(time: player.time, playing: player.playing, duration: player.duration,
-                                 clicks: plan?.clicks.map(\.t) ?? [],
-                                 seek: { player.seek($0) }, togglePlay: { player.toggle() })
-                            .transition(.opacity)
+                        VStack(spacing: Theme.Space.x3) {
+                            editBar
+                            EditTimeline(edit: $edit, selection: $selection, duration: duration, playhead: sourceTime,
+                                         clicks: plan?.clicks.map(\.t) ?? [], thumbnails: thumbs.images,
+                                         seek: seekSource, willChange: remember)
+                        }
+                        .frame(maxWidth: 680)
+                        .transition(.opacity)
+                    } else {
+                        stageTools
                     }
-                    stageTools
                 }
-                .frame(maxWidth: isVideo && !cropping ? 600 : nil)
                 .padding(.horizontal, F.leading)
                 .padding(.bottom, Theme.Space.x6)
             }
@@ -199,6 +239,192 @@ struct ExportStudio: View {
             }
         }
         .animation(Theme.Motion.snappy, value: cropping)
+    }
+
+    /// Over the timeline: play and the time, then what you can do to what's
+    /// picked, or Split, Zoom and Crop.
+    private var editBar: some View {
+        HStack(spacing: Theme.Space.x2) {
+            PlayButton(playing: player.playing) {
+                if selection != nil, framingID != nil { selection = nil }
+                player.toggle()
+            }
+            Text("\(EditTimeline.clock(player.time)) / \(EditTimeline.clock(player.duration))")
+                .font(Theme.Typography.ui(Theme.Typography.caption))
+                .monospacedDigit()
+                .foregroundStyle(Theme.Palette.ink3)
+                .fixedSize()
+            Spacer(minLength: Theme.Space.x2)
+            if let segment = selectedSegment {
+                SpeedSwitch(rate: segment.rate) { rate in setRate(rate, for: segment.id) }
+                    .disabled(segment.removed)
+                    .opacity(segment.removed ? 0.4 : 1)
+                ChipButton(title: segment.removed ? "Keep" : "Cut", symbol: segment.removed ? "arrow.uturn.backward" : "scissors") {
+                    toggleCut(segment.id)
+                }
+                .toolTip(segment.removed ? "Put it back" : "Cut this part out", "⌫", align: .center)
+                ChipButton(title: "Done", primary: true) { selection = nil }
+            } else if let id = framingID {
+                Text("Drag the box to frame it")
+                    .font(Theme.Typography.ui(Theme.Typography.caption))
+                    .foregroundStyle(Theme.Palette.ink3)
+                    .fixedSize()
+                ChipButton(title: "Remove", symbol: "trash") { removeZoom(id) }
+                    .toolTip("Remove this zoom", "⌫", align: .center)
+                ChipButton(title: "Done", primary: true) { selection = nil }
+            } else {
+                ChipButton(title: "Split", symbol: "scissors") { split() }
+                    .toolTip("Split at the playhead", "S", align: .center)
+                ChipButton(title: "Zoom", symbol: "plus.magnifyingglass") { addZoom() }
+                    .toolTip("Frame this moment closer", "Z", align: .center)
+                stageTools
+            }
+        }
+        .animation(Theme.Motion.snappy, value: selection)
+    }
+
+    /// The edit's keys: S, Z, ⌫, ⌘Z and ⇧⌘Z.
+    private var editKeys: some View {
+        ZStack {
+            Button("") { split() }.keyboardShortcut("s", modifiers: [])
+            Button("") { addZoom() }.keyboardShortcut("z", modifiers: [])
+            Button("") { deleteSelection() }.keyboardShortcut(.delete, modifiers: [])
+            Button("") { undo() }.keyboardShortcut("z", modifiers: .command)
+            Button("") { redo() }.keyboardShortcut("z", modifiers: [.command, .shift])
+        }
+        .disabled(cropping || busy)
+        .opacity(0)
+        .frame(width: 0, height: 0)
+        .accessibilityHidden(true)
+    }
+
+    private func zoomBinding(_ id: UUID) -> Binding<ClipEdit.Zoom> {
+        Binding(
+            get: { edit.zooms.first { $0.id == id } ?? ClipEdit.Zoom(from: 0, to: 0) },
+            set: { new in
+                if let index = edit.zooms.firstIndex(where: { $0.id == id }) { edit.zooms[index] = new }
+            }
+        )
+    }
+
+    private func remember() { history.remember(edit) }
+
+    private func seekSource(_ seconds: Double) {
+        player.seek(map?.output(at: seconds) ?? seconds)
+    }
+
+    private func split() {
+        guard duration > 0, !cropping else { return }
+        var next = edit
+        guard next.split(at: sourceTime, duration: duration) != nil else {
+            return show("Move the playhead away from the ends to split")
+        }
+        remember()
+        edit = next
+    }
+
+    private func addZoom() {
+        guard duration > 0, !cropping else { return }
+        var next = edit
+        guard let id = next.addZoom(at: sourceTime, duration: duration) else {
+            return show("There's no room for a zoom here")
+        }
+        // Framed on the first click inside it, if there is one.
+        if let index = next.zooms.firstIndex(where: { $0.id == id }) {
+            let zoom = next.zooms[index]
+            if let click = plan?.clicks.first(where: { $0.t >= zoom.from && $0.t <= zoom.to }) {
+                let x = (click.at.x - crop.minX) / max(crop.width, 0.01)
+                let y = (click.at.y - crop.minY) / max(crop.height, 0.01)
+                next.zooms[index].x = FramingOverlay.clamped(x, depth: zoom.depth)
+                next.zooms[index].y = FramingOverlay.clamped(y, depth: zoom.depth)
+            }
+        }
+        remember()
+        edit = next
+        selection = .zoom(id)
+    }
+
+    private func setRate(_ rate: Double, for id: UUID) {
+        remember()
+        edit.change(id, duration: duration) { $0.rate = rate }
+    }
+
+    private func toggleCut(_ id: UUID) {
+        let pieces = edit.pieces(duration)
+        let kept = pieces.filter { !$0.removed && $0.id != id }
+        if pieces.first(where: { $0.id == id })?.removed == false, kept.isEmpty {
+            return show("Split first, then cut a part out")
+        }
+        remember()
+        edit.change(id, duration: duration) { $0.removed.toggle() }
+    }
+
+    private func removeZoom(_ id: UUID) {
+        remember()
+        edit.zooms.removeAll { $0.id == id }
+        selection = nil
+    }
+
+    private func deleteSelection() {
+        switch selection {
+        case .segment(let id): toggleCut(id)
+        case .zoom(let id): removeZoom(id)
+        case nil: break
+        }
+    }
+
+    private func undo() {
+        guard let previous = history.undo(edit) else { return }
+        edit = previous
+        dropStaleSelection()
+    }
+
+    private func redo() {
+        guard let next = history.redo(edit) else { return }
+        edit = next
+        dropStaleSelection()
+    }
+
+    private func dropStaleSelection() {
+        switch selection {
+        case .segment(let id) where !edit.pieces(duration).contains(where: { $0.id == id }): selection = nil
+        case .zoom(let id) where !edit.zooms.contains(where: { $0.id == id }): selection = nil
+        default: break
+        }
+    }
+
+    private func editChanged(_ new: ClipEdit) {
+        ExportEdits.set(new, for: entry.id)
+        guard duration > 0 else { return }
+        let key = new.timeKey(duration)
+        guard key != mapKey else { return refresh() }
+        // The timing changed: build the edited video again once the hand
+        // pauses, not on every step of a drag.
+        rebuild += 1
+        let token = rebuild
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+            guard token == rebuild else { return }
+            let was = sourceTime
+            map = key.isEmpty ? nil : TimeMap(edit: edit, duration: duration)
+            mapKey = key
+            refresh(at: map?.output(at: was) ?? was)
+        }
+    }
+
+    /// Picking a zoom shows a still of its moment to frame it on.
+    private func selectionChanged(_ new: EditSelection?) {
+        guard case .zoom(let id) = new, let zoom = edit.zooms.first(where: { $0.id == id }) else {
+            framingImage = nil
+            return
+        }
+        player.pause()
+        let moment = (zoom.from + zoom.to) / 2
+        Task {
+            if let frame = await FrameGrabber(url: source).frame(at: moment) {
+                let image = frame.transformed(by: CGAffineTransform(translationX: -frame.extent.minX, y: -frame.extent.minY))
+                framingImage = ExportRenderer.cgImage(ExportRenderer.cropped(image, to: crop))
+            }
+        }
     }
 
     private func fitted(_ size: CGSize, in room: CGSize) -> CGSize {
@@ -387,8 +613,13 @@ struct ExportStudio: View {
                 return
             }
             prepareCursor()
-            let start = plan?.firstMoment.map { min($0, max(duration - 0.05, 0)) } ?? 0
-            player.show(url: videoSource, style: style, setup: setup, at: start)
+            thumbs.load(source, duration: duration)
+            if edit.end.map({ $0 > duration }) == true { edit.end = nil }
+            mapKey = edit.timeKey(duration)
+            map = mapKey.isEmpty ? nil : TimeMap(edit: edit, duration: duration)
+            let first = plan?.firstMoment.map { min($0, max(duration - 0.05, 0)) } ?? 0
+            let start = map.map { $0.output(at: max(first, edit.start)) } ?? first
+            player.show(url: videoSource, style: style, setup: setup, timeKey: mapKey, at: start)
             await grabFrame(at: start)
             return
         }
@@ -414,10 +645,10 @@ struct ExportStudio: View {
         }
     }
 
-    private func refresh() {
+    private func refresh(at: Double? = nil) {
         if isVideo {
             prepareCursor()
-            player.show(url: videoSource, style: style, setup: setup, at: nil)
+            player.show(url: videoSource, style: style, setup: setup, timeKey: mapKey, at: at)
         } else {
             rerender()
         }
@@ -445,6 +676,7 @@ struct ExportStudio: View {
     }
 
     private func startCropping() {
+        selection = nil
         if isVideo {
             player.pause()
             let moment = player.time
@@ -593,7 +825,7 @@ final class PreviewPlayer: ObservableObject {
     @Published var duration: Double = 0
     @Published var playing = false
     @Published var renderSize: CGSize = .zero
-    private var url: URL?
+    private var key: String?
     private var item: AVPlayerItem?
     private var observer: Any?
     private var ended: NSObjectProtocol?
@@ -610,19 +842,30 @@ final class PreviewPlayer: ObservableObject {
         }
     }
 
-    /// Shows `url` in `style`; `at` moves to a moment, nil keeps the current one.
-    func show(url: URL, style: ExportStyle, setup: ExportRenderer.VideoSetup, at: Double?) {
+    /// Shows `url` in `style`, cut and retimed by the setup's edit; `at`
+    /// moves to a moment (in the export's seconds), nil keeps the current one.
+    /// `timeKey` changes whenever the edit changes the video's timing.
+    func show(url: URL, style: ExportStyle, setup: ExportRenderer.VideoSetup, timeKey: String = "", at: Double?) {
         build += 1
         let id = build
-        let asset = (url == self.url ? item?.asset : nil) ?? AVURLAsset(url: url)
+        let key = url.path + "#" + timeKey
+        let reuse: AVAsset? = key == self.key ? item?.asset : nil
         Task {
+            let asset: AVAsset
+            if let reuse {
+                asset = reuse
+            } else {
+                guard let made = try? await ExportRenderer.timeline(for: AVURLAsset(url: url), map: setup.map),
+                      id == build else { return }
+                asset = made
+            }
             guard let composition = try? await ExportRenderer.composition(for: asset, style: style, setup: setup, longest: 1400),
                   id == build else { return }
-            if url != self.url || item == nil {
+            if key != self.key || item == nil {
                 let item = AVPlayerItem(asset: asset)
                 item.videoComposition = composition
                 self.item = item
-                self.url = url
+                self.key = key
                 player.replaceCurrentItem(with: item)
                 if let ended { NotificationCenter.default.removeObserver(ended) }
                 ended = NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: item, queue: .main) { [weak self] _ in
@@ -807,7 +1050,7 @@ private struct CropOverlay: View {
 }
 
 /// A small button over the preview: Crop, Reset, Done.
-private struct ChipButton: View {
+struct ChipButton: View {
     let title: String
     var symbol: String? = nil
     var primary = false
@@ -864,76 +1107,6 @@ private struct FormatSwitch: View {
         }
         .padding(S.padding)
         .background(SegmentTrack())
-    }
-}
-
-/// Under a recording's preview: play, the timeline with a tick at every
-/// click, the time.
-private struct Scrubber: View {
-    let time: Double
-    let playing: Bool
-    let duration: Double
-    let clicks: [Double]
-    let seek: (Double) -> Void
-    let togglePlay: () -> Void
-    @State private var hovering = false
-
-    var body: some View {
-        let shape = RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous)
-        HStack(spacing: Theme.Space.x2) {
-            Button(action: togglePlay) {
-                Image(systemName: playing ? "pause.fill" : "play.fill")
-                    .font(.system(size: 10, weight: .medium))
-                    .foregroundStyle(Theme.Palette.ink)
-                    .frame(width: 28, height: 28)
-                    .background(shape.fill(Theme.Palette.fill))
-                    .contentShape(shape)
-            }
-            .buttonStyle(PressStyle())
-            .keyboardShortcut(.space, modifiers: [])
-            .toolTip(playing ? "Pause" : "Play", "Space", align: .center)
-
-            GeometryReader { geo in
-                let width = geo.size.width
-                let x = CGFloat(time / max(duration, 0.01)) * width
-                ZStack(alignment: .leading) {
-                    shape.fill(Theme.Palette.fill)
-                    Rectangle()
-                        .fill(Theme.Palette.ink.opacity(hovering ? 0.065 : 0.05))
-                        .frame(width: max(0, x))
-                    ForEach(Array(clicks.enumerated()), id: \.offset) { _, click in
-                        Circle()
-                            .fill(Theme.Palette.ink3)
-                            .frame(width: 4, height: 4)
-                            .offset(x: CGFloat(click / max(duration, 0.01)) * width - 2)
-                    }
-                    Rectangle()
-                        .fill(Theme.Palette.ink)
-                        .frame(width: 2, height: 14)
-                        .offset(x: min(max(x - 1, 0), width - 2))
-                }
-                .clipShape(shape)
-                .contentShape(shape)
-                .gesture(
-                    DragGesture(minimumDistance: 0).onChanged { drag in
-                        seek(Double(min(max(drag.location.x / max(width, 1), 0), 1)) * duration)
-                    }
-                )
-                .onHover { inside in withAnimation(Theme.Motion.hover) { hovering = inside } }
-            }
-            .frame(height: 28)
-
-            Text("\(Self.clock(time)) / \(Self.clock(duration))")
-                .font(Theme.Typography.ui(Theme.Typography.caption))
-                .monospacedDigit()
-                .foregroundStyle(Theme.Palette.ink3)
-                .fixedSize()
-        }
-    }
-
-    static func clock(_ seconds: Double) -> String {
-        let whole = Int(max(seconds, 0))
-        return String(format: "%d:%02d.%d", whole / 60, whole % 60, Int((max(seconds, 0) - Double(whole)) * 10))
     }
 }
 

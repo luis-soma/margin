@@ -570,6 +570,10 @@ enum ExportRenderer {
         var plan: MotionPlan?
         var drawCursor = false
         var crop = CGRect(x: 0, y: 0, width: 1, height: 1)
+        /// Trims, cuts, speeds and zooms; nil when there are none.
+        var edit: ClipEdit?
+        /// Export seconds to recording seconds, when the edit changes time.
+        var map: TimeMap?
     }
 
     /// The crop as pixels in Core Image's frame (bottom-left origin).
@@ -589,8 +593,10 @@ enum ExportRenderer {
     /// `fit`, on its backdrop.
     static func videoFrame(_ source: CIImage, at t: Double, style: ExportStyle, setup: VideoSetup, fit: CGFloat) -> CIImage {
         var image = source.transformed(by: CGAffineTransform(translationX: -source.extent.minX, y: -source.extent.minY))
-        if let plan = setup.plan {
-            image = moving(image, at: t, plan: plan, style: style, drawCursor: setup.drawCursor, crop: setup.crop)
+        let s = setup.map?.source(at: t) ?? t
+        let framing = setup.edit?.framing(at: s)
+        if setup.plan != nil || framing != nil {
+            image = moving(image, at: s, plan: setup.plan, style: style, drawCursor: setup.drawCursor, crop: setup.crop, framing: framing)
         } else {
             image = cropped(image, to: setup.crop)
         }
@@ -620,7 +626,12 @@ enum ExportRenderer {
             request.finish(with: frame.cropped(to: bounds), context: context)
         }
         composition.renderSize = renderSize
-        if let frameDuration { composition.frameDuration = frameDuration }
+        if let frameDuration {
+            composition.frameDuration = frameDuration
+        } else if setup.edit != nil {
+            // Zooms and speed changes move between the recording's frames.
+            composition.frameDuration = CMTime(value: 1, timescale: 60)
+        }
         return composition
     }
 
@@ -639,9 +650,10 @@ enum ExportRenderer {
     /// within 4K so every player opens it.
     static func exportVideo(from url: URL, style: ExportStyle, setup: VideoSetup = VideoSetup(), to output: URL,
                             progress: @escaping @MainActor (Double) -> Void) async throws {
-        let asset = AVURLAsset(url: url)
+        let asset = try await timeline(for: AVURLAsset(url: url), map: setup.map)
         guard let track = try await asset.loadTracks(withMediaType: .video).first else { throw VideoError.noVideo }
-        let frameRate = try await track.load(.nominalFrameRate)
+        let recorded = try await track.load(.nominalFrameRate)
+        let frameRate: Float = setup.edit != nil ? 60 : recorded
         let duration = try await asset.load(.duration).seconds
         let composition = try await Self.composition(for: asset, style: style, setup: setup, longest: 3840)
         let renderSize = composition.renderSize
@@ -690,6 +702,8 @@ enum ExportRenderer {
             let rate = basic.map { $0.mSampleRate > 0 ? $0.mSampleRate : 48_000 } ?? 48_000
             let channels = min(max(Int(basic?.mChannelsPerFrame ?? 2), 1), 2)
             let out = AVAssetReaderTrackOutput(track: sound, outputSettings: [AVFormatIDKey: kAudioFormatLinearPCM])
+            // Sped up or slowed down, it keeps its pitch.
+            if setup.map != nil { out.audioTimePitchAlgorithm = .spectral }
             let input = AVAssetWriterInput(mediaType: .audio, outputSettings: [
                 AVFormatIDKey: kAudioFormatMPEG4AAC,
                 AVSampleRateKey: rate,
@@ -781,7 +795,7 @@ enum ExportRenderer {
     static func exportGIF(from url: URL, style: ExportStyle, setup: VideoSetup = VideoSetup(), to output: URL,
                           progress: @escaping @MainActor (Double) -> Void) async throws {
         let fps = 20.0
-        let asset = AVURLAsset(url: url)
+        let asset = try await timeline(for: AVURLAsset(url: url), map: setup.map)
         guard let track = try await asset.loadTracks(withMediaType: .video).first else { throw VideoError.noVideo }
         let duration = try await asset.load(.duration).seconds
         let composition = try await Self.composition(for: asset, style: style, setup: setup, longest: 960,
