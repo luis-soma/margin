@@ -45,6 +45,19 @@ don't run local hooks.
 Verified against real Claude Code 2.1.302 runs: payload shapes, the script,
 and that Claude runs normally with Margin off.
 
+## Claude app and Claude projects (built)
+
+Settings → Claude adds a small MCP server called `margin` to the Claude
+app, and offers a skill to add in Claude › Settings › Capabilities › Skills.
+With both, Claude can document a chat or a Claude project into Margin:
+
+| Tool | Does |
+| --- | --- |
+| `margin_projects` | Lists the projects, with counts and dates |
+| `margin_project` | What a project already has, so nothing is added twice |
+| `margin_add` | Adds captures at the date they happened: Figma frames, pictures, links, notes, and since 0.6 local files (`file`, a full path) and pages from the chat (`html`). HTML files and site folders become live prototypes |
+| `margin_about` | Writes a project's About, which Ask, the hand off and Claude read |
+
 ## Other tools: the plan
 
 Everything below plugs into the same pipeline: an adapter turns the tool's

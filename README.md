@@ -34,6 +34,18 @@ Needs macOS 13 or later.
 - **Hand off.** The project as a folder your agent can read: the story by
   day, your decisions, the project's look and every capture. Everything, or
   only what's new since last time.
+- **Ask.** Ask about a project in your own words. Margin finds the captures
+  on the timeline or sorts the map around your question.
+- **Export.** Dress a screenshot or recording for docs: a background, padding,
+  rounded corners, a shadow and a size. Crop it, and for recordings zoom on
+  clicks with a smooth cursor. Save as PNG, MP4 or GIF.
+- **Bring anything in.** Drop any file on a project. Pictures, videos, notes
+  and links come in as themselves; an HTML file or site folder becomes a
+  prototype you can click through. Check the kind and date before it's added.
+- **Move captures.** Select captures on the timeline or the map and drag them
+  onto another project in the sidebar.
+- **Claude.** Connect Claude in Settings and it can document a chat or a
+  project into Margin, including local files and HTML builds.
 
 Your archive stays on your Mac, in `~/Library/Application Support/Margin`.
 AI features are optional and use your own Gemini key.

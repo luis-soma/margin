@@ -57,6 +57,20 @@ Margin lives in the menu bar (the bracket-and-dot icon).
   **Return**, or press **Esc** to keep just the capture.
 - **Archive:** open it from the menu bar icon. Drag the slider at the top from
   **close-up** to **big picture**.
+- **Ask:** the Ask button finds captures on the timeline or sorts the map
+  around a question in your own words. Needs a Gemini key for the AI part.
+- **Export:** open a capture and click the pencil under its details. Pick a
+  background (or add your own), padding, corners, shadow and a size or ratio.
+  Crop if you need to. For recordings, Motion adds zoom on clicks, a smooth
+  cursor and click ripples. Export as PNG, MP4 or GIF.
+- **Bring files in:** drag any file onto a project. A short review shows what
+  each becomes and when it happened; change either before you add it. HTML
+  files and site folders become prototypes you can click through.
+- **Move captures:** drag across empty space on the timeline or the map to
+  select captures (or Shift-click), then drag them onto a project in the
+  sidebar. Drag projects in the sidebar to reorder them.
+- **Project page:** a project's name, icon, cover and notes, from the dots on
+  its sidebar row or **⌘I**. Ask, the hand off and Claude read the notes.
 
 ### Figma (optional)
 
