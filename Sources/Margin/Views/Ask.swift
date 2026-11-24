@@ -621,7 +621,10 @@ struct AskPanel: View {
         return VStack(alignment: .leading, spacing: Theme.Space.x2) {
             ZStack(alignment: .topLeading) {
                 if ask.stage == .working {
-                    ShimmerText(text: ask.text, size: Theme.Typography.body)
+                    Text(ask.text)
+                        .font(Theme.Typography.ui(Theme.Typography.body))
+                        .foregroundStyle(Theme.Palette.ink2)
+                        .lineLimit(4)
                         .fixedSize(horizontal: false, vertical: true)
                         .transition(.opacity)
                 } else {
@@ -678,6 +681,7 @@ struct AskPanel: View {
                     .frame(width: 9, height: 9)
                     .frame(width: 28, height: 28)
                     .background(Theme.Palette.fillSelected, in: shape)
+                    .overlay(WorkingRing(cornerRadius: Theme.Radius.control))
             }
             .buttonStyle(PressStyle())
             .toolTip("Stop", edge: .below, align: .trailing)
@@ -707,11 +711,9 @@ struct AskPanel: View {
     @ViewBuilder private var content: some View {
         switch ask.stage {
         case .working:
-            VStack(alignment: .leading, spacing: Theme.Space.x4) {
-                WorkingPill(text: ask.stepNote ?? currentStep)
-                trace(done: false)
-            }
-            .transition(.opacity)
+            trace(done: false)
+                .padding(.top, Theme.Space.x1)
+                .transition(.opacity)
         case .answered:
             outcome.transition(.opacity)
         default:
@@ -756,10 +758,10 @@ struct AskPanel: View {
         submit()
     }
 
-    /// The plan, quietly: done steps checked, the current one in ink, the
-    /// rest faint. The pill above says the same step out loud.
+    /// The plan, quietly: one ink drop on the step it's on, running down to
+    /// the next when it moves on and leaving a check behind. The rest faint.
     private func trace(done all: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: StepDrop.gap) {
             ForEach(Array(ask.plan.enumerated()), id: \.offset) { index, step in
                 let done = all || index < ask.stepIndex
                 let now = !all && index == ask.stepIndex
@@ -767,17 +769,27 @@ struct AskPanel: View {
                     ZStack {
                         if done {
                             Image(systemName: "checkmark").font(.system(size: 8, weight: .bold))
-                                .transition(.scale(scale: 0.6).combined(with: .opacity))
-                        } else {
-                            Circle().fill(now ? Theme.Palette.ink : Theme.Palette.ink3.opacity(0.4)).frame(width: 4, height: 4)
+                                .transition(.scale(scale: 0.6).combined(with: .opacity)
+                                    .animation(AskModel.tick.delay(all ? 0 : 0.22)))
+                        } else if !now {
+                            Circle().fill(Theme.Palette.ink3.opacity(0.35)).frame(width: 3, height: 3)
                         }
                     }
-                    .frame(width: 12)
-                    Text(done ? step.done : step.doing)
+                    .frame(width: StepDrop.gutter)
+                    Text(now ? (ask.stepNote ?? step.doing) : done ? step.done : step.doing)
                 }
                 .font(Theme.Typography.ui(Theme.Typography.control))
                 .foregroundStyle(now ? Theme.Palette.ink : done ? Theme.Palette.ink3 : Theme.Palette.ink3.opacity(0.6))
-                .frame(height: 22)
+                .frame(height: StepDrop.row)
+            }
+        }
+        .overlay(alignment: .topLeading) {
+            if !all, ask.plan.indices.contains(ask.stepIndex) {
+                StepDrop(position: Double(ask.stepIndex))
+                    .fill(Theme.Palette.ink)
+                    .frame(width: StepDrop.gutter)
+                    .animation(StepDrop.fall, value: ask.stepIndex)
+                    .transition(.opacity)
             }
         }
         .padding(.leading, 2)
@@ -841,10 +853,6 @@ struct AskPanel: View {
                 }
             }
         }
-    }
-
-    private var currentStep: String {
-        ask.plan.indices.contains(ask.stepIndex) ? ask.plan[ask.stepIndex].doing : "Working"
     }
 
     private var workedLine: String {
@@ -1001,53 +1009,6 @@ private struct PanelButton: View {
     }
 }
 
-/// What the agent is doing, out loud: an ink strip, three dots circling,
-/// the step in light words. The one dark thing in the panel.
-private struct WorkingPill: View {
-    let text: String
-
-    var body: some View {
-        HStack(spacing: Theme.Space.x2) {
-            OrbitDots().frame(width: 14, height: 14)
-            ShimmerText(text: text, size: Theme.Typography.control,
-                        base: Theme.Palette.paper.opacity(0.55), light: Theme.Palette.paper)
-                .id(text)
-                .transition(.blurFade)
-        }
-        .animation(AskModel.tick, value: text)
-        .padding(.leading, Theme.Space.x3)
-        .padding(.trailing, Theme.Space.x3 + 2)
-        .frame(height: 32)
-        .background(RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous).fill(Theme.Palette.ink))
-        .fixedSize()
-    }
-}
-
-/// Three dots of different sizes circling slowly, each breathing a little
-/// out of step: the agent at work. In paper, on the ink pill.
-private struct OrbitDots: View {
-    var body: some View {
-        TimelineView(.animation) { timeline in
-            let t: Double = timeline.date.timeIntervalSinceReferenceDate
-            Canvas { context, size in
-                let cx: Double = Double(size.width) / 2, cy: Double = Double(size.height) / 2
-                let u: Double = Double(size.width) / 14
-                let sizes: [Double] = [3.2, 2.5, 1.8]
-                for i in 0..<3 {
-                    let phase: Double = Double(i) * 2 * .pi / 3
-                    let angle: Double = t * 2 * .pi / 2.2 + phase
-                    let breathe: Double = 0.5 + 0.5 * sin(t * 2 * .pi / 1.3 + phase)
-                    let r: Double = (3.4 + 0.9 * breathe) * u
-                    let d: Double = sizes[i] * (0.85 + 0.3 * breathe) * u
-                    let rect = CGRect(x: cx + cos(angle) * r - d / 2, y: cy + sin(angle) * r - d / 2, width: d, height: d)
-                    context.fill(Path(ellipseIn: rect), with: .color(Theme.Palette.paper.opacity(0.5 + 0.5 * breathe)))
-                }
-            }
-        }
-        .allowsHitTesting(false)
-    }
-}
-
 /// A small icon button inside the field, nested in its corners.
 struct AskIconButton<Label: View>: View {
     let help: String
@@ -1070,50 +1031,70 @@ struct AskIconButton<Label: View>: View {
     }
 }
 
-/// A 5 pt ink dot, breathing slowly: the step in progress.
-private struct BreathingDot: View {
-    var body: some View {
-        TimelineView(.animation) { timeline in
-            let t: Double = timeline.date.timeIntervalSinceReferenceDate
-            let wave: Double = 0.5 + 0.5 * sin(t * 2 * .pi / 1.4)
-            Circle()
-                .fill(Theme.Palette.ink)
-                .frame(width: 5, height: 5)
-                .opacity(0.35 + 0.65 * wave)
+/// The plan's ink drop. At rest it's a dot on its step; moving on, it
+/// gathers, runs down to the next step drawn out like a drop of ink, its
+/// tail trailing, and settles round again. The fall eases in and out, so it
+/// leaves slowly, runs, and lands soft.
+private struct StepDrop: Shape {
+    static let row: CGFloat = 22
+    static let gap: CGFloat = 2
+    static let gutter: CGFloat = 12
+    static let fall = Animation.timingCurve(0.7, 0, 0.2, 1, duration: 0.62)
+
+    /// The step it's on; fractions while it runs.
+    var position: Double
+
+    var animatableData: Double {
+        get { position }
+        set { position = newValue }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        let travel = position - position.rounded(.down)
+        // Drawn out most halfway between steps, round at either end.
+        let stretch = CGFloat(sin(travel * .pi))
+        let radius: CGFloat = 2.6
+        let width = radius * (1 - 0.24 * stretch)
+        let tail = 12 * stretch
+        let x = rect.midX
+        let y = Self.row / 2 + CGFloat(position) * (Self.row + Self.gap)
+        var path = Path()
+        guard tail > 0.5 else {
+            path.addEllipse(in: CGRect(x: x - radius, y: y - radius, width: radius * 2, height: radius * 2))
+            return path
         }
-        .frame(width: 5, height: 5)
+        let tip = CGPoint(x: x, y: y - width - tail)
+        path.move(to: tip)
+        path.addQuadCurve(to: CGPoint(x: x + width, y: y),
+                          control: CGPoint(x: x + width * 0.9, y: y - width - tail * 0.3))
+        path.addArc(center: CGPoint(x: x, y: y), radius: width,
+                    startAngle: .degrees(0), endAngle: .degrees(180), clockwise: false)
+        path.addQuadCurve(to: tip, control: CGPoint(x: x - width * 0.9, y: y - width - tail * 0.3))
+        path.closeSubpath()
+        return path
     }
 }
 
-/// Text with a slow, faint light passing through it, once every 2.4 s:
-/// grey words, a band a shade darker crossing them. Low key on purpose.
-struct ShimmerText: View {
-    let text: String
-    var size: CGFloat = Theme.Typography.control
-    var base: Color = Theme.Palette.ink3
-    var light: Color = Theme.Palette.ink
+/// Around the stop button while Ask works: a faint ink trail running round
+/// its edge. The one thing in the panel that keeps moving.
+private struct WorkingRing: View {
+    let cornerRadius: CGFloat
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        let label = Text(text).font(Theme.Typography.ui(size))
-        label
-            .foregroundStyle(base)
-            .lineLimit(1)
-            .overlay {
-                TimelineView(.animation) { timeline in
-                    let t: Double = timeline.date.timeIntervalSinceReferenceDate
-                    let p: Double = (t / 2.4).truncatingRemainder(dividingBy: 1) * 1.6 - 0.3
-                    label
-                        .foregroundStyle(light)
-                        .lineLimit(1)
-                        .mask(
-                            LinearGradient(stops: [
-                                .init(color: .clear, location: unit(p - 0.18)),
-                                .init(color: .black.opacity(0.55), location: unit(p)),
-                                .init(color: .clear, location: unit(p + 0.18)),
-                            ], startPoint: .leading, endPoint: .trailing)
-                        )
-                }
-            }
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        TimelineView(.animation(paused: reduceMotion)) { timeline in
+            let t: Double = timeline.date.timeIntervalSinceReferenceDate
+            let turn: Double = (t / 1.4).truncatingRemainder(dividingBy: 1) * 360
+            shape.strokeBorder(
+                AngularGradient(gradient: Gradient(stops: [
+                    .init(color: Theme.Palette.ink.opacity(0), location: 0),
+                    .init(color: Theme.Palette.ink.opacity(0), location: 0.5),
+                    .init(color: Theme.Palette.ink.opacity(0.75), location: 1),
+                ]), center: .center, angle: .degrees(turn)),
+                lineWidth: 1.25)
+        }
+        .allowsHitTesting(false)
     }
 }
 
