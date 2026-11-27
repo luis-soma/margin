@@ -14,8 +14,14 @@ struct ExportStyle: Codable, Equatable {
     var padding: Double = 0.45
     /// 0 to 1: how round the capture's corners are.
     var radius: Double = 0.3
-    /// 0 to 1: how far the capture lifts off the backdrop.
+    /// 0 to 1: how dark the shadow under the capture is.
     var shadow: Double = 0.5
+    /// 0 to 1: how far the shadow spreads, crisp to very soft.
+    var shadowSoftness: Double = 0.5
+    /// 0 to 1: how far below the capture it falls.
+    var shadowDistance: Double = 0.5
+    /// With `.color`: the flat colour, as 0xRRGGBB.
+    var color: Int = 0xEBEBEB
     var ratio: Ratio = .auto
     /// With `.custom`: the frame's width to its height.
     var ratioWidth: Double = 3
@@ -40,6 +46,8 @@ struct ExportStyle: Codable, Equatable {
         case paper, fog, dawn, silver, dusk, smoke, cobalt, aurora
         // Plain.
         case white, mist, ink
+        /// One flat colour of your choosing.
+        case color
         case blur, none, picture
 
         var id: String { rawValue }
@@ -57,6 +65,7 @@ struct ExportStyle: Codable, Equatable {
             case .white: return "White"
             case .mist: return "Mist"
             case .ink: return "Ink"
+            case .color: return "Color"
             case .blur: return "From the capture"
             case .none: return "None"
             case .picture: return "Your picture"
@@ -183,7 +192,7 @@ struct ExportStyle: Codable, Equatable {
 
     // Older saved styles lack the newer settings: those take their defaults.
     private enum CodingKeys: String, CodingKey {
-        case backdrop, picture, padding, radius, shadow, ratio, ratioWidth, ratioHeight
+        case backdrop, picture, padding, radius, shadow, shadowSoftness, shadowDistance, color, ratio, ratioWidth, ratioHeight
         case zoom, zoomAmount, smoothCursor, cursorSize, showClicks
     }
 
@@ -195,6 +204,9 @@ struct ExportStyle: Codable, Equatable {
         padding = (try? c.decodeIfPresent(Double.self, forKey: .padding)) ?? fallback.padding
         radius = (try? c.decodeIfPresent(Double.self, forKey: .radius)) ?? fallback.radius
         shadow = (try? c.decodeIfPresent(Double.self, forKey: .shadow)) ?? fallback.shadow
+        shadowSoftness = (try? c.decodeIfPresent(Double.self, forKey: .shadowSoftness)) ?? fallback.shadowSoftness
+        shadowDistance = (try? c.decodeIfPresent(Double.self, forKey: .shadowDistance)) ?? fallback.shadowDistance
+        color = (try? c.decodeIfPresent(Int.self, forKey: .color)) ?? fallback.color
         ratio = (try? c.decodeIfPresent(Ratio.self, forKey: .ratio)) ?? fallback.ratio
         ratioWidth = (try? c.decodeIfPresent(Double.self, forKey: .ratioWidth)) ?? fallback.ratioWidth
         ratioHeight = (try? c.decodeIfPresent(Double.self, forKey: .ratioHeight)) ?? fallback.ratioHeight
@@ -321,11 +333,16 @@ enum ExportRenderer {
         let capture = (blend.outputImage ?? placed).cropped(to: bounds)
 
         var result = backdrop(style, bounds: bounds, capture: image)
-        if style.shadow > 0.01 {
-            let s = CGFloat(style.shadow)
+        if style.shadow > 0.005 {
             // A soft, wide shadow under a close one, the way a card lifts.
-            let wide = shadow(of: shape, alpha: 0.10 + 0.22 * s, blur: (0.008 + 0.03 * s) * layout.unit, drop: 0.012 * s * layout.unit)
-            let close = shadow(of: shape, alpha: 0.06 + 0.08 * s, blur: 0.003 * layout.unit, drop: 0.002 * layout.unit)
+            // Strength goes all the way down to barely there; softness
+            // spreads the wide one; distance moves it down.
+            let s = CGFloat(style.shadow)
+            let soft = CGFloat(style.shadowSoftness), far = CGFloat(style.shadowDistance)
+            let wide = shadow(of: shape, alpha: 0.42 * s, blur: (0.004 + 0.06 * soft * soft + 0.02 * soft) * layout.unit,
+                              drop: 0.024 * far * layout.unit)
+            let close = shadow(of: shape, alpha: 0.2 * s * (1 - 0.4 * soft), blur: 0.003 * layout.unit,
+                               drop: 0.004 * far * layout.unit)
             result = close.composited(over: wide.composited(over: result))
         }
         return capture.composited(over: result).cropped(to: bounds)
@@ -355,6 +372,8 @@ enum ExportRenderer {
                 .applyingGaussianBlur(sigma: 0.07 * max(bounds.width, bounds.height))
                 .applyingFilter("CIColorControls", parameters: ["inputSaturation": 1.2, "inputBrightness": 0.02])
                 .cropped(to: bounds)
+        case .color:
+            return CIImage(color: ciColor(style.color)).cropped(to: bounds)
         case .picture:
             // Your own picture, filling the frame, its middle kept.
             guard let name = style.picture, let picture = backgroundPicture(name) else {

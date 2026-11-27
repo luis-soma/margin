@@ -446,6 +446,12 @@ struct ExportStudio: View {
             group("Background") {
                 Swatches(style: $style, options: ExportStyle.Backdrop.available(video: isVideo), capture: small)
                     .padding(.vertical, Theme.Space.x3)
+                if style.backdrop == .color {
+                    divider
+                    ColorChoices(color: $style.color)
+                        .padding(.vertical, Theme.Space.x3)
+                        .transition(.opacity)
+                }
             }
             group("Frame") {
                 sliderRow("Padding", $style.padding)
@@ -453,6 +459,14 @@ struct ExportStudio: View {
                 sliderRow("Corners", $style.radius)
                 divider
                 sliderRow("Shadow", $style.shadow)
+                if style.shadow > 0.005 {
+                    sliderRow("Softness", $style.shadowSoftness)
+                        .padding(.top, -Theme.Space.x2)
+                        .transition(.opacity)
+                    sliderRow("Distance", $style.shadowDistance)
+                        .padding(.top, -Theme.Space.x2)
+                        .transition(.opacity)
+                }
             }
             group("Size") {
                 VStack(alignment: .leading, spacing: Theme.Space.x2) {
@@ -512,6 +526,8 @@ struct ExportStudio: View {
                 .background(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous).fill(Theme.Palette.raised))
                 .animation(Theme.Motion.snappy, value: style.zoom)
                 .animation(Theme.Motion.snappy, value: style.smoothCursor)
+                .animation(Theme.Motion.snappy, value: style.shadow > 0.005)
+                .animation(Theme.Motion.snappy, value: style.backdrop == .color)
         }
     }
 
@@ -1121,7 +1137,8 @@ private struct Swatches: View {
     var body: some View {
         LazyVGrid(columns: columns, alignment: .leading, spacing: 8) {
             ForEach(options) { option in
-                Swatch(option: option, selected: style.backdrop == option, image: option == .blur ? thumbnail : nil) {
+                Swatch(option: option, selected: style.backdrop == option, image: option == .blur ? thumbnail : nil,
+                       tint: style.color) {
                     withAnimation(Theme.Motion.snappy) { style.backdrop = option }
                 }
             }
@@ -1308,6 +1325,8 @@ private struct Swatch: View {
     let selected: Bool
     /// The capture (blurred) or your picture.
     let image: NSImage?
+    /// For "Color": the colour picked.
+    var tint: Int = 0xEBEBEB
     let action: () -> Void
     @State private var hovering = false
 
@@ -1340,6 +1359,17 @@ private struct Swatch: View {
         switch option {
         case .none:
             Checkerboard(square: 5)
+        case .color:
+            // The colour picked, and a small wheel: any colour.
+            Color(nsColor: ExportRenderer.color(tint))
+                .overlay(alignment: .bottomTrailing) {
+                    Circle()
+                        .fill(AngularGradient(colors: ColorChoices.wheel, center: .center))
+                        .overlay(Circle().strokeBorder(Color.white, lineWidth: 1.5))
+                        .frame(width: 11, height: 11)
+                        .shadow(color: .black.opacity(0.15), radius: 1, y: 0.5)
+                        .padding(4)
+                }
         case .blur, .picture:
             if let image {
                 Image(nsImage: image)
@@ -1561,5 +1591,102 @@ private struct Checkerboard: View {
             }
             context.fill(path, with: .color(Theme.Palette.ink.opacity(0.06)))
         }
+    }
+}
+
+// MARK: - Picking a colour
+
+/// A flat background's colour: a few quiet ones to start from, a wheel for
+/// any colour (the Mac's colour panel) and the hex, to type or paste.
+private struct ColorChoices: View {
+    @Binding var color: Int
+
+    static let presets: [Int] = [0xFFFFFF, 0xF2F2F0, 0xE3E3E0, 0xDDE6F0, 0xE2ECE4, 0xF2E5E0, 0xEAE5F3, 0x2A2A2A, 0x101010]
+    static let wheel: [Color] = [.red, .yellow, .green, .cyan, .blue, .purple, .red]
+
+    @State private var hex = ""
+    @FocusState private var typing: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Theme.Space.x3) {
+            HStack(spacing: 6) {
+                ForEach(Self.presets, id: \.self) { preset in
+                    dot(Color(nsColor: ExportRenderer.color(preset)), chosen: color == preset) {
+                        withAnimation(Theme.Motion.snappy) { color = preset }
+                    }
+                    .toolTip(Self.hexString(preset), align: .center)
+                }
+                dot(AngularGradient(colors: Self.wheel, center: .center), chosen: !Self.presets.contains(color)) {
+                    ColorPanelBridge.shared.open(with: ExportRenderer.color(color)) { picked in color = picked }
+                }
+                .toolTip("Any colour", "Opens the colour panel", align: .center)
+            }
+            HStack(spacing: Theme.Space.x2) {
+                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                    .fill(Color(nsColor: ExportRenderer.color(color)))
+                    .overlay(RoundedRectangle(cornerRadius: 4, style: .continuous).strokeBorder(Color.black.opacity(0.1), lineWidth: 0.5))
+                    .frame(width: 16, height: 16)
+                TextField("", text: $hex)
+                    .textFieldStyle(.plain)
+                    .font(Theme.Typography.ui(Theme.Typography.control).monospaced())
+                    .foregroundStyle(Theme.Palette.ink)
+                    .focused($typing)
+                    .onSubmit(apply)
+                    .onChange(of: typing) { now in if !now { apply() } }
+            }
+            .padding(.horizontal, Theme.Space.x2)
+            .frame(width: 120, height: 28)
+            .background(RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous).fill(Theme.Palette.fill))
+        }
+        .onAppear { hex = Self.hexString(color) }
+        .onChange(of: color) { new in if !typing { hex = Self.hexString(new) } }
+    }
+
+    private func dot<Fill: ShapeStyle>(_ fill: Fill, chosen: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Circle()
+                .fill(fill)
+                .overlay(Circle().strokeBorder(Color.black.opacity(0.1), lineWidth: 0.5))
+                .frame(width: 20, height: 20)
+                .padding(3)
+                .overlay(Circle().strokeBorder(Theme.Palette.ink, lineWidth: 1.5).opacity(chosen ? 1 : 0))
+                .contentShape(Circle())
+        }
+        .buttonStyle(PressStyle(scale: 0.92))
+    }
+
+    private func apply() {
+        let digits = hex.trimmingCharacters(in: .whitespaces).replacingOccurrences(of: "#", with: "")
+        let full = digits.count == 3 ? digits.map { "\($0)\($0)" }.joined() : digits
+        if full.count == 6, let value = Int(full, radix: 16) {
+            withAnimation(Theme.Motion.snappy) { color = value }
+        }
+        hex = Self.hexString(color)
+    }
+
+    static func hexString(_ value: Int) -> String { String(format: "#%06X", value & 0xFFFFFF) }
+}
+
+/// The Mac's colour panel, reporting back to whoever opened it last.
+@MainActor
+final class ColorPanelBridge: NSObject {
+    static let shared = ColorPanelBridge()
+    private var report: ((Int) -> Void)?
+
+    func open(with color: NSColor, report: @escaping (Int) -> Void) {
+        self.report = report
+        let panel = NSColorPanel.shared
+        panel.showsAlpha = false
+        panel.isContinuous = true
+        panel.color = color
+        panel.setTarget(self)
+        panel.setAction(#selector(changed(_:)))
+        panel.orderFront(nil)
+    }
+
+    @objc private func changed(_ panel: NSColorPanel) {
+        guard let rgb = panel.color.usingColorSpace(.sRGB) else { return }
+        let r = Int((rgb.redComponent * 255).rounded()), g = Int((rgb.greenComponent * 255).rounded()), b = Int((rgb.blueComponent * 255).rounded())
+        report?((min(max(r, 0), 255) << 16) | (min(max(g, 0), 255) << 8) | min(max(b, 0), 255))
     }
 }
