@@ -60,7 +60,8 @@ Margin lives in the menu bar (the bracket-and-dot icon).
 - **Ask:** the Ask button finds captures on the timeline or sorts the map
   around a question in your own words. Needs a Gemini key for the AI part.
 - **Export:** open a capture and click the pencil under its details. Pick a
-  background (or add your own), padding, corners, shadow and a size or ratio.
+  background, a flat colour or a picture of your own, then padding, corners,
+  shadow (with softness and distance) and a size or ratio.
   Crop if you need to. For recordings, Motion adds zoom on clicks, a smooth
   cursor and click ripples. Export as PNG, MP4 or GIF.
 - **Edit a recording:** under its preview is a strip of its frames. Drag
